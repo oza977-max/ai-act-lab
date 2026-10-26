@@ -18,3 +18,4 @@ This is separate from `notebook/`, which records individual training runs.
 | [007](007-tech-spec.md) | The technical specification: from what to how (`/gvm-tech-spec`, slice 1) | 2026-10-26 |
 | [008](008-design-review.md) | The design review: five narrow readers before building (`/gvm-design-review`) | 2026-10-26 |
 | [009](009-first-build-chunk.md) | The first build chunk: red, green, and an honest reviewer (P1-C01) | 2026-10-26 |
+| [010](010-first-real-model.md) | A real model on this Mac (P1-C02) | 2026-10-26 |
