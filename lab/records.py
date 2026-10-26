@@ -69,7 +69,7 @@ def _first_json_object(raw: str) -> dict | None:
 
 def parse_answer(raw: str | None) -> tuple[Record | None, ParseStatus]:
     """Read a model's raw answer as a record (ADR-005). Never repairs or guesses."""
-    if raw is None or len(raw) > MAX_RAW_CHARS:
+    if not isinstance(raw, str) or len(raw) > MAX_RAW_CHARS:
         return None, "unreadable"
     obj = _first_json_object(raw)
     if obj is None:

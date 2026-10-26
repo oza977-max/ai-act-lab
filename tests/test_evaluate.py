@@ -93,3 +93,43 @@ def test_malformed_gold_line_names_file_and_line(eval10):
     gold.write_text(gold.read_text() + "{not json\n")
     with pytest.raises(EvaluationError, match=r"gold.jsonl.*line 11"):
         load_gold(gold)
+
+
+def test_duplicate_id_error_names_the_line(eval10):
+    gold, run_dir = eval10
+    rewrite_outputs(run_dir, lambda lines: lines + [lines[0]])
+    with pytest.raises(EvaluationError, match=r"outputs.jsonl: line 11: duplicate id E01"):
+        measures(gold, run_dir)
+
+
+def test_non_object_line_is_an_error_with_line(eval10):
+    gold, run_dir = eval10
+    path = run_dir / "outputs.jsonl"
+    path.write_text(path.read_text() + "[1]\n")
+    with pytest.raises(EvaluationError, match=r"line 11: not a JSON object"):
+        measures(gold, run_dir)
+
+
+def test_non_string_raw_counts_as_unreadable(eval10):
+    gold, run_dir = eval10
+    def numeric(lines):
+        for l in lines:
+            if l["id"] == "E05":
+                l["raw"] = 5
+        return lines
+    rewrite_outputs(run_dir, numeric)
+    assert measures(gold, run_dir).unreadable == 1
+
+
+def test_unknown_gold_tier_is_an_error(eval10):
+    gold, run_dir = eval10
+    gold.write_text(gold.read_text().replace('"tier": "prohibited"', '"tier": "limited-risk"', 1))
+    with pytest.raises(EvaluationError, match="limited-risk"):
+        load_gold(gold)
+
+
+def test_empty_gold_set_is_an_error(eval10):
+    gold, run_dir = eval10
+    gold.write_text("")
+    with pytest.raises(EvaluationError, match="no cases"):
+        load_gold(gold)

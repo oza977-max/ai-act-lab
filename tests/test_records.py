@@ -49,3 +49,14 @@ def test_overlong_answer_is_unreadable():
 
 def test_none_is_unreadable():
     assert parse_answer(None) == (None, "unreadable")
+
+
+def test_non_string_raw_is_unreadable():
+    assert parse_answer(5) == (None, "unreadable")
+    assert parse_answer({"tier": "minimal"}) == (None, "unreadable")
+
+
+def test_raw_of_exactly_4000_characters_is_read_but_4001_is_not():
+    body = json.dumps(GOOD)
+    assert parse_answer(body + " " * (4000 - len(body)))[1] == "ok"
+    assert parse_answer(body + " " * (4001 - len(body)))[1] == "unreadable"

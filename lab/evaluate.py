@@ -47,26 +47,34 @@ class Measures:
         return self.answered_correct / self.answered if self.answered else None
 
 
-def _read_jsonl(path: Path) -> list[dict]:
+def _read_jsonl(path: Path) -> list[tuple[int, dict]]:
+    """Return (line number, object) pairs; every non-blank line must be a JSON object."""
     rows = []
-    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        raise EvaluationError(f"{path}: not valid UTF-8 text") from exc
+    for number, line in enumerate(text.splitlines(), start=1):
         if not line.strip():
             continue
         try:
-            rows.append(json.loads(line))
+            row = json.loads(line)
         except json.JSONDecodeError as exc:
             raise EvaluationError(f"{path}: line {number} is not valid JSON ({exc.msg})") from exc
+        if not isinstance(row, dict):
+            raise EvaluationError(f"{path}: line {number}: not a JSON object")
+        rows.append((number, row))
     return rows
 
 
-def _index_by_id(rows: list[dict], path: Path) -> dict[str, dict]:
+def _index_by_id(rows: list[tuple[int, dict]], path: Path) -> dict[str, dict]:
     indexed: dict[str, dict] = {}
-    for row in rows:
+    for number, row in rows:
         row_id = row.get("id")
-        if row_id is None:
-            raise EvaluationError(f"{path}: a line has no id")
+        if not isinstance(row_id, str) or not row_id:
+            raise EvaluationError(f"{path}: line {number}: missing or non-text id")
         if row_id in indexed:
-            raise EvaluationError(f"{path}: duplicate id {row_id}")
+            raise EvaluationError(f"{path}: line {number}: duplicate id {row_id}")
         indexed[row_id] = row
     return indexed
 
@@ -75,11 +83,28 @@ def load_gold(path: Path) -> dict[str, str]:
     """Map each gold case id to its gold tier."""
     gold = {}
     for case_id, row in _index_by_id(_read_jsonl(path), path).items():
-        tier = row.get("gold", {}).get("tier")
+        record = row.get("gold")
+        tier = record.get("tier") if isinstance(record, dict) else None
         if tier not in TIERS:
             raise EvaluationError(f"{path}: case {case_id} has unknown gold tier {tier!r}")
         gold[case_id] = tier
+    if not gold:
+        raise EvaluationError(f"{path}: the gold set has no cases")
     return gold
+
+
+RUN_FIELDS = ("model", "build_revision", "prompt_version", "guideline_version", "gold_version", "run_date")
+
+
+def load_run(path: Path) -> dict:
+    """Read run.json; missing header fields are shown as '(not recorded)'."""
+    try:
+        run = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise EvaluationError(f"{path}: not valid JSON") from exc
+    if not isinstance(run, dict):
+        raise EvaluationError(f"{path}: not a JSON object")
+    return {**run, **{k: run.get(k) or "(not recorded)" for k in RUN_FIELDS}}
 
 
 def load_outputs(path: Path) -> dict[str, dict]:
@@ -139,11 +164,11 @@ def headline(m: Measures) -> str:
 
 def render_report(m: Measures, run: dict) -> str:
     lines = [
-        f"# Evaluation report: {run.get('model', 'unknown model')}",
+        f"# Evaluation report: {run['model']}",
         "",
-        f"Model build: {run.get('build_revision')} | Prompt: {run.get('prompt_version')} | "
-        f"Guideline: {run.get('guideline_version')} | Gold set: {run.get('gold_version')} | "
-        f"Run date: {run.get('run_date')}",
+        f"Model build: {run['build_revision']} | Prompt: {run['prompt_version']} | "
+        f"Guideline: {run['guideline_version']} | Gold set: {run['gold_version']} | "
+        f"Run date: {run['run_date']}",
         "",
         "## Summary",
         "",
@@ -183,9 +208,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--run", type=Path, required=True, help="run folder with outputs.jsonl and run.json")
     args = parser.parse_args(argv)
     try:
-        run = json.loads((args.run / "run.json").read_text(encoding="utf-8"))
+        run = load_run(args.run / "run.json")
         measures = evaluate(load_gold(args.gold), load_outputs(args.run / "outputs.jsonl"))
-    except (EvaluationError, OSError, json.JSONDecodeError) as exc:
+    except (EvaluationError, OSError) as exc:
         print(f"evaluate: {exc}", file=sys.stderr)
         return 1
     (args.run / "report.md").write_text(render_report(measures, run), encoding="utf-8")

@@ -14,15 +14,18 @@ self='scripts/confidentiality-check.sh'
 blocked=0
 report() { echo "confidentiality check: BLOCKED ($1)"; printf '%s\n' "$2"; blocked=1; }
 
-files=$(git diff --cached --name-only --diff-filter=ACMR)
+files=$(git -c core.quotepath=off diff --cached --name-only --diff-filter=ACMR)
 bad_types=$(printf '%s\n' "$files" | grep -i -E '\.(xlsx|xls|numbers)$' || true)
 [ -n "$bad_types" ] && report "spreadsheet files must be CSV" "$bad_types"
 bad_names=$(printf '%s\n' "$files" | grep -i -E "$pattern" || true)
 [ -n "$bad_names" ] && report "file name" "$bad_names"
 
-for f in $files; do
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
   [ "$f" = "$self" ] && continue
-  added=$(git diff --cached -U0 -- "$f" | grep '^+' | grep -v '^+++' || true)
+  # Added lines: every "+" line after the first hunk header, so a line that
+  # itself starts with "++" is still scanned.
+  added=$(git diff --cached -U0 --no-color -- "$f" | awk '/^@@/{h=1; next} h && /^\+/{print}' || true)
   [ -z "$added" ] && continue
   hits=$(printf '%s\n' "$added" | grep -i -E "$pattern" || true)
   case "$f" in
@@ -33,7 +36,9 @@ for f in $files; do
     priv=$(printf '%s\n' "$added" | grep -i -F -f "$deny" || true)
     [ -n "$priv" ] && report "$f: a term from the private list" "(line withheld; the term is on your private list)"
   fi
-done
+done <<EOF_FILES
+$files
+EOF_FILES
 
 if [ "$blocked" -eq 1 ]; then exit 1; fi
 echo "confidentiality check: clean"; exit 0

@@ -41,3 +41,17 @@ def test_clean_change_passes(tmp_path):
     (repo / "case.md").write_text("A recruitment tool built by a fictional company.\n")
     git(repo, "add", "case.md")
     assert run_guard(repo).returncode == 0
+
+
+def test_file_name_with_space_is_scanned(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / "my case.md").write_text("Built by Zebrafoo Holdings.\n")
+    git(repo, "add", "my case.md")
+    assert run_guard(repo).returncode == 1
+
+
+def test_added_line_starting_with_plus_plus_is_scanned(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / "case.md").write_text("++ Zebrafoo Holdings\n")
+    git(repo, "add", "case.md")
+    assert run_guard(repo).returncode == 1
