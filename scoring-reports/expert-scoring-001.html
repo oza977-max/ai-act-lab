@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Act Lab — Expert Scoring Report 001</title>
+  <style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: "ET Book", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  color: #111;
+  background: #fffff8;
+  line-height: 1.6;
+  padding: 2rem 1rem 6rem;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+/* ── Typography ── */
+h1 {
+  font-size: 2.4rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+  color: #111;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  color: #111;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  color: #333;
+}
+
+p, li {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+  max-width: 640px;
+}
+
+ul, ol { padding-left: 1.4rem; margin-bottom: 1.2rem; }
+li { margin-bottom: 0.4rem; }
+
+.subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #555;
+  margin-bottom: 2.5rem;
+  max-width: 640px;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Floating TOC (Left Side) ── */
+nav.toc {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  width: 220px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  background: #fffff8;
+  border-right: 2px solid #ddd;
+  padding: 1rem 1rem 1rem 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  z-index: 100;
+}
+
+nav.toc .toc-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  margin-bottom: 0.6rem;
+}
+
+nav.toc a {
+  color: #555;
+  text-decoration: none;
+  display: block;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+nav.toc a:hover { color: #111; }
+nav.toc a.active { color: #111; font-weight: 600; }
+nav.toc .toc-h3 { padding-left: 0.8rem; font-size: 0.78rem; color: #888; }
+nav.toc .toc-h3:hover { color: #555; }
+
+/* Offset main content for left TOC */
+main {
+  margin-left: 260px;
+}
+
+/* ── Sidenotes (Right Margin) ── */
+.sidenote {
+  float: right;
+  clear: right;
+  width: 220px;
+  margin-right: -260px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #666;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+/* ── Tables (Few's principles) ── */
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  width: auto;
+  min-width: 480px;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 2px solid #333;
+  color: #111;
+}
+
+tbody td {
+  padding: 0.45rem 1rem 0.45rem 0;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: 2px solid #333; }
+tbody tr:nth-child(even) { background: #f9f9f4; }
+
+caption {
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #666;
+  text-align: left;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Requirement Blocks ── */
+.req {
+  background: #f7f7f0;
+  border-left: 3px solid #999;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.req-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.req p { margin-bottom: 0.3rem; }
+
+/* ── Priority Chips (MoSCoW) ── */
+.priority {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+.priority.must { background: #111; color: #fff; }
+.priority.should { background: #bbb; color: #fff; }
+.priority.could { background: #e8e8e0; color: #666; }
+.priority.wont { background: #fff; color: #999; border: 1px solid #ccc; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  nav.toc {
+    position: static;
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  main { margin-left: 0; }
+  .sidenote {
+    float: none;
+    width: 100%;
+    margin: 0.8rem 0;
+    padding: 0.6rem 0 0.6rem 1rem;
+  }
+}
+
+/* ── Test Case Components (/gvm-test-cases) ── */
+.test-case {
+  background: #f7f7f0;
+  border-left: 3px solid #669;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.tc-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.tc-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.tc-bdd p {
+  margin-bottom: 0.2rem;
+  padding-left: 1rem;
+}
+
+.tc-trace {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+.tc-detail {
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.tc-detail h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.health-issue {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.health-issue.acknowledged {
+  opacity: 0.6;
+  border-left-color: #ccc;
+}
+
+/* ── Open Questions ── */
+.open-question {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.oq-context {
+  font-size: 0.88rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* ── Inline Code ── */
+code {
+  font-family: "Menlo", "Consolas", "Monaco", monospace;
+  font-size: 0.88rem;
+  background: #f0f0e8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* ── GVM Attribution (per shared rule 24) ── */
+.gvm-attribution {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 0;
+  max-width: none;
+}
+  </style>
+</head>
+<body>
+  <nav class="toc" id="toc">
+    <div class="toc-title">Contents</div>
+    <!-- Auto-generated by script at bottom -->
+  </nav>
+
+  <main>
+    <p class="date">October 2026</p>
+    <h1>AI Act Lab</h1>
+    <p class="subtitle"><em>What this report is, in plain English: before an authority is allowed to ground a decision in this project, it is scored on five questions about the author (standing, venue, range, uptake, how current) and four about the work (how concrete, how thorough, how current, how influential). Two assessments were made independently, one by the session running the phase and one by a fresh agent given only names and titles, and then reconciled: where they agreed the score stands; where they differed by one point the lower score is recorded; a difference of two or more would have been escalated to the owner. None was.</em></p>
+
+    <table>
+      <caption>Table 1 — Report metadata</caption>
+      <tbody>
+        <tr><td><strong>Date:</strong></td><td>2026-10-26</td></tr>
+        <tr><td><strong>Operation:</strong></td><td>score on discovery, during <code>/gvm-init</code></td></tr>
+        <tr><td><strong>Scope:</strong></td><td>ten newly proposed experts, fifteen works, for two coverage gaps found during calibration: EU AI Act classification practice and gold-set annotation (Group A), and small-model adaptation with LoRA, data curation and abstention (Group B)</td></tr>
+        <tr><td><strong>Target reference files (on owner approval):</strong></td><td><code>industry/ai-governance.md</code> (1 expert), <code>industry/ai-evaluation.md</code> (3 experts), new <code>industry/llm-fine-tuning.md</code> (6 experts)</td></tr>
+        <tr><td><strong>Status:</strong></td><td>scores reconciled across two independent passes; persistence to the shared library awaits the owner's approval of the init report</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="executive-summary">1. Executive Summary</h2>
+    <table>
+      <caption>Table 2 — Assessment at a glance</caption>
+      <tbody>
+        <tr><td>Experts assessed</td><td>10</td></tr>
+        <tr><td>Works assessed</td><td>15</td></tr>
+        <tr><td>Full convergence on every dimension</td><td>3 experts (European Commission; Chalkidis on both works; Pustejovsky &amp; Stubbs on the expert score)</td></tr>
+        <tr><td>Largest single-dimension difference</td><td>1 point (all cases)</td></tr>
+        <tr><td>Escalations (2+ point divergence)</td><td>0</td></tr>
+        <tr><td>Boundary cases recorded</td><td>4 (Dettmers expert score; LIMA work; SelectiveNet work; <em>AI Engineering</em> work)</td></tr>
+        <tr><td>Existence verification</td><td>all 15 works verified by the independent pass, 11 by web search, 4 from established knowledge; one date clarified (<em>AI Engineering</em>, released January 2025)</td></tr>
+      </tbody>
+    </table>
+    <p>Scoring scale: integers 1 to 5. Classification by average: Canonical 4.5 and above, Established 3.5 to 4.4, Recognised 2.5 to 3.4, Emerging 1.5 to 2.4, Provisional below 1.5. An average of exactly 4.5 classifies upward.</p>
+
+    <h2 id="expert-scorecards">2. Expert Scorecards</h2>
+
+    <h3 id="european-commission-ai-office">2.1 European Commission (AI Office)</h3>
+    <p><strong>Sources:</strong> European Commission, <em>Guidelines on the definition of an artificial intelligence system established by Regulation (EU) 2024/1689</em>, C(2025) 924 final, 6 February 2025; <em>Guidelines on prohibited artificial intelligence practices established by Regulation (EU) 2024/1689</em>, C(2025) 884 final, 4 February 2025. Also noted: <em>Guidelines on the classification of high-risk AI systems under Article 6</em>, published in draft for consultation on 19 May 2026; no final adoption found as of 26 October 2026.</p>
+
+    <p><strong>Expert score:</strong></p>
+    <table>
+      <caption>Table 3 — European Commission (AI Office): expert score</caption>
+      <thead>
+        <tr><th style="text-align:right">Authority</th><th style="text-align:right">Publication</th><th style="text-align:right">Breadth</th><th style="text-align:right">Adoption</th><th style="text-align:right">Currency</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">5</td><td style="text-align:right">5</td><td style="text-align:right">4</td><td style="text-align:right">5</td><td style="text-align:right">5</td><td><strong>Canonical</strong> (avg 4.8)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Authority 5, the regulator itself; Article 96 of the Act mandates the Commission to issue these guidelines. Publication 5, numbered Commission acts in the C(2025) series, published through the Commission's digital-strategy library. Breadth 4, covers the definition, Article 5, general-purpose models (July 2025) and Article 6 in draft; not 5 while the Article 6 guidance is unfinished. Adoption 5, national market-surveillance authorities and compliance programmes across the EU work from them. Currency 5, Article 6 draft May 2026, general-purpose model guidelines July 2025.</p>
+
+    <p>Utilisation: no usage data, newly added.</p>
+
+    <p><strong>Work score — <em>Guidelines on the definition of an AI system</em>, C(2025) 924:</strong></p>
+    <table>
+      <caption>Table 4 — Guidelines on the definition of an AI system: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">3</td><td style="text-align:right">4</td><td style="text-align:right">4</td><td><strong>Established</strong> (avg 3.75)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 4, breaks Article 3(1) into seven elements with named out-of-scope examples (basic data processing, classical heuristics, simple prediction). Currency 4, February 2025, not affected by the Omnibus, described as designed to evolve (split 5/4, lower recorded). Influence 4, the first gate in AI Act scoping, cited by national-authority FAQs and law-firm briefings; non-binding (split 4/5, lower recorded).</p>
+
+    <p><strong>Work score — <em>Guidelines on prohibited AI practices</em>, C(2025) 884:</strong></p>
+    <table>
+      <caption>Table 5 — Guidelines on prohibited AI practices: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">5</td><td style="text-align:right">5</td><td style="text-align:right">4</td><td style="text-align:right">4</td><td><strong>Canonical</strong> (avg 4.5, classifies upward)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 5, practice-by-practice tests with concrete in-scope and out-of-scope examples for each Article 5 prohibition. Depth 5, roughly 140 pages, including interplay with the GDPR, the DSA and consumer law. Currency 4, February 2025; Article 5 applied from 2 February 2025; the two prohibitions added by the Omnibus (applying from 2 December 2026) post-date it. Influence 4, the operative reference for Article 5 across the member states (split 4/5, lower recorded).</p>
+
+    <h3 id="ilias-chalkidis-et-al">2.2 Ilias Chalkidis et al.</h3>
+    <p><strong>Sources:</strong> Chalkidis, Jana, Hartung, Bommarito, Androutsopoulos, Katz, Aletras, <em>"LexGLUE: A Benchmark Dataset for Legal Language Understanding in English"</em>, ACL 2022; Chalkidis, Fergadiotis, Androutsopoulos, <em>"MultiEURLEX: A multi-lingual and multi-label legal document classification dataset for zero-shot cross-lingual transfer"</em>, EMNLP 2021.</p>
+
+    <p><strong>Expert score:</strong></p>
+    <table>
+      <caption>Table 6 — Ilias Chalkidis et al.: expert score</caption>
+      <thead>
+        <tr><th style="text-align:right">Authority</th><th style="text-align:right">Publication</th><th style="text-align:right">Breadth</th><th style="text-align:right">Adoption</th><th style="text-align:right">Currency</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">5</td><td style="text-align:right">3</td><td style="text-align:right">4</td><td style="text-align:right">3</td><td><strong>Established</strong> (avg 3.8)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Authority 4, lead author of LEGAL-BERT, LexGLUE and MultiEURLEX; co-organiser of the Natural Legal Language Processing workshop series. Publication 5, ACL, EMNLP, NAACL and ICAIL main tracks. Adoption 4, LEGAL-BERT has citations in the thousands; LexGLUE and MultiEURLEX are standard Hugging Face-hosted legal datasets. Currency 3 (split 4/3, lower recorded).</p>
+
+    <p>Utilisation: no usage data, newly added.</p>
+
+    <p><strong>Work score — <em>LexGLUE</em>:</strong></p>
+    <table>
+      <caption>Table 7 — LexGLUE: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">3</td><td style="text-align:right">4</td><td><strong>Established</strong> (avg 3.75)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 4, seven defined tasks, released code, fixed splits, public leaderboard. Depth 4, benchmarks a dozen encoder models including legal-domain variants with per-task analysis. Influence 4, several hundred citations; the default legal-NLP benchmark before LegalBench. Both passes matched on every dimension.</p>
+
+    <p><strong>Work score — <em>MultiEURLEX</em>:</strong></p>
+    <table>
+      <caption>Table 8 — MultiEURLEX: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">3</td><td style="text-align:right">3</td><td style="text-align:right">3</td><td><strong>Recognised</strong> (avg 3.25)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 4, 65,000 EU laws in 23 languages with hierarchical EUROVOC labels and a defined zero-shot transfer protocol. Both passes matched on every dimension.</p>
+
+    <h3 id="james-pustejovsky-and-amber-stubbs">2.3 James Pustejovsky and Amber Stubbs</h3>
+    <p><strong>Source:</strong> James Pustejovsky and Amber Stubbs, <em>Natural Language Annotation for Machine Learning</em>, O'Reilly (2012).</p>
+
+    <p><strong>Expert score:</strong></p>
+    <table>
+      <caption>Table 9 — James Pustejovsky and Amber Stubbs: expert score</caption>
+      <thead>
+        <tr><th style="text-align:right">Authority</th><th style="text-align:right">Publication</th><th style="text-align:right">Breadth</th><th style="text-align:right">Adoption</th><th style="text-align:right">Currency</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">3</td><td style="text-align:right">4</td><td style="text-align:right">2</td><td><strong>Recognised</strong> (avg 3.4)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Authority 4, Pustejovsky is TJX Feldberg Professor at Brandeis, author of the Generative Lexicon and lead designer of TimeML. Publication 4, O'Reilly, with MIT Press and ACL/LREC venues for the underlying research. Adoption 4, the MATTER annotation cycle is standard teaching material for corpus annotation. Currency 2 reflects the 2012 date; the method is unchanged in practice. Both passes matched on every dimension.</p>
+
+    <p>Utilisation: no usage data, newly added.</p>
+
+    <p><strong>Work score — <em>Natural Language Annotation for Machine Learning</em>:</strong></p>
+    <table>
+      <caption>Table 10 — Natural Language Annotation for Machine Learning: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">2</td><td style="text-align:right">4</td><td><strong>Established</strong> (avg 3.5)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 4, step-by-step specification writing, guideline drafting, inter-annotator agreement computation, worked TimeML case study (split 5/4, lower recorded). Depth 4, a full-length book covering the whole model-annotate-train-test-evaluate-revise loop. Influence 4, citations in the thousands; the standard reference on corpus annotation method.</p>
+
+    <h3 id="edward-j-hu-et-al">2.4 Edward J. Hu et al.</h3>
+    <p><strong>Source:</strong> Hu, Shen, Wallis, Allen-Zhu, Li, Wang, Wang, Chen, <em>"LoRA: Low-Rank Adaptation of Large Language Models"</em>, ICLR 2022.</p>
+
+    <p><strong>Expert score:</strong></p>
+    <table>
+      <caption>Table 11 — Edward J. Hu et al.: expert score</caption>
+      <thead>
+        <tr><th style="text-align:right">Authority</th><th style="text-align:right">Publication</th><th style="text-align:right">Breadth</th><th style="text-align:right">Adoption</th><th style="text-align:right">Currency</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">5</td><td style="text-align:right">3</td><td style="text-align:right">5</td><td style="text-align:right">4</td><td><strong>Established</strong> (avg 4.2)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Authority 4, Microsoft Research team that defined the dominant parameter-efficient method (split 4/5, lower recorded). Publication 5, ICLR 2022. Adoption 5, implemented in Hugging Face PEFT, <code>mlx-lm</code>, llama.cpp and every major fine-tuning stack. Currency 4, still the default adapter method in 2026.</p>
+
+    <p>Utilisation: no usage data, newly added.</p>
+
+    <p><strong>Work score — <em>LoRA</em>:</strong></p>
+    <table>
+      <caption>Table 12 — LoRA: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">5</td><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">5</td><td><strong>Canonical</strong> (avg 4.5, classifies upward)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 5, exact parameterisation, initialisation, scaling, rank and target-module ablations, reference code. Depth 4, experiments across RoBERTa, DeBERTa, GPT-2 and GPT-3 175B with subspace analysis. Currency 4, the base for later variants (QLoRA, DoRA, rsLoRA); unchanged in practice. Influence 5, citations in the tens of thousands. Both passes matched on every dimension.</p>
+
+    <h3 id="tim-dettmers-et-al">2.5 Tim Dettmers et al.</h3>
+    <p><strong>Source:</strong> Dettmers, Pagnoni, Holtzman, Zettlemoyer, <em>"QLoRA: Efficient Finetuning of Quantized LLMs"</em>, NeurIPS 2023 (oral).</p>
+
+    <p><strong>Expert score:</strong></p>
+    <table>
+      <caption>Table 13 — Tim Dettmers et al.: expert score</caption>
+      <thead>
+        <tr><th style="text-align:right">Authority</th><th style="text-align:right">Publication</th><th style="text-align:right">Breadth</th><th style="text-align:right">Adoption</th><th style="text-align:right">Currency</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">5</td><td style="text-align:right">3</td><td style="text-align:right">5</td><td style="text-align:right">4</td><td><strong>Established</strong> (avg 4.2)</td></tr>
+      </tbody>
+    </table>
+    <span class="sidenote"><em>Boundary case: the primary pass averaged 4.2 (Established), the independent pass 4.6 (Canonical). Recorded as Established per the lower-integer rule; flagged for the owner.</em></span>
+    <p>Evidence: Authority 4, author of bitsandbytes, LLM.int8() and 8-bit optimisers; now faculty at CMU and at Ai2 (split 4/5, lower recorded). Publication 5, NeurIPS oral, ICLR, ICML. Breadth 3 (split 3/4, lower recorded). Adoption 5, bitsandbytes is the default quantisation backend in Hugging Face Transformers. Currency 4, continued quantisation and inference work through 2025.</p>
+
+    <p>Utilisation: no usage data, newly added.</p>
+
+    <p><strong>Work score — <em>QLoRA</em>:</strong></p>
+    <table>
+      <caption>Table 14 — QLoRA: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">5</td><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">5</td><td><strong>Canonical</strong> (avg 4.5, classifies upward)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 5, the NF4 data type, double quantisation, paged optimisers, full hyperparameters and memory tables. Depth 4, over a thousand fine-tuning runs across datasets and scales plus a human and GPT-4 evaluation of Guanaco (split 4/5, lower recorded). Currency 4, still the standard recipe for 4-bit LoRA on consumer hardware. Influence 5, several thousand citations; 4-bit LoRA is the default low-memory path.</p>
+
+    <h3 id="chunting-zhou-et-al">2.6 Chunting Zhou et al.</h3>
+    <p><strong>Source:</strong> Zhou, Liu, Xu, Iyer, Sun, Mao, Ma, Efrat, Yu, Yu, Zhang, Ghosh, Lewis, Zettlemoyer, Levy, <em>"LIMA: Less Is More for Alignment"</em>, NeurIPS 2023.</p>
+
+    <p><strong>Expert score:</strong></p>
+    <table>
+      <caption>Table 15 — Chunting Zhou et al.: expert score</caption>
+      <thead>
+        <tr><th style="text-align:right">Authority</th><th style="text-align:right">Publication</th><th style="text-align:right">Breadth</th><th style="text-align:right">Adoption</th><th style="text-align:right">Currency</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">5</td><td style="text-align:right">2</td><td style="text-align:right">4</td><td style="text-align:right">3</td><td><strong>Established</strong> (avg 3.6)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Authority 4, Meta AI team including Omer Levy and Luke Zettlemoyer. Publication 5, NeurIPS 2023. Breadth 2, a single-result team for scoring purposes (split 2/3, lower recorded). Adoption 4, the "superficial alignment hypothesis" drove the shift to small curated fine-tuning sets in open-model practice.</p>
+
+    <p>Utilisation: no usage data, newly added.</p>
+
+    <p><strong>Work score — <em>LIMA</em>:</strong></p>
+    <table>
+      <caption>Table 16 — LIMA: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">3</td><td style="text-align:right">3</td><td style="text-align:right">3</td><td style="text-align:right">4</td><td><strong>Recognised</strong> (avg 3.25)</td></tr>
+      </tbody>
+    </table>
+    <span class="sidenote"><em>Boundary case: the primary pass averaged 3.5 (Established), the independent pass 3.25 (Recognised). Recorded as Recognised; flagged for the owner.</em></span>
+    <p>Evidence: Specificity 3 (split 4/3, lower recorded). Influence 4, citations in the thousands; the standard reference for data quality over quantity.</p>
+
+    <h3 id="yizhong-wang-et-al">2.7 Yizhong Wang et al.</h3>
+    <p><strong>Source:</strong> Wang, Kordi, Mishra, Liu, Smith, Khashabi, Hajishirzi, <em>"Self-Instruct: Aligning Language Models with Self-Generated Instructions"</em>, ACL 2023.</p>
+
+    <p><strong>Expert score:</strong></p>
+    <table>
+      <caption>Table 17 — Yizhong Wang et al.: expert score</caption>
+      <thead>
+        <tr><th style="text-align:right">Authority</th><th style="text-align:right">Publication</th><th style="text-align:right">Breadth</th><th style="text-align:right">Adoption</th><th style="text-align:right">Currency</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">5</td><td style="text-align:right">3</td><td style="text-align:right">5</td><td style="text-align:right">3</td><td><strong>Established</strong> (avg 4.0)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Authority 4, University of Washington and Ai2 team with Hajishirzi, Smith and Khashabi; Wang led Super-NaturalInstructions and the Tülu recipes. Publication 5, ACL, EMNLP, NeurIPS. Breadth 3 (split 3/4, lower recorded). Adoption 5, Stanford Alpaca was built directly on it; "self-instruct" is now generic vocabulary for synthetic instruction data. Currency 3 (split 3/4, lower recorded).</p>
+
+    <p>Utilisation: no usage data, newly added.</p>
+
+    <p><strong>Work score — <em>Self-Instruct</em>:</strong></p>
+    <table>
+      <caption>Table 18 — Self-Instruct: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">3</td><td style="text-align:right">5</td><td><strong>Established</strong> (avg 4.0)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 4, full pipeline with 175 seed tasks, generation prompts, a ROUGE-L de-duplication threshold, released code and data (split 5/4, lower recorded). Depth 4, 52,000 instructions, evaluation on Super-NaturalInstructions and a 252-prompt user-oriented set with human ratings. Influence 5, several thousand citations; the basis of Alpaca and most later synthetic-instruction pipelines.</p>
+
+    <h3 id="yonatan-geifman-and-ran-el-yaniv">2.8 Yonatan Geifman and Ran El-Yaniv</h3>
+    <p><strong>Sources:</strong> Geifman and El-Yaniv, <em>"Selective Classification for Deep Neural Networks"</em>, NeurIPS 2017; Geifman and El-Yaniv, <em>"SelectiveNet: A Deep Neural Network with an Integrated Reject Option"</em>, ICML 2019. Lineage: C. K. Chow, <em>"On optimum recognition error and reject tradeoff"</em>, IEEE Transactions on Information Theory (1970), not scored.</p>
+
+    <p><strong>Expert score:</strong></p>
+    <table>
+      <caption>Table 19 — Yonatan Geifman and Ran El-Yaniv: expert score</caption>
+      <thead>
+        <tr><th style="text-align:right">Authority</th><th style="text-align:right">Publication</th><th style="text-align:right">Breadth</th><th style="text-align:right">Adoption</th><th style="text-align:right">Currency</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">5</td><td style="text-align:right">3</td><td style="text-align:right">3</td><td style="text-align:right">3</td><td><strong>Established</strong> (avg 3.6)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Authority 4, El-Yaniv is a Technion professor who established selective prediction for deep networks; Geifman co-founded Deci AI. Publication 5, NeurIPS, ICML, ICLR. Adoption 3 (split 3/4, lower recorded).</p>
+
+    <p>Utilisation: no usage data, newly added.</p>
+
+    <p><strong>Work score — <em>Selective Classification for Deep Neural Networks</em>:</strong></p>
+    <table>
+      <caption>Table 20 — Selective Classification for Deep Neural Networks: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">3</td><td style="text-align:right">3</td><td style="text-align:right">4</td><td><strong>Established</strong> (avg 3.5)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 4, an explicit algorithm to choose a confidence threshold that meets a target risk with a stated guarantee, using softmax response or MC-dropout (split 5/4, lower recorded). Depth 3 (split 4/3, lower recorded). Influence 4, citations in the thousands; defines the framework later abstention work uses.</p>
+
+    <p><strong>Work score — <em>SelectiveNet</em>:</strong></p>
+    <table>
+      <caption>Table 21 — SelectiveNet: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">3</td><td style="text-align:right">3</td><td style="text-align:right">3</td><td><strong>Recognised</strong> (avg 3.25)</td></tr>
+      </tbody>
+    </table>
+    <span class="sidenote"><em>Boundary case: the primary pass averaged 3.25 (Recognised), the independent pass 3.5 (Established). Recorded as Recognised; flagged for the owner.</em></span>
+    <p>Evidence: Specificity 4, a concrete architecture with prediction, selection and auxiliary heads and a coverage-constrained loss. Influence 3 (split 3/4, lower recorded).</p>
+
+    <h3 id="sebastian-raschka">2.9 Sebastian Raschka</h3>
+    <p><strong>Sources:</strong> Sebastian Raschka, <em>Build a Large Language Model (From Scratch)</em>, Manning (2024); Sebastian Raschka, <em>"Practical Tips for Finetuning LLMs Using LoRA (Low-Rank Adaptation)"</em>, Ahead of AI newsletter, 19 November 2023.</p>
+
+    <p><strong>Expert score:</strong></p>
+    <table>
+      <caption>Table 22 — Sebastian Raschka: expert score</caption>
+      <thead>
+        <tr><th style="text-align:right">Authority</th><th style="text-align:right">Publication</th><th style="text-align:right">Breadth</th><th style="text-align:right">Adoption</th><th style="text-align:right">Currency</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">3</td><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">5</td><td><strong>Established</strong> (avg 4.0)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Authority 4, PhD, former assistant professor at UW-Madison, former staff research engineer at Lightning AI, LitGPT maintainer. Publication 3 (split 4/3, lower recorded; the recent work is Manning and a newsletter rather than peer-reviewed venues). Breadth 4, classical machine learning through LLM pretraining, fine-tuning and reasoning-model work. Adoption 4, <em>Python Machine Learning</em> translated into a dozen languages; the companion repository has tens of thousands of stars (split 4/5, lower recorded). Currency 5, 2024 book, 2025 follow-up, newsletter active in 2026.</p>
+
+    <p>Utilisation: no usage data, newly added.</p>
+
+    <p><strong>Work score — <em>Build a Large Language Model (From Scratch)</em>:</strong></p>
+    <table>
+      <caption>Table 23 — Build a Large Language Model (From Scratch): work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">5</td><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">3</td><td><strong>Established</strong> (avg 4.0)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 5, every component implemented line by line in runnable PyTorch with a public repository. Depth 4, tokenisation through pretraining, classification fine-tuning and instruction fine-tuning, LoRA appendix. Currency 4, GPT-2 base architecture, with Llama 3 and Qwen3 conversions added in the repository (split 5/4, lower recorded). Influence 3 (split 3/4, lower recorded).</p>
+
+    <p><strong>Work score — <em>Practical Tips for Finetuning LLMs Using LoRA</em>:</strong></p>
+    <table>
+      <caption>Table 24 — Practical Tips for Finetuning LLMs Using LoRA: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">5</td><td style="text-align:right">3</td><td style="text-align:right">3</td><td style="text-align:right">3</td><td><strong>Established</strong> (avg 3.5)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Specificity 5, concrete settings (scaling factor twice the rank, adapters on all linear layers, single epoch, the QLoRA memory-versus-time trade-off) drawn from hundreds of runs. Both passes matched on every dimension.</p>
+
+    <h3 id="chip-huyen">2.10 Chip Huyen</h3>
+    <p><strong>Source:</strong> Chip Huyen, <em>AI Engineering: Building Applications with Foundation Models</em>, O'Reilly (January 2025).</p>
+
+    <p><strong>Expert score:</strong></p>
+    <table>
+      <caption>Table 25 — Chip Huyen: expert score</caption>
+      <thead>
+        <tr><th style="text-align:right">Authority</th><th style="text-align:right">Publication</th><th style="text-align:right">Breadth</th><th style="text-align:right">Adoption</th><th style="text-align:right">Currency</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">5</td><td><strong>Established</strong> (avg 4.2)</td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: Authority 4, formerly at NVIDIA and Snorkel AI, co-founder of Claypot AI, taught Stanford CS 329S on machine-learning systems design. Publication 4, O'Reilly; <em>Designing Machine Learning Systems</em> was a category bestseller. Breadth 4, machine-learning systems, LLM evaluation, retrieval, agents, fine-tuning, inference. Adoption 4, her two O'Reilly books are default practitioner references (split 4/5, lower recorded). Currency 5, January 2025 book, active writing in 2025 and 2026.</p>
+
+    <p>Utilisation: no usage data, newly added.</p>
+
+    <p><strong>Work score — <em>AI Engineering</em>:</strong></p>
+    <table>
+      <caption>Table 26 — AI Engineering: work score</caption>
+      <thead>
+        <tr><th style="text-align:right">Specificity</th><th style="text-align:right">Depth</th><th style="text-align:right">Currency</th><th style="text-align:right">Influence</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:right">4</td><td style="text-align:right">4</td><td style="text-align:right">5</td><td style="text-align:right">4</td><td><strong>Established</strong> (avg 4.25)</td></tr>
+      </tbody>
+    </table>
+    <span class="sidenote"><em>Boundary case: the primary pass averaged 4.25 (Established), the independent pass 4.5 (Canonical). Recorded as Established; flagged for the owner.</em></span>
+    <p>Evidence: Specificity 4, decision frameworks for fine-tune versus prompt versus retrieve, evaluation design, dataset engineering; survey-style rather than code-led. Depth 4, roughly 530 pages spanning evaluation through inference optimisation (split 4/5, lower recorded). Currency 5, January 2025. Influence 4, O'Reilly's top-selling 2025 title in its category.</p>
+
+    <h2 id="independent-verification">3. Independent Verification</h2>
+    <p>Primary pass (P) by the session running <code>/gvm-init</code>, recorded before the independent pass was read. Independent pass (I) by a fresh agent given names and titles only. Expert dimensions in the order Authority, Publication, Breadth, Adoption, Currency; work dimensions in the order Specificity, Depth, Currency, Influence.</p>
+
+    <table>
+      <caption>Table 27 — Primary (P), independent (I) and final scores by expert and work</caption>
+      <thead>
+        <tr><th>Expert / work</th><th style="text-align:right">P</th><th style="text-align:right">I</th><th style="text-align:right">Final</th><th>Differences</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>European Commission</td><td style="text-align:right">5 5 4 5 5</td><td style="text-align:right">5 5 4 5 5</td><td style="text-align:right">5 5 4 5 5</td><td>none</td></tr>
+        <tr><td>— Definition guidelines</td><td style="text-align:right">4 3 5 4</td><td style="text-align:right">4 3 4 5</td><td style="text-align:right">4 3 4 4</td><td>Currency, Influence (1 each)</td></tr>
+        <tr><td>— Prohibited practices guidelines</td><td style="text-align:right">5 5 4 4</td><td style="text-align:right">5 5 4 5</td><td style="text-align:right">5 5 4 4</td><td>Influence (1)</td></tr>
+        <tr><td>Chalkidis et al.</td><td style="text-align:right">4 5 3 4 4</td><td style="text-align:right">4 5 3 4 3</td><td style="text-align:right">4 5 3 4 3</td><td>Currency (1)</td></tr>
+        <tr><td>— LexGLUE</td><td style="text-align:right">4 4 3 4</td><td style="text-align:right">4 4 3 4</td><td style="text-align:right">4 4 3 4</td><td>none</td></tr>
+        <tr><td>— MultiEURLEX</td><td style="text-align:right">4 3 3 3</td><td style="text-align:right">4 3 3 3</td><td style="text-align:right">4 3 3 3</td><td>none</td></tr>
+        <tr><td>Pustejovsky &amp; Stubbs</td><td style="text-align:right">4 4 3 4 2</td><td style="text-align:right">4 4 3 4 2</td><td style="text-align:right">4 4 3 4 2</td><td>none</td></tr>
+        <tr><td>— <em>Natural Language Annotation</em></td><td style="text-align:right">5 4 2 4</td><td style="text-align:right">4 4 2 4</td><td style="text-align:right">4 4 2 4</td><td>Specificity (1)</td></tr>
+        <tr><td>Hu et al.</td><td style="text-align:right">4 5 3 5 4</td><td style="text-align:right">5 5 3 5 4</td><td style="text-align:right">4 5 3 5 4</td><td>Authority (1)</td></tr>
+        <tr><td>— LoRA</td><td style="text-align:right">5 4 4 5</td><td style="text-align:right">5 4 4 5</td><td style="text-align:right">5 4 4 5</td><td>none</td></tr>
+        <tr><td>Dettmers et al.</td><td style="text-align:right">4 5 3 5 4</td><td style="text-align:right">5 5 4 5 4</td><td style="text-align:right">4 5 3 5 4</td><td>Authority, Breadth (1 each); boundary</td></tr>
+        <tr><td>— QLoRA</td><td style="text-align:right">5 4 4 5</td><td style="text-align:right">5 5 4 5</td><td style="text-align:right">5 4 4 5</td><td>Depth (1)</td></tr>
+        <tr><td>Zhou et al.</td><td style="text-align:right">4 5 2 4 3</td><td style="text-align:right">4 5 3 4 3</td><td style="text-align:right">4 5 2 4 3</td><td>Breadth (1)</td></tr>
+        <tr><td>— LIMA</td><td style="text-align:right">4 3 3 4</td><td style="text-align:right">3 3 3 4</td><td style="text-align:right">3 3 3 4</td><td>Specificity (1); boundary</td></tr>
+        <tr><td>Wang et al.</td><td style="text-align:right">4 5 3 5 3</td><td style="text-align:right">4 5 4 5 4</td><td style="text-align:right">4 5 3 5 3</td><td>Breadth, Currency (1 each)</td></tr>
+        <tr><td>— Self-Instruct</td><td style="text-align:right">5 4 3 5</td><td style="text-align:right">4 4 3 5</td><td style="text-align:right">4 4 3 5</td><td>Specificity (1)</td></tr>
+        <tr><td>Geifman &amp; El-Yaniv</td><td style="text-align:right">4 5 3 3 3</td><td style="text-align:right">4 5 3 4 3</td><td style="text-align:right">4 5 3 3 3</td><td>Adoption (1)</td></tr>
+        <tr><td>— Selective Classification</td><td style="text-align:right">5 4 3 4</td><td style="text-align:right">4 3 3 4</td><td style="text-align:right">4 3 3 4</td><td>Specificity, Depth (1 each)</td></tr>
+        <tr><td>— SelectiveNet</td><td style="text-align:right">4 3 3 3</td><td style="text-align:right">4 3 3 4</td><td style="text-align:right">4 3 3 3</td><td>Influence (1); boundary</td></tr>
+        <tr><td>Raschka</td><td style="text-align:right">4 4 4 4 5</td><td style="text-align:right">4 3 4 5 5</td><td style="text-align:right">4 3 4 4 5</td><td>Publication, Adoption (1 each)</td></tr>
+        <tr><td>— <em>Build a Large Language Model</em></td><td style="text-align:right">5 4 5 3</td><td style="text-align:right">5 4 4 4</td><td style="text-align:right">5 4 4 3</td><td>Currency, Influence (1 each)</td></tr>
+        <tr><td>— LoRA practical tips</td><td style="text-align:right">5 3 3 3</td><td style="text-align:right">5 3 3 3</td><td style="text-align:right">5 3 3 3</td><td>none</td></tr>
+        <tr><td>Huyen</td><td style="text-align:right">4 4 4 4 5</td><td style="text-align:right">4 4 4 5 5</td><td style="text-align:right">4 4 4 4 5</td><td>Adoption (1)</td></tr>
+        <tr><td>— <em>AI Engineering</em></td><td style="text-align:right">4 4 5 4</td><td style="text-align:right">4 5 5 4</td><td style="text-align:right">4 4 5 4</td><td>Depth (1); boundary</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Overall confidence: High.</strong> Every dimension converged within one point. Convergence shows the scores are stable between two passes of the same model family; it does not prove them correct. The owner's approval remains the correctness check.</p>
+
+    <p><strong>Existence checks by the independent pass.</strong> Both Commission guidelines confirmed on the Commission's digital-strategy library with their C-numbers and February 2025 approval dates. The Article 6 high-risk classification guidelines exist only as a draft published for consultation on 19 May 2026; no final text was found as of 26 October 2026. Raschka's newsletter article confirmed with its date and subtitle. Huyen's book confirmed as released January 2025. The remaining papers confirmed against their stated venues and years.</p>
+
+    <h2 id="utilisation-analysis">4. Utilisation Analysis</h2>
+    <p>No activation data exists for any of the ten experts; all are newly added. The activation log holds rows for the existing experts loaded during this calibration (Tier 1 and the two industry files), but those experts were not scored in this operation and their utilisation is outside its scope.</p>
+
+    <h2 id="summary-table">5. Summary Table</h2>
+    <p>Sorted by expert classification, then average.</p>
+
+    <table>
+      <caption>Table 28 — Summary of expert classifications, sorted by classification then average</caption>
+      <thead>
+        <tr><th>Expert</th><th>Classification (avg)</th><th style="text-align:right">Works</th><th>Highest-classified work</th><th>Verification</th><th>Cite rate</th><th>Sample</th><th>Flag</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>European Commission (AI Office)</td><td>Canonical (4.8)</td><td style="text-align:right">2</td><td>Prohibited practices guidelines, Canonical</td><td>High</td><td>n/a</td><td>newly added</td><td>none</td></tr>
+        <tr><td>Edward J. Hu et al.</td><td>Established (4.2)</td><td style="text-align:right">1</td><td><em>LoRA</em>, Canonical</td><td>High</td><td>n/a</td><td>newly added</td><td>none</td></tr>
+        <tr><td>Tim Dettmers et al.</td><td>Established (4.2)</td><td style="text-align:right">1</td><td><em>QLoRA</em>, Canonical</td><td>High</td><td>n/a</td><td>newly added</td><td>boundary (expert)</td></tr>
+        <tr><td>Chip Huyen</td><td>Established (4.2)</td><td style="text-align:right">1</td><td><em>AI Engineering</em>, Established</td><td>High</td><td>n/a</td><td>newly added</td><td>boundary (work)</td></tr>
+        <tr><td>Yizhong Wang et al.</td><td>Established (4.0)</td><td style="text-align:right">1</td><td><em>Self-Instruct</em>, Established</td><td>High</td><td>n/a</td><td>newly added</td><td>none</td></tr>
+        <tr><td>Sebastian Raschka</td><td>Established (4.0)</td><td style="text-align:right">2</td><td><em>Build a Large Language Model</em>, Established</td><td>High</td><td>n/a</td><td>newly added</td><td>none</td></tr>
+        <tr><td>Ilias Chalkidis et al.</td><td>Established (3.8)</td><td style="text-align:right">2</td><td><em>LexGLUE</em>, Established</td><td>High</td><td>n/a</td><td>newly added</td><td>none</td></tr>
+        <tr><td>Chunting Zhou et al.</td><td>Established (3.6)</td><td style="text-align:right">1</td><td><em>LIMA</em>, Recognised</td><td>High</td><td>n/a</td><td>newly added</td><td>boundary (work)</td></tr>
+        <tr><td>Geifman &amp; El-Yaniv</td><td>Established (3.6)</td><td style="text-align:right">2</td><td><em>Selective Classification</em>, Established</td><td>High</td><td>n/a</td><td>newly added</td><td>boundary (work)</td></tr>
+        <tr><td>Pustejovsky &amp; Stubbs</td><td>Recognised (3.4)</td><td style="text-align:right">1</td><td><em>Natural Language Annotation</em>, Established</td><td>High</td><td>n/a</td><td>newly added</td><td>none</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="recall-check">6. Recall Check</h2>
+    <p>The scoring method requires a check in the other direction: not only whether the proposed names deserve their scores, but whether any widely cited authority was missed. A separate blind agent enumerated each field's most-cited authorities without seeing the roster; the comparison is recorded in <code>init/init-001.md</code>, section 3.3.</p>
+
+    <h2 id="changes">7. Changes</h2>
+    <p>Not applicable: this is a first scoring, not a rescore.</p>
+
+    <p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
+</main>
+
+  <script>
+(function () {
+  const toc = document.getElementById('toc');
+  const headings = document.querySelectorAll('h2[id], h3[id]');
+  const links = [];
+
+  headings.forEach(function (h) {
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    if (h.tagName === 'H3') a.classList.add('toc-h3');
+    toc.appendChild(a);
+    links.push({ el: a, target: h });
+  });
+
+  function onScroll() {
+    let current = links[0];
+    for (let i = 0; i < links.length; i++) {
+      if (links[i].target.getBoundingClientRect().top <= 80) current = links[i];
+    }
+    links.forEach(function (l) { l.el.classList.remove('active'); });
+    if (current) {
+      current.el.classList.add('active');
+      const tocEl = document.getElementById('toc');
+      const elTop = current.el.offsetTop - tocEl.offsetTop;
+      const elBot = elTop + current.el.offsetHeight;
+      if (elTop < tocEl.scrollTop || elBot > tocEl.scrollTop + tocEl.clientHeight) {
+        tocEl.scrollTop = elTop - tocEl.clientHeight / 2;
+      }
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+  </script>
+</body>
+</html>

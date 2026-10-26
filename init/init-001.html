@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Act Lab — Expert Calibration (init-001)</title>
+  <style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: "ET Book", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  color: #111;
+  background: #fffff8;
+  line-height: 1.6;
+  padding: 2rem 1rem 6rem;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+/* ── Typography ── */
+h1 {
+  font-size: 2.4rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+  color: #111;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  color: #111;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  color: #333;
+}
+
+p, li {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+  max-width: 640px;
+}
+
+ul, ol { padding-left: 1.4rem; margin-bottom: 1.2rem; }
+li { margin-bottom: 0.4rem; }
+
+.subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #555;
+  margin-bottom: 2.5rem;
+  max-width: 640px;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Floating TOC (Left Side) ── */
+nav.toc {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  width: 220px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  background: #fffff8;
+  border-right: 2px solid #ddd;
+  padding: 1rem 1rem 1rem 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  z-index: 100;
+}
+
+nav.toc .toc-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  margin-bottom: 0.6rem;
+}
+
+nav.toc a {
+  color: #555;
+  text-decoration: none;
+  display: block;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+nav.toc a:hover { color: #111; }
+nav.toc a.active { color: #111; font-weight: 600; }
+nav.toc .toc-h3 { padding-left: 0.8rem; font-size: 0.78rem; color: #888; }
+nav.toc .toc-h3:hover { color: #555; }
+
+/* Offset main content for left TOC */
+main {
+  margin-left: 260px;
+}
+
+/* ── Sidenotes (Right Margin) ── */
+.sidenote {
+  float: right;
+  clear: right;
+  width: 220px;
+  margin-right: -260px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #666;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+/* ── Tables (Few's principles) ── */
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  width: auto;
+  min-width: 480px;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 2px solid #333;
+  color: #111;
+}
+
+tbody td {
+  padding: 0.45rem 1rem 0.45rem 0;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: 2px solid #333; }
+tbody tr:nth-child(even) { background: #f9f9f4; }
+
+caption {
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #666;
+  text-align: left;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Requirement Blocks ── */
+.req {
+  background: #f7f7f0;
+  border-left: 3px solid #999;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.req-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.req p { margin-bottom: 0.3rem; }
+
+/* ── Priority Chips (MoSCoW) ── */
+.priority {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+.priority.must { background: #111; color: #fff; }
+.priority.should { background: #bbb; color: #fff; }
+.priority.could { background: #e8e8e0; color: #666; }
+.priority.wont { background: #fff; color: #999; border: 1px solid #ccc; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  nav.toc {
+    position: static;
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  main { margin-left: 0; }
+  .sidenote {
+    float: none;
+    width: 100%;
+    margin: 0.8rem 0;
+    padding: 0.6rem 0 0.6rem 1rem;
+  }
+}
+
+/* ── Test Case Components (/gvm-test-cases) ── */
+.test-case {
+  background: #f7f7f0;
+  border-left: 3px solid #669;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.tc-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.tc-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.tc-bdd p {
+  margin-bottom: 0.2rem;
+  padding-left: 1rem;
+}
+
+.tc-trace {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+.tc-detail {
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.tc-detail h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.health-issue {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.health-issue.acknowledged {
+  opacity: 0.6;
+  border-left-color: #ccc;
+}
+
+/* ── Open Questions ── */
+.open-question {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.oq-context {
+  font-size: 0.88rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* ── Inline Code ── */
+code {
+  font-family: "Menlo", "Consolas", "Monaco", monospace;
+  font-size: 0.88rem;
+  background: #f0f0e8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* ── GVM Attribution (per shared rule 24) ── */
+.gvm-attribution {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 0;
+  max-width: none;
+}
+  </style>
+</head>
+<body>
+  <nav class="toc" id="toc">
+    <div class="toc-title">Contents</div>
+    <!-- Auto-generated by script at bottom -->
+  </nav>
+
+  <main>
+    <p class="date">October 2026</p>
+    <h1>AI Act Lab</h1>
+    <p class="subtitle"><em>A learning project: fine-tune a small open language model on a laptop to triage AI systems under the EU AI Act. This report records which published authorities will ground every later decision, and why.</em></p>
+
+    <table>
+      <caption>Table 1 — Report metadata</caption>
+      <thead>
+        <tr><th>Field</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Date</td><td>2026-10-26</td></tr>
+        <tr><td>Phase</td><td><code>/gvm-init</code> (Discovery, entry point for a new project)</td></tr>
+        <tr><td>Status</td><td>awaiting owner review</td></tr>
+      </tbody>
+    </table>
+      <h2 id="executive-summary">1. Executive Summary</h2>
+
+    <p><strong>Project:</strong> AI Act Lab.</p>
+
+    <p><strong>Business domain:</strong> two domains at once. A regulated one, EU AI Act compliance (risk-tier triage of AI systems against Regulation (EU) 2024/1689 as amended by the Digital Omnibus on AI, Regulation (EU) 2026/1744). And a technical one, adapting a small open language model with LoRA on an Apple M2 with 8 GB of memory, with honest measurement.</p>
+
+    <p><strong>What this phase does, in plain English.</strong> The Grounded Vibe Methodology does not let the AI assistant make design calls from instinct. Every decision in later phases must cite a named, published authority: a book, a peer-reviewed paper, a regulation or an official guideline. This phase assembles that list, called the expert roster, scores each authority on how trustworthy it is, and writes the result down so the later phases (impact map, requirements, test cases, technical specification, build) read the same list. Think of it as choosing the reference shelf before writing the first page.</p>
+
+    <p><strong>How the roster is organised.</strong></p>
+
+    <ul>
+      <li><em>Tier 1, process experts.</em> How software is specified, built and tested well. Always active. Drawn from the methodology's standard shelf.</li>
+      <li><em>Tier 2b, industry experts.</em> The regulation, its interpretation, and the craft of evaluating AI models. Chosen for this project.</li>
+      <li><em>Tier 2a (software patterns) and Tier 3 (tools and libraries)</em> are not chosen yet. They are added when the requirements and the technical specification make the stack concrete. For this project that means the <code>mlx-lm</code> fine-tuning library, the conversion tools and Ollama; they will be grounded at the tech-spec phase.</li>
+    </ul>
+
+    <p><strong>Pre-check.</strong> No earlier initialisation of this project exists: no <code>init/</code> folder and no activation-log rows for this repository. Other projects on this machine have added industry files to the shared library; two of them turned out to fit this project and were reused.</p>
+
+    <p><strong>Application brief.</strong> The methodology offers an optional one-page project brief at this point. It was not written separately: <code>docs/00-plan.md</code> already answers every question the brief asks (problem, solution, value, existing landscape, solution shape, stakeholders, constraints), so a second copy would drift from the first.</p>
+
+    <p><strong>How the domain question was answered.</strong> The methodology normally asks the owner for the business domain interactively. This run was started by another session with the domain already stated in its brief, so the brief's answer was used. The owner can correct it in review.</p>
+
+    <p><strong>Scope of this phase.</strong> No training code was written, no model downloaded, no Python package installed. The output is this report, a scoring report for the newly proposed experts, and the activation log.</p>
+    <h2 id="process-experts">2. Process Experts (Tier 1)</h2>
+
+    <p><strong>Decision: the standard Tier 1 roster is confirmed unchanged.</strong> The regulated nature of the domain is carried by the Tier 2b experts, not by swapping out the process experts. Nothing in the standard roster conflicts with a data-and-evaluation project; several entries fit it unusually well.</p>
+
+    <p>The seventeen Tier 1 experts, and the role each will actually play here:</p>
+
+    <table>
+      <caption>Table 2 — Tier 1 process experts and the role each plays on this project</caption>
+      <thead>
+        <tr><th>Expert</th><th>Work</th><th>Role on this project</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>George Fairbanks</td><td><em>Just Enough Software Architecture</em> (2010)</td><td>Risk-driven depth: thorough on the label scheme, the gold set and the evaluation harness, where the project can fail; light on everything else</td></tr>
+        <tr><td>Mike Cohn</td><td><em>Agile Estimating and Planning</em> (2005); <em>User Stories Applied</em> (2004)</td><td>Vertical slicing. The first slice stays tiny: label scheme, lookup table, gold set, zero-shot baseline. Training comes later</td></tr>
+        <tr><td>Kent Beck</td><td><em>Test-Driven Development: By Example</em> (2002)</td><td>Tests first for the deterministic parts: the lookup table, the citation checker, the scorer</td></tr>
+        <tr><td>Andrew Hunt and David Thomas</td><td><em>The Pragmatic Programmer</em> (2019 ed.)</td><td>Tracer bullets: a thin end-to-end thread (describe a system, get a scored record) before any tuning. DRY for the lookup table as the single source of dates</td></tr>
+        <tr><td>Cem Kaner</td><td><em>Lessons Learned in Software Testing</em> (2001)</td><td>Realistic test data: the gold set must read like real system descriptions, not toy sentences</td></tr>
+        <tr><td>Boris Beizer</td><td><em>Software Testing Techniques</em> (1990)</td><td>Bugs cluster at boundaries: the Annex III versus Article 50 boundary gets the most hand-labelling effort</td></tr>
+        <tr><td>Frederick Brooks</td><td><em>The Mythical Man-Month</em>; <em>The Design of Design</em></td><td>Conceptual integrity: one idea throughout, the model judges, the table knows the dates</td></tr>
+        <tr><td>Michael Keeling</td><td><em>Design It!</em> (2017)</td><td>Decision records. The decisions log in <code>docs/00-plan.md</code> continues in this style</td></tr>
+        <tr><td>Len Bass, Paul Clements, Rick Kazman</td><td><em>Software Architecture in Practice</em> (4th ed.); <em>Documenting Software Architectures</em></td><td>Quality-attribute scenarios: memory ceiling, run time per training run, accuracy targets stated as measurable scenarios</td></tr>
+        <tr><td>Simon Brown</td><td>C4 model</td><td>One context diagram when the tech spec is written: owner, model, lookup table, Ollama, local page</td></tr>
+        <tr><td>Martin Fowler</td><td><em>Refactoring</em> (2nd ed.); <em>Patterns of Enterprise Application Architecture</em></td><td>Anti-bloat lens: keep scripts small and readable</td></tr>
+        <tr><td>Steve McConnell</td><td><em>Code Complete</em> (2nd ed.)</td><td>Defensive construction: fail loudly on a missing table entry or a malformed model output</td></tr>
+        <tr><td>Robert C. Martin</td><td><em>Clean Code</em> (2008)</td><td>No swallowed errors in the evaluation harness; a silent failure would fake a result</td></tr>
+        <tr><td>Sandi Metz</td><td><em>Practical Object-Oriented Design</em> (2nd ed.)</td><td>Test the public behaviour of scripts, not their internals</td></tr>
+      </tbody>
+    </table>
+
+    <p>Metz and Martin are object-oriented authors and this project is mostly short Python scripts and data files. Their principles still apply, proportionately. No replacement was needed.</p>
+    <h2 id="industry-domain">3. Industry Domain (Tier 2b)</h2>
+
+    <h3 id="activated-files">3.1 Files activated from the shared library</h3>
+
+    <p>Two existing industry files match this project and are activated.</p>
+
+    <p><strong><code>industry/ai-governance.md</code>.</strong> Holds the EU AI Act itself (scored Canonical), the NIST AI Risk Management Framework, several financial-sector model-risk standards, and five practitioners. The entries that matter most here:</p>
+
+    <ul>
+      <li><em>EU AI Act, Regulation (EU) 2024/1689.</em> The primary source for the label scheme, the Annex III categories and the article citations.</li>
+      <li><em>NIST AI RMF.</em> Its Measure function is the reminder that a claim is tested, not asserted. The project's measurement plan follows that.</li>
+      <li><em>Margaret Mitchell et al., Model Cards.</em> The shipped model gets a model card: intended use, out-of-scope use, evaluation data, disaggregated results, caveats. The README's honesty paragraph becomes that card.</li>
+      <li><em>Michael Power, The Audit Society.</em> Guards against verification theatre. A citation that looks right is not a citation that is right; the citation checker tests against a fixed table.</li>
+      <li><em>Cathy O'Neil and Virginia Eubanks.</em> The harm lens for writing cases: who is affected when a system is misclassified as minimal risk.</li>
+      <li><em>OWASP Top 10 for LLM Applications.</em> A system description typed by a user is untrusted text. Prompt injection inside a description is a test case, not an afterthought.</li>
+    </ul>
+
+    <p>The entries on US, UK, Singaporean and Canadian banking supervision (SR 26-2, SS1/23, FEAT, E-23) are loaded with the file but are not expected to be cited; the project is not sector-specific.</p>
+
+    <p><strong><code>industry/ai-evaluation.md</code>.</strong> The craft of measuring models honestly. The entries that matter most here:</p>
+
+    <ul>
+      <li><em>Sayash Kapoor and Arvind Narayanan, Leakage and the Reproducibility Crisis.</em> The test set is touched once. Teacher-written training cases must not paraphrase gold cases. Leakage checks are a requirement, not a hope.</li>
+      <li><em>Percy Liang et al., HELM.</em> One headline number hides trade-offs. The project reports tier accuracy, category accuracy, citation validity and review behaviour separately, and names what was not evaluated.</li>
+      <li><em>Lianmin Zheng et al., Judging LLM-as-a-Judge.</em> The judge pass that filters synthetic cases is itself a model with biases. Its agreement with the owner's gold labels is measured before it is trusted.</li>
+      <li><em>Deborah Raji et al., Closing the AI Accountability Gap.</em> Write the evaluation scope before running it, so coverage cannot be claimed after the fact.</li>
+      <li><em>Mitchell, Model Cards</em> (also here) and <em>NIST AI RMF</em> (also here).</li>
+      <li><em>UK AI Security Institute, Inspect</em> and <em>METR</em> describe evaluation infrastructure at a scale this project does not need; loaded, unlikely to be cited.</li>
+    </ul>
+
+    <p><strong>Files considered and not activated.</strong> <code>model-risk.md</code> (bank model-validation standards; useful vocabulary but sector-specific, and the project deliberately carries no sector), <code>forecast-verification.md</code>, <code>world-models.md</code>, <code>predictive-neuroscience.md</code> (unrelated).</p>
+
+    <p><strong>Two housekeeping notes on the shared library, flagged, not changed.</strong> The EU AI Act entry describes the Digital Omnibus as a "provisional agreement, May 2026"; it has since been adopted as Regulation (EU) 2026/1744, in force 27 July 2026. This is exactly why the project keeps dates in a lookup table and not in prose or weights; the project's table, not the library entry, is the source of truth for dates. Second, Margaret Mitchell and the NIST AI RMF each carry a full score block in both files, which the methodology's single-canonical-source rule says should be a cross-reference. Noted for <code>/gvm-experts</code>.</p>
+    <h3 id="coverage-gaps">3.2 Coverage gaps and the experts proposed to fill them</h3>
+
+    <p>The two activated files cover the regulation and the general craft of evaluation. Checked against what this project actually has to do, eight gaps remained. Ten experts are proposed to fill them. Each was scored twice, independently, and the scores reconciled; the full record with evidence is in <code>scoring-reports/expert-scoring-001.md</code>. <strong>None has been written into the shared library yet. That happens when the owner approves this report.</strong></p>
+
+    <table>
+      <caption>Table 3 — Coverage gaps, the experts proposed to fill them, and their classification</caption>
+      <thead>
+        <tr><th>Gap</th><th>What the project needs</th><th>Proposed expert</th><th>Classification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Interpreting the Act's classification rules</td><td>Official tests for "is this an AI system" and "is this prohibited", with worked examples</td><td>European Commission (AI Office), AI Act guidelines</td><td>Canonical</td></tr>
+        <tr><td>Evidence on legal-text classification by language models</td><td>What small models have achieved on EU legal classification, and how labels behave in hierarchies</td><td>Ilias Chalkidis et al., LexGLUE and MultiEURLEX</td><td>Established</td></tr>
+        <tr><td>Building the hand-checked gold set</td><td>A method for writing the labelling guideline, measuring agreement and adjudicating</td><td>James Pustejovsky and Amber Stubbs, <em>Natural Language Annotation for Machine Learning</em></td><td>Recognised</td></tr>
+        <tr><td>The fine-tuning technique</td><td>What LoRA does, which knobs matter, why the adapter is small</td><td>Edward J. Hu et al., <em>LoRA</em></td><td>Established (work: Canonical)</td></tr>
+        <tr><td>Fitting training in 8 GB</td><td>Why a 4-bit base with adapters matches full-precision quality, and what to compare against</td><td>Tim Dettmers et al., <em>QLoRA</em></td><td>Established (work: Canonical)</td></tr>
+        <tr><td>Writing training cases with a teacher model</td><td>How teacher-written data is generated, de-duplicated and filtered; how few good cases can be enough</td><td>Yizhong Wang et al., <em>Self-Instruct</em>; Chunting Zhou et al., <em>LIMA</em></td><td>Established; Established</td></tr>
+        <tr><td>Measuring "needs human review" honestly</td><td>The reject option: coverage against error on answered cases</td><td>Yonatan Geifman and Ran El-Yaniv, selective classification</td><td>Established</td></tr>
+        <tr><td>Teaching the craft as we go</td><td>Practical, current guides that explain the mechanism in plain terms</td><td>Sebastian Raschka, <em>Build a Large Language Model (From Scratch)</em>; Chip Huyen, <em>AI Engineering</em></td><td>Established; Established</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Where each would be filed.</strong> The Commission guidelines join the EU AI Act entry in <code>industry/ai-governance.md</code>. Chalkidis, Pustejovsky and Stubbs, and Geifman and El-Yaniv join <code>industry/ai-evaluation.md</code>, because benchmarks, gold sets and abstention are evaluation concerns. Hu, Dettmers, Zhou, Wang, Raschka and Huyen go into a new file, <code>industry/llm-fine-tuning.md</code>, for the craft of adapting small language models. The new file follows the same append-only convention as the others.</p>
+
+    <p><strong>Four boundary cases.</strong> Where the two scoring passes disagreed on the band, the lower integer was recorded and the entry flagged: Dettmers (expert score, Established versus Canonical), <em>LIMA</em> (Recognised versus Established), <em>SelectiveNet</em> (Recognised versus Established), <em>AI Engineering</em> (Established versus Canonical). None changes how the expert is used.</p>
+
+    <p><strong>One finding from verification worth knowing now.</strong> The Commission's guidelines on classifying high-risk systems under Article 6 exist only as a draft, published for consultation on 19 May 2026, with no final text found as of today. The definition guidelines and the prohibited-practices guidelines are final (February 2025). The label scheme in the requirements phase will therefore rest on the Act's text and the draft, and say so.</p>
+
+    <p><strong>What each proposed expert will govern on this project.</strong></p>
+
+    <p><em>European Commission (AI Office), AI Act guidelines.</em> Definition first: a described system that fails the seven-element test for "AI system" is out of scope, which is a different answer from "minimal risk", and the label scheme must handle it. Prohibitions are illustrated, not just listed: the prohibited-practices guidelines supply the worked examples for prohibited cases in the gold set. The two prohibitions the Omnibus added apply from 2 December 2026 and post-date the guidelines; cases for them come from the amended Act text. Where guidance and the amended text differ, the text wins and the lookup table records the date checked.</p>
+
+    <p><em>Ilias Chalkidis et al.</em> Legal labels come in hierarchies, and performance differs by level; Annex III has areas and sub-points, so score both. Fine-tuned small models have a track record on legal classification, so expect weak zero-shot numbers from small instruct models and a large gain from fine-tuning, which the baseline makes visible. The benchmarks predate instruction-tuned models; use them to set expectations, not as the target.</p>
+
+    <p><em>James Pustejovsky and Amber Stubbs.</em> The MATTER cycle: Model, Annotate, Train and Test, Evaluate, Revise. The labelling guideline is written before any case is labelled, with decision rules and examples, and revised when labelling exposes gaps. A gold standard is adjudicated, not single-pass: measure agreement on a sample (a second rater, or the owner re-labelling blind after a gap) and feed the disagreements back into the guideline. Every gold case records which guideline version labelled it.</p>
+
+    <p><em>Edward J. Hu et al., LoRA.</em> Freeze the base, train small low-rank update matrices alongside selected weights. Rank 4 to 16 was enough in the paper, which is why the adapter is a few megabytes against hundreds for the base. The knobs are rank, which matrices get adapters, and the scaling factor; every notebook entry records them. Adapters merge back into the base at no inference cost, which is what makes the later export step possible.</p>
+
+    <p><em>Tim Dettmers et al., QLoRA.</em> A 4-bit base with LoRA adapters matched 16-bit fine-tuning quality in the paper's benchmarks at a fraction of the memory; this is the design that fits 8 GB. Quantisation error is small but not zero, so the fine-tuned 4-bit model is compared against the untuned model at the same precision. Their best results came from a small curated dataset, not the largest one.</p>
+
+    <p><em>Chunting Zhou et al., LIMA.</em> One thousand carefully curated examples produced strong results on a 65-billion-parameter base: the model already holds the knowledge, and fine-tuning teaches format and behaviour. This is the published support for "the model learns judgement and format, not dates". The caveat travels with the claim: a 0.8-billion-parameter model holds less, so the project expects to need more examples and measures rather than assumes. Diversity in the set mattered more than volume.</p>
+
+    <p><em>Yizhong Wang et al., Self-Instruct.</em> A model can write its own training data if the pipeline filters for diversity and quality; the paper dropped near-duplicates and malformed outputs before training. Keep the rejection statistics: the share of teacher-written cases the judge removes is a measurement, and a rising share is a warning about the teacher prompt. Teacher-written data inherits the teacher's blind spots; the gold set, not the teacher, is the ground truth.</p>
+
+    <p><em>Yonatan Geifman and Ran El-Yaniv, selective classification.</em> A classifier with a reject option trades coverage (the share of cases it answers) against selective risk (its error rate on those it answers). "Needs human review" is a reject option. Report the two numbers together, because accuracy alone can be bought by refusing everything. Set the operating point from the target, nine in ten right on answered cases, and measure how much review that costs.</p>
+
+    <p><em>Sebastian Raschka.</em> Settings that work in practice: a scaling factor about twice the rank, adapters on all linear layers rather than attention only, few epochs on small sets, and scoring the task rather than trusting the loss. These become the notebook's starting defaults, changed one at a time. His book supplies the plain-English explanations of tokens, attention and fine-tuning stages that the teaching rule needs.</p>
+
+    <p><em>Chip Huyen.</em> Fine-tune for behaviour and format, retrieve for facts: the book's framing of when to fine-tune, prompt or retrieve is the published version of the project's main design rule. Evaluation-driven development: define the measurement before building the thing measured. Synthetic data is engineered, with generation, verification and filtering as separate steps.</p>
+    <h3 id="recall-check">3.3 Recall check: what a blind enumeration found</h3>
+
+    <p>Scoring only tests the names put forward. To test the names left out, a separate agent was asked, without sight of the roster, to list the most-cited authorities in four fields: EU AI Act classification; parameter-efficient fine-tuning and synthetic data; honest evaluation including abstention; and gold-set annotation. It returned 48 entries. Compared with the roster:</p>
+
+    <p><strong>Already covered.</strong> The Act, the two final Commission guidelines, the draft Article 6 guidelines, LoRA, QLoRA, Self-Instruct, LIMA, LLM-as-judge bias (Zheng), leakage (Kapoor and Narayanan), selective classification (Geifman and El-Yaniv, with Chow's 1970 reject option as lineage), Pustejovsky and Stubbs, and LexGLUE. The blind list's top entries in every field are on the roster.</p>
+
+    <p><strong>Absent, and recommended for addition at the phase where they become concrete.</strong> Each would be scored and approved then, not now.</p>
+
+    <table>
+      <caption>Table 4 — Authorities absent from the roster, recommended for addition at the phase where they become concrete</caption>
+      <thead>
+        <tr><th>Authority</th><th>Why it matters here</th><th>Phase</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Ron Artstein and Massimo Poesio, <em>Inter-Coder Agreement for Computational Linguistics</em> (2008)</td><td>The definitive guide to agreement measures for the gold-set check</td><td>Requirements</td></tr>
+        <tr><td>Paul Röttger et al., <em>Two Contrasting Data Annotation Paradigms</em> (2022)</td><td>A legal triage guideline is prescriptive; this names the choice and its consequences</td><td>Requirements</td></tr>
+        <tr><td>Evan Miller, <em>Adding Error Bars to Evals</em> (2024), with Dietterich (1998)</td><td>A 100-case test set gives wide confidence intervals; honesty requires reporting them</td><td>Requirements</td></tr>
+        <tr><td>Amita Kamath, Robin Jia and Percy Liang, <em>Selective Question Answering under Domain Shift</em> (2020)</td><td>Abstention metrics as used in NLP: coverage at a fixed accuracy</td><td>Requirements</td></tr>
+        <tr><td>Hanning Zhang et al., <em>R-Tuning</em> (2024); Bingbing Wen et al., abstention survey (2025)</td><td>How to train a model to say "I don't know" as a label, which is what "needs human review" is</td><td>Tech spec</td></tr>
+        <tr><td>Dan Biderman et al., <em>LoRA Learns Less and Forgets Less</em> (2024); John Schulman et al., <em>LoRA Without Regret</em> (2025)</td><td>Honest limits of LoRA and current hyperparameter guidance</td><td>Tech spec</td></tr>
+        <tr><td>Lichang Chen et al., <em>AlpaGasus</em> (2024); Wei Liu et al., <em>DEITA</em> (2024)</td><td>Judge-based filtering of teacher-written data, which is the planned judge pass</td><td>Tech spec</td></tr>
+        <tr><td>Cheng-Yu Hsieh et al., <em>Distilling Step-by-Step</em> (2023)</td><td>Distilling a rationale into a small model; the output includes a one-sentence reason</td><td>Tech spec</td></tr>
+        <tr><td>Neel Guha et al., <em>LegalBench</em> (2023)</td><td>The current legal-reasoning benchmark, more recent than LexGLUE</td><td>Requirements (bake-off design)</td></tr>
+        <tr><td>Pehlivan, Forgó and Valcke (eds.), <em>The EU Artificial Intelligence (AI) Act: A Commentary</em> (2024); Veale and Zuiderveen Borgesius (2021)</td><td>Per-article interpretation when writing the labelling guideline, if the owner has access</td><td>Requirements</td></tr>
+        <tr><td>AI Office, <em>Code of Practice on Transparency of AI-Generated Content</em> (reported final June 2026)</td><td>Source for Article 50 transparency cases; status to be verified first</td><td>Requirements</td></tr>
+        <tr><td>Arnav Gudibande et al., <em>The False Promise of Imitating Proprietary LLMs</em> (2024); Ilia Shumailov et al., model collapse (2024)</td><td>The cautions an honest write-up of teacher-generated data should acknowledge</td><td>Documentation</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Noted, not needed for a triage model.</strong> Harmonised standards and management-system standards (CEN-CENELEC JTC 21, ISO/IEC 42001, ISO/IEC 23894) concern obligations after classification, not the classification itself. The academic risk-assessment literature on the Act (Novelli et al., Almada and Petit, Schuett, Laux and colleagues) is about Article 9, not triage. LoRA's successors and the adapter lineage (DoRA, LoRA+, PiSSA; Houlsby, Li and Liang, Lester) and the PEFT library belong to the tech spec if the chosen library supports them. Calibration and verbalised-confidence work (Guo et al., Kadavath et al., Xiong et al.) becomes relevant only if review is triggered by a confidence threshold rather than a learned label. The kappa originals (Cohen, Fleiss, Krippendorff), annotation-campaign texts (Fort; Hovy and Lavid), model-based adjudication (Dawid and Skene; Paun et al.), the annotation-quality audit by Klie et al. (2024), and the legal corpora (CUAD, CLAUDETTE, OPP-115) are useful background that Artstein and Poesio, and Pustejovsky and Stubbs, already summarise for a project of this size. Work on LLM annotators needing human validation (Gilardi et al.; Pangakis et al.) restates a rule the project already has.</p>
+
+    <p><strong>Authority scored 3 or lower.</strong> The recall rule also asks for present experts with a low Authority score. Only METR (Authority 3) qualifies; it is peripheral here.</p>
+
+    <p><strong>One discrepancy to carry forward.</strong> The recall agent's sources disagreed on the Digital Omnibus's final adoption and application dates, and it did not check the consolidated text. The project plan records Regulation (EU) 2026/1744 as in force from 27 July 2026, from the research session that started the project. That stands, and the lookup-table requirement will include re-verifying every date against the Official Journal, with the date checked recorded in the table.</p>
+    <h3 id="deferred-phases">3.4 Deferred to later phases</h3>
+
+    <p>Not chosen now, by design:</p>
+
+    <ul>
+      <li><em>Tier 2a, software patterns.</em> Activated during requirements and tech spec as patterns emerge. Likely candidates: <code>domain/data-intensive.md</code> (Kleppmann) for the dataset files and splits, <code>domain/security.md</code> for the untrusted-input surface, <code>domain/user-documentation.md</code> for the owner-facing explanations.</li>
+      <li><em>Tier 3, tools and libraries.</em> Activated at tech spec when the stack is fixed. The shared library has a Python file (Ramalho, Percival and Gregory). It has nothing yet for <code>mlx-lm</code> and Apple's MLX framework, Hugging Face PEFT, the llama.cpp GGUF converter or Ollama; those will be discovered and scored then, from their official documentation and maintainers.</li>
+      <li><em>Base-model choice.</em> Deliberately not an expert question. The owner asked why Qwen is always the default. The answer will be a measured bake-off on the gold set between at least three candidates under two billion parameters, scored on zero-shot tier accuracy, output-format compliance, speed on this Mac, and licence and provenance acceptability for a European compliance audience. That is written into the requirements, not decided here.</li>
+    </ul>
+    <h2 id="expert-roster-summary">4. Expert Roster Summary</h2>
+
+    <p>Every expert active for this project. Downstream phases read this table.</p>
+
+    <table>
+      <caption>Table 5 — Expert roster for this project, with tier, classification, reference file and status</caption>
+      <thead>
+        <tr><th>Expert Name</th><th>Work</th><th>Tier</th><th>Classification</th><th>Reference File</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Paul Clements</td><td><em>Documenting Software Architectures</em> (2nd ed.)</td><td>tier1</td><td>Established</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Simon Brown</td><td><em>Software Architecture for Developers</em>; C4 model</td><td>tier1</td><td>Established</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>George Fairbanks</td><td><em>Just Enough Software Architecture</em></td><td>tier1</td><td>Recognised</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Michael Keeling</td><td><em>Design It!</em></td><td>tier1</td><td>Recognised</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Len Bass</td><td><em>Software Architecture in Practice</em> (4th ed.)</td><td>tier1</td><td>Canonical</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Rick Kazman</td><td><em>Software Architecture in Practice</em> (4th ed.)</td><td>tier1</td><td>Canonical</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Frederick Brooks</td><td><em>The Mythical Man-Month</em>; <em>The Design of Design</em></td><td>tier1</td><td>Canonical</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Martin Fowler</td><td><em>Refactoring</em> (2nd ed.); <em>Patterns of Enterprise Application Architecture</em></td><td>tier1</td><td>Canonical</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Steve McConnell</td><td><em>Code Complete</em> (2nd ed.)</td><td>tier1</td><td>Established</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Robert C. Martin</td><td><em>Clean Code</em></td><td>tier1</td><td>Established</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Andrew Hunt</td><td><em>The Pragmatic Programmer</em> (20th anniversary ed.)</td><td>tier1</td><td>Established</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>David Thomas</td><td><em>The Pragmatic Programmer</em> (20th anniversary ed.)</td><td>tier1</td><td>Established</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Kent Beck</td><td><em>Test-Driven Development: By Example</em></td><td>tier1</td><td>Canonical</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Sandi Metz</td><td><em>Practical Object-Oriented Design</em> (2nd ed.)</td><td>tier1</td><td>Established</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Boris Beizer</td><td><em>Software Testing Techniques</em> (2nd ed.)</td><td>tier1</td><td>Recognised</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Cem Kaner</td><td><em>Lessons Learned in Software Testing</em></td><td>tier1</td><td>Recognised</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>Mike Cohn</td><td><em>Agile Estimating and Planning</em>; <em>User Stories Applied</em></td><td>tier1</td><td>Established</td><td>architecture-specialists.md</td><td>existing</td></tr>
+        <tr><td>EU AI Act</td><td>Regulation (EU) 2024/1689, as amended by Regulation (EU) 2026/1744</td><td>tier2b</td><td>Canonical</td><td>industry/ai-governance.md</td><td>existing</td></tr>
+        <tr><td>NIST</td><td><em>AI Risk Management Framework 1.0</em></td><td>tier2b</td><td>Canonical</td><td>industry/ai-governance.md (also scored in ai-evaluation.md)</td><td>existing</td></tr>
+        <tr><td>Federal Reserve / OCC / FDIC</td><td>SR 26-2</td><td>tier2b</td><td>Canonical</td><td>industry/ai-governance.md</td><td>existing</td></tr>
+        <tr><td>PRA</td><td>SS1/23</td><td>tier2b</td><td>Canonical</td><td>industry/ai-governance.md (scored in model-risk.md)</td><td>existing</td></tr>
+        <tr><td>MAS</td><td>FEAT Principles</td><td>tier2b</td><td>Established</td><td>industry/ai-governance.md</td><td>existing</td></tr>
+        <tr><td>OSFI</td><td>Guideline E-23</td><td>tier2b</td><td>Canonical</td><td>industry/ai-governance.md</td><td>existing</td></tr>
+        <tr><td>OWASP</td><td><em>Top 10 for LLM Applications</em></td><td>tier2b</td><td>Established</td><td>industry/ai-governance.md</td><td>existing</td></tr>
+        <tr><td>Michael Power</td><td><em>The Audit Society</em></td><td>tier2b</td><td>Established</td><td>industry/ai-governance.md</td><td>existing</td></tr>
+        <tr><td>Margaret Mitchell et al.</td><td><em>Model Cards for Model Reporting</em></td><td>tier2b</td><td>Established</td><td>industry/ai-governance.md (also scored in ai-evaluation.md)</td><td>existing</td></tr>
+        <tr><td>Cathy O'Neil</td><td><em>Weapons of Math Destruction</em></td><td>tier2b</td><td>Established</td><td>industry/ai-governance.md</td><td>existing</td></tr>
+        <tr><td>Stuart Russell</td><td><em>Human Compatible</em></td><td>tier2b</td><td>Established</td><td>industry/ai-governance.md</td><td>existing</td></tr>
+        <tr><td>Virginia Eubanks</td><td><em>Automating Inequality</em></td><td>tier2b</td><td>Established</td><td>industry/ai-governance.md</td><td>existing</td></tr>
+        <tr><td>Deborah Raji et al.</td><td><em>Closing the AI Accountability Gap</em></td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md</td><td>existing</td></tr>
+        <tr><td>Percy Liang et al.</td><td><em>Holistic Evaluation of Language Models</em></td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md</td><td>existing</td></tr>
+        <tr><td>Sayash Kapoor and Arvind Narayanan</td><td><em>Leakage and the Reproducibility Crisis</em>; <em>AI Snake Oil</em></td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md</td><td>existing</td></tr>
+        <tr><td>Lianmin Zheng et al.</td><td><em>Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena</em></td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md</td><td>existing</td></tr>
+        <tr><td>Anthropic</td><td><em>Responsible Scaling Policy</em> (as representative of frontier-lab risk policies)</td><td>tier2b</td><td>Recognised</td><td>industry/ai-evaluation.md</td><td>existing</td></tr>
+        <tr><td>METR</td><td>Autonomous-capability evaluation methodology</td><td>tier2b</td><td>Recognised</td><td>industry/ai-evaluation.md</td><td>existing</td></tr>
+        <tr><td>UK AI Security Institute</td><td>Inspect</td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md</td><td>existing</td></tr>
+        <tr><td>European Commission (AI Office)</td><td>AI Act guidelines: definition of an AI system, C(2025) 924; prohibited practices, C(2025) 884</td><td>tier2b</td><td>Canonical</td><td>industry/ai-governance.md (proposed)</td><td>newly scored (pending owner approval)</td></tr>
+        <tr><td>Ilias Chalkidis et al.</td><td><em>LexGLUE</em>; <em>MultiEURLEX</em></td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md (proposed)</td><td>newly scored (pending owner approval)</td></tr>
+        <tr><td>James Pustejovsky and Amber Stubbs</td><td><em>Natural Language Annotation for Machine Learning</em></td><td>tier2b</td><td>Recognised</td><td>industry/ai-evaluation.md (proposed)</td><td>newly scored (pending owner approval)</td></tr>
+        <tr><td>Yonatan Geifman and Ran El-Yaniv</td><td><em>Selective Classification for Deep Neural Networks</em>; <em>SelectiveNet</em></td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md (proposed)</td><td>newly scored (pending owner approval)</td></tr>
+        <tr><td>Edward J. Hu et al.</td><td><em>LoRA: Low-Rank Adaptation of Large Language Models</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
+        <tr><td>Tim Dettmers et al.</td><td><em>QLoRA: Efficient Finetuning of Quantized LLMs</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
+        <tr><td>Chunting Zhou et al.</td><td><em>LIMA: Less Is More for Alignment</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
+        <tr><td>Yizhong Wang et al.</td><td><em>Self-Instruct</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
+        <tr><td>Sebastian Raschka</td><td><em>Build a Large Language Model (From Scratch)</em>; <em>Practical Tips for Finetuning LLMs Using LoRA</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
+        <tr><td>Chip Huyen</td><td><em>AI Engineering</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
+      </tbody>
+    </table>
+
+    <p>Reference files live in the methodology's shared library on this machine, outside the repository; the paths are relative to its <code>references/</code> folder.</p>
+    <h2 id="activation-log">5. Activation Log</h2>
+
+    <p>The activation log already existed on this machine, created on 2026-05-31 by an earlier project, so it was not initialised anew. This calibration appended one <code>loaded</code> row for each of the thirty-six experts in the three reference files read, and one <code>cited</code> row for each expert named in this report, all tagged with this repository's path. The log lives at <code>~/.claude/gvm/expert-activations.csv</code>, outside the repository, and records nothing confidential: timestamps, this project's folder path, expert names and works.</p>
+    <h2 id="next-steps">6. Next Steps</h2>
+
+    <p><strong>Next command: <code>/gvm-impact-map</code>.</strong> The methodology's order is init, impact map, requirements. The impact map comes before requirements so that every requirement can later be traced to a goal and an actor, which is how scope creep is caught early.</p>
+
+    <p><strong>What the impact map will ask of the owner, in plain English.</strong> Four questions, each answered in a table:</p>
+
+    <ol>
+      <li><em>Why.</em> The goal, in measurable terms. For a learning project there are two goals in tension: the owner learns the craft of training and evaluating a small model, and the model reaches a stated accuracy on clean descriptions while handing the rest to a human. The owner will be asked how "learned the craft" will be judged.</li>
+      <li><em>Who.</em> The actors whose behaviour has to change for the goal to be met: the owner as learner and labeller; a reader of a triage result; whoever handles a "needs human review" output; and, indirectly, anyone affected by a misclassified system. The owner will be asked whether anyone other than the owner will ever use the model.</li>
+      <li><em>How.</em> The impacts: what each actor does differently once the deliverables exist.</li>
+      <li><em>What.</em> The deliverables that cause those impacts, which the requirements phase then details: the label scheme, the dates-and-duties lookup table, the gold set, the baseline measurement, and only later the trained adapter.</li>
+    </ol>
+
+    <p><strong>Before the impact map, two decisions from the owner on this report.</strong> First, approve or amend the ten proposed experts; on approval they are written into the shared library and this table's "proposed" markers are removed with a changelog entry. Second, confirm the business-domain statement in section 1.</p>
+
+    <p><strong>Learning log.</strong> The lesson for this step, the terms it introduced, the decision that is the owner's, and three check questions are in <code>docs/learning/001-expert-calibration.md</code>, the first entry of the owner's own textbook.</p>
+<p><strong>Configured later.</strong> Stack specialists (Tier 3) at <code>/gvm-tech-spec</code>; software-pattern specialists (Tier 2a) as requirements expose them.</p>
+
+    <p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
+</main>
+
+  <script>
+(function () {
+  const toc = document.getElementById('toc');
+  const headings = document.querySelectorAll('h2[id], h3[id]');
+  const links = [];
+
+  headings.forEach(function (h) {
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    if (h.tagName === 'H3') a.classList.add('toc-h3');
+    toc.appendChild(a);
+    links.push({ el: a, target: h });
+  });
+
+  function onScroll() {
+    let current = links[0];
+    for (let i = 0; i < links.length; i++) {
+      if (links[i].target.getBoundingClientRect().top <= 80) current = links[i];
+    }
+    links.forEach(function (l) { l.el.classList.remove('active'); });
+    if (current) {
+      current.el.classList.add('active');
+      const tocEl = document.getElementById('toc');
+      const elTop = current.el.offsetTop - tocEl.offsetTop;
+      const elBot = elTop + current.el.offsetHeight;
+      if (elTop < tocEl.scrollTop || elBot > tocEl.scrollTop + tocEl.clientHeight) {
+        tocEl.scrollTop = elTop - tocEl.clientHeight / 2;
+      }
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+  </script>
+</body>
+</html>
