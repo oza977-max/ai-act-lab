@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Act Lab — Impact Map</title>
+  <style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: "ET Book", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  color: #111;
+  background: #fffff8;
+  line-height: 1.6;
+  padding: 2rem 1rem 6rem;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+/* ── Typography ── */
+h1 {
+  font-size: 2.4rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+  color: #111;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  color: #111;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  color: #333;
+}
+
+p, li {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+  max-width: 640px;
+}
+
+ul, ol { padding-left: 1.4rem; margin-bottom: 1.2rem; }
+li { margin-bottom: 0.4rem; }
+
+.subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #555;
+  margin-bottom: 2.5rem;
+  max-width: 640px;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Floating TOC (Left Side) ── */
+nav.toc {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  width: 220px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  background: #fffff8;
+  border-right: 2px solid #ddd;
+  padding: 1rem 1rem 1rem 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  z-index: 100;
+}
+
+nav.toc .toc-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  margin-bottom: 0.6rem;
+}
+
+nav.toc a {
+  color: #555;
+  text-decoration: none;
+  display: block;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+nav.toc a:hover { color: #111; }
+nav.toc a.active { color: #111; font-weight: 600; }
+nav.toc .toc-h3 { padding-left: 0.8rem; font-size: 0.78rem; color: #888; }
+nav.toc .toc-h3:hover { color: #555; }
+
+/* Offset main content for left TOC */
+main {
+  margin-left: 260px;
+}
+
+/* ── Sidenotes (Right Margin) ── */
+.sidenote {
+  float: right;
+  clear: right;
+  width: 220px;
+  margin-right: -260px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #666;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+/* ── Tables (Few's principles) ── */
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  width: auto;
+  min-width: 480px;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 2px solid #333;
+  color: #111;
+}
+
+tbody td {
+  padding: 0.45rem 1rem 0.45rem 0;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: 2px solid #333; }
+tbody tr:nth-child(even) { background: #f9f9f4; }
+
+caption {
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #666;
+  text-align: left;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Requirement Blocks ── */
+.req {
+  background: #f7f7f0;
+  border-left: 3px solid #999;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.req-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.req p { margin-bottom: 0.3rem; }
+
+/* ── Priority Chips (MoSCoW) ── */
+.priority {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+.priority.must { background: #111; color: #fff; }
+.priority.should { background: #bbb; color: #fff; }
+.priority.could { background: #e8e8e0; color: #666; }
+.priority.wont { background: #fff; color: #999; border: 1px solid #ccc; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  nav.toc {
+    position: static;
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  main { margin-left: 0; }
+  .sidenote {
+    float: none;
+    width: 100%;
+    margin: 0.8rem 0;
+    padding: 0.6rem 0 0.6rem 1rem;
+  }
+}
+
+/* ── Test Case Components (/gvm-test-cases) ── */
+.test-case {
+  background: #f7f7f0;
+  border-left: 3px solid #669;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.tc-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.tc-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.tc-bdd p {
+  margin-bottom: 0.2rem;
+  padding-left: 1rem;
+}
+
+.tc-trace {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+.tc-detail {
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.tc-detail h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.health-issue {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.health-issue.acknowledged {
+  opacity: 0.6;
+  border-left-color: #ccc;
+}
+
+/* ── Open Questions ── */
+.open-question {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.oq-context {
+  font-size: 0.88rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* ── Inline Code ── */
+code {
+  font-family: "Menlo", "Consolas", "Monaco", monospace;
+  font-size: 0.88rem;
+  background: #f0f0e8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* ── GVM Attribution (per shared rule 24) ── */
+.gvm-attribution {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 0;
+  max-width: none;
+}
+  </style>
+</head>
+<body>
+  <nav class="toc" id="toc">
+    <div class="toc-title">Contents</div>
+  </nav>
+  <main>
+    <p class="date">October 2026</p>
+    <h1>AI Act Lab</h1>
+    <p class="subtitle">Impact map: two goals, the people whose behaviour must change, how it changes, and the eighteen deliverables every requirement must trace to. Approved by the owner on 2026-10-26.</p>
+    <h2 id="the-map-as-a-tree">The map as a tree</h2>
+    <p>Read top to bottom: each goal, the people whose behaviour must change for it, how it changes, and what we build to cause that change. Every requirement in the next phase must point at one deliverable here.</p>
+    <h3 id="g-1">G-1. The triage answer is trustworthy on clean descriptions and honest about the rest</h3>
+    <p><strong>Measured by:</strong> On the held-out test set: tier accuracy on answered cases; share of cases answered; gain over the untuned base model. <strong>Target:</strong> At least 90% correct on answered cases; at least 75% of cases answered; gain larger than its 95% confidence interval. <strong>Deadline:</strong> 2026-11-16.</p>
+    <ul>
+      <li><strong>A-1. Owner as labeller and reviewer</strong>: Writes the label scheme, checks every gold case, decides whether a model version is good enough, and reviews every needs-human-review hand-off<ul>
+        <li>I-1 (+). Labels each gold case against a written guideline and records doubts instead of guessing<ul>
+          <li>D-1 [content]. Label scheme and labelling guideline: tiers, Annex III areas, out of scope, needs human review, decision rules with examples, versioned</li>
+          <li>D-2 [content]. Gold set of 100 hand-checked cases, weighted to the Annex III versus Article 50 boundary and to the minimal tier</li>
+          <li>D-3 [process]. Agreement check: the owner re-labels a blind sample after a gap, and disagreements are settled into the guideline</li>
+        </ul></li>
+        <li>I-2 (-). Spends review time only on the cases the model hands off, not on re-checking every answer<ul>
+          <li>D-4 [feature]. Needs human review as a trained output, measured as accuracy on answered cases and share answered</li>
+          <li>D-5 [feature]. Hand-off record: what the model saw, why it declined, which articles are in play</li>
+        </ul></li>
+        <li>I-3 (+). Accepts or rejects a model version on measured numbers with intervals, not on impressions<ul>
+          <li>D-6 [tool]. Evaluation script: tier accuracy, Annex III category accuracy, citation validity, answered-case accuracy and coverage, each with a 95% interval</li>
+          <li>D-7 [process]. Base-model bake-off on the gold set: at least three candidates under 2B parameters, scored on zero-shot tier accuracy, output-format compliance, speed on this Mac, and licence and provenance</li>
+          <li>D-8 [process]. Held-out test set touched once at the end, with a leakage check against training cases</li>
+        </ul></li>
+      </ul></li>
+      <li><strong>A-2. Future user of the triage model</strong>: Someone who describes an AI system in plain English and reads the triage record; the owner now, others using the public repository later<ul>
+        <li>I-4 (+). Relies on the tier, citation and reason for clean descriptions, and takes dates and duties from the lookup table, never from the model<ul>
+          <li>D-9 [content]. Dates-and-duties lookup table from Regulation (EU) 2024/1689 as amended by Regulation (EU) 2026/1744, each entry with a source link and a last-checked date</li>
+          <li>D-10 [feature]. Fine-tuned LoRA adapter on the chosen base model, returning tier, Annex III category, article and a one-sentence reason</li>
+          <li>D-11 [content]. Teacher-written training set of about 2,000 cases, filtered by a judge from a different model family</li>
+          <li>D-12 [tool]. Citation checker against a fixed table of valid articles</li>
+          <li>D-13 [tool]. Local triage page that attaches the lookup table to the model's answer and runs offline</li>
+          <li>D-14 [content]. Model card: intended use, out-of-scope use, evaluation numbers with intervals, known limits</li>
+        </ul></li>
+        <li>I-5 (+). Takes a needs-human-review answer to a person instead of overriding it<ul>
+          <li>D-15 [content]. Plain-language hand-off message on the triage page saying the case needs a person and what to ask them</li>
+        </ul></li>
+      </ul></li>
+    </ul>
+    <h3 id="g-2">G-2. The owner runs, reads and explains a fine-tuning cycle unaided</h3>
+    <p><strong>Measured by:</strong> Train-and-evaluate cycles the owner runs from the notebook commands and writes up; concepts the owner explains to a colleague. <strong>Target:</strong> At least 3 cycles run and written up by the owner; explains rank, learning rate, overfitting, selective accuracy and coverage. <strong>Deadline:</strong> 2026-11-16.</p>
+    <ul>
+      <li><strong>A-3. Owner as learner</strong>: Runs training and evaluation commands, writes the notebook entries, answers the check questions<ul>
+        <li>I-6 (+). Runs each train-and-evaluate cycle from the written commands without asking how<ul>
+          <li>D-16 [process]. Owner-runnable training and evaluation commands, one per step, in the lab notebook</li>
+        </ul></li>
+        <li>I-7 (+). Changes one training setting per run and writes a prediction before seeing the result<ul>
+          <li>D-17 [process]. Lab notebook entry per run: what changed, the prediction, what happened, next try</li>
+        </ul></li>
+        <li>I-8 (+). Explains each result with its confidence interval rather than as a bare number<ul>
+          <li>D-18 [content]. Learning-log entries with recaps and check questions, one per step</li>
+        </ul></li>
+      </ul></li>
+    </ul>
+    <h2 id="goals">Goals</h2>
+    <table>
+      <caption>Table 1 — Goals, each with a metric, a target and a deadline</caption>
+      <thead><tr><th>ID</th><th>Statement</th><th>Metric</th><th>Target</th><th>Deadline</th></tr></thead>
+      <tbody>
+        <tr><td>G-1</td><td>The triage answer is trustworthy on clean descriptions and honest about the rest</td><td>On the held-out test set: tier accuracy on answered cases; share of cases answered; gain over the untuned base model</td><td>At least 90% correct on answered cases; at least 75% of cases answered; gain larger than its 95% confidence interval</td><td>2026-11-16</td></tr>
+        <tr><td>G-2</td><td>The owner runs, reads and explains a fine-tuning cycle unaided</td><td>Train-and-evaluate cycles the owner runs from the notebook commands and writes up; concepts the owner explains to a colleague</td><td>At least 3 cycles run and written up by the owner; explains rank, learning rate, overfitting, selective accuracy and coverage</td><td>2026-11-16</td></tr>
+      </tbody>
+    </table>
+    <h2 id="actors">Actors</h2>
+    <table>
+      <caption>Table 2 — Actors, each linked to one goal</caption>
+      <thead><tr><th>ID</th><th>Goal-ID</th><th>Name</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>A-1</td><td>G-1</td><td>Owner as labeller and reviewer</td><td>Writes the label scheme, checks every gold case, decides whether a model version is good enough, and reviews every needs-human-review hand-off</td></tr>
+        <tr><td>A-2</td><td>G-1</td><td>Future user of the triage model</td><td>Someone who describes an AI system in plain English and reads the triage record; the owner now, others using the public repository later</td></tr>
+        <tr><td>A-3</td><td>G-2</td><td>Owner as learner</td><td>Runs training and evaluation commands, writes the notebook entries, answers the check questions</td></tr>
+      </tbody>
+    </table>
+    <h2 id="impacts">Impacts</h2>
+    <table>
+      <caption>Table 3 — Impacts: the behaviour change each actor makes</caption>
+      <thead><tr><th>ID</th><th>Actor-ID</th><th>Behavioural change</th><th>Direction</th></tr></thead>
+      <tbody>
+        <tr><td>I-1</td><td>A-1</td><td>Labels each gold case against a written guideline and records doubts instead of guessing</td><td>+</td></tr>
+        <tr><td>I-2</td><td>A-1</td><td>Spends review time only on the cases the model hands off, not on re-checking every answer</td><td>-</td></tr>
+        <tr><td>I-3</td><td>A-1</td><td>Accepts or rejects a model version on measured numbers with intervals, not on impressions</td><td>+</td></tr>
+        <tr><td>I-4</td><td>A-2</td><td>Relies on the tier, citation and reason for clean descriptions, and takes dates and duties from the lookup table, never from the model</td><td>+</td></tr>
+        <tr><td>I-5</td><td>A-2</td><td>Takes a needs-human-review answer to a person instead of overriding it</td><td>+</td></tr>
+        <tr><td>I-6</td><td>A-3</td><td>Runs each train-and-evaluate cycle from the written commands without asking how</td><td>+</td></tr>
+        <tr><td>I-7</td><td>A-3</td><td>Changes one training setting per run and writes a prediction before seeing the result</td><td>+</td></tr>
+        <tr><td>I-8</td><td>A-3</td><td>Explains each result with its confidence interval rather than as a bare number</td><td>+</td></tr>
+      </tbody>
+    </table>
+    <h2 id="deliverables">Deliverables</h2>
+    <table>
+      <caption>Table 4 — Deliverables, each linked to one impact</caption>
+      <thead><tr><th>ID</th><th>Impact-ID</th><th>Title</th><th>Type</th></tr></thead>
+      <tbody>
+        <tr><td>D-1</td><td>I-1</td><td>Label scheme and labelling guideline: tiers, Annex III areas, out of scope, needs human review, decision rules with examples, versioned</td><td>content</td></tr>
+        <tr><td>D-2</td><td>I-1</td><td>Gold set of 100 hand-checked cases, weighted to the Annex III versus Article 50 boundary and to the minimal tier</td><td>content</td></tr>
+        <tr><td>D-3</td><td>I-1</td><td>Agreement check: the owner re-labels a blind sample after a gap, and disagreements are settled into the guideline</td><td>process</td></tr>
+        <tr><td>D-4</td><td>I-2</td><td>Needs human review as a trained output, measured as accuracy on answered cases and share answered</td><td>feature</td></tr>
+        <tr><td>D-5</td><td>I-2</td><td>Hand-off record: what the model saw, why it declined, which articles are in play</td><td>feature</td></tr>
+        <tr><td>D-6</td><td>I-3</td><td>Evaluation script: tier accuracy, Annex III category accuracy, citation validity, answered-case accuracy and coverage, each with a 95% interval</td><td>tool</td></tr>
+        <tr><td>D-7</td><td>I-3</td><td>Base-model bake-off on the gold set: at least three candidates under 2B parameters, scored on zero-shot tier accuracy, output-format compliance, speed on this Mac, and licence and provenance</td><td>process</td></tr>
+        <tr><td>D-8</td><td>I-3</td><td>Held-out test set touched once at the end, with a leakage check against training cases</td><td>process</td></tr>
+        <tr><td>D-9</td><td>I-4</td><td>Dates-and-duties lookup table from Regulation (EU) 2024/1689 as amended by Regulation (EU) 2026/1744, each entry with a source link and a last-checked date</td><td>content</td></tr>
+        <tr><td>D-10</td><td>I-4</td><td>Fine-tuned LoRA adapter on the chosen base model, returning tier, Annex III category, article and a one-sentence reason</td><td>feature</td></tr>
+        <tr><td>D-11</td><td>I-4</td><td>Teacher-written training set of about 2,000 cases, filtered by a judge from a different model family</td><td>content</td></tr>
+        <tr><td>D-12</td><td>I-4</td><td>Citation checker against a fixed table of valid articles</td><td>tool</td></tr>
+        <tr><td>D-13</td><td>I-4</td><td>Local triage page that attaches the lookup table to the model's answer and runs offline</td><td>tool</td></tr>
+        <tr><td>D-14</td><td>I-4</td><td>Model card: intended use, out-of-scope use, evaluation numbers with intervals, known limits</td><td>content</td></tr>
+        <tr><td>D-15</td><td>I-5</td><td>Plain-language hand-off message on the triage page saying the case needs a person and what to ask them</td><td>content</td></tr>
+        <tr><td>D-16</td><td>I-6</td><td>Owner-runnable training and evaluation commands, one per step, in the lab notebook</td><td>process</td></tr>
+        <tr><td>D-17</td><td>I-7</td><td>Lab notebook entry per run: what changed, the prediction, what happened, next try</td><td>process</td></tr>
+        <tr><td>D-18</td><td>I-8</td><td>Learning-log entries with recaps and check questions, one per step</td><td>content</td></tr>
+      </tbody>
+    </table>
+    <h2 id="changelog">Changelog</h2>
+    <table>
+      <caption>Table 5 — Changes to this map</caption>
+      <thead><tr><th>Date</th><th>Change</th><th>Rationale</th></tr></thead>
+      <tbody>
+        <tr><td>2026-10-26</td><td>Approved by the owner: G-1, G-2; A-1 to A-3; I-1 to I-8; D-1 to D-18</td><td>Elicited with the owner in /gvm-impact-map; validator clean (no implicit parents, goals pass the ambiguity scan, no childless nodes)</td></tr>
+      </tbody>
+    </table>
+
+    <p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
+  </main>
+  <script>
+(function () {
+  const toc = document.getElementById('toc');
+  const headings = document.querySelectorAll('h2[id], h3[id]');
+  const links = [];
+
+  headings.forEach(function (h) {
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    if (h.tagName === 'H3') a.classList.add('toc-h3');
+    toc.appendChild(a);
+    links.push({ el: a, target: h });
+  });
+
+  function onScroll() {
+    let current = links[0];
+    for (let i = 0; i < links.length; i++) {
+      if (links[i].target.getBoundingClientRect().top <= 80) current = links[i];
+    }
+    links.forEach(function (l) { l.el.classList.remove('active'); });
+    if (current) {
+      current.el.classList.add('active');
+      const tocEl = document.getElementById('toc');
+      const elTop = current.el.offsetTop - tocEl.offsetTop;
+      const elBot = elTop + current.el.offsetHeight;
+      if (elTop < tocEl.scrollTop || elBot > tocEl.scrollTop + tocEl.clientHeight) {
+        tocEl.scrollTop = elTop - tocEl.clientHeight / 2;
+      }
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+  </script>
+</body>
+</html>

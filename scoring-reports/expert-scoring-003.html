@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Act Lab — Expert Scoring Report 003</title>
+  <style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: "ET Book", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  color: #111;
+  background: #fffff8;
+  line-height: 1.6;
+  padding: 2rem 1rem 6rem;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+/* ── Typography ── */
+h1 {
+  font-size: 2.4rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+  color: #111;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  color: #111;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  color: #333;
+}
+
+p, li {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+  max-width: 640px;
+}
+
+ul, ol { padding-left: 1.4rem; margin-bottom: 1.2rem; }
+li { margin-bottom: 0.4rem; }
+
+.subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #555;
+  margin-bottom: 2.5rem;
+  max-width: 640px;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Floating TOC (Left Side) ── */
+nav.toc {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  width: 220px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  background: #fffff8;
+  border-right: 2px solid #ddd;
+  padding: 1rem 1rem 1rem 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  z-index: 100;
+}
+
+nav.toc .toc-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  margin-bottom: 0.6rem;
+}
+
+nav.toc a {
+  color: #555;
+  text-decoration: none;
+  display: block;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+nav.toc a:hover { color: #111; }
+nav.toc a.active { color: #111; font-weight: 600; }
+nav.toc .toc-h3 { padding-left: 0.8rem; font-size: 0.78rem; color: #888; }
+nav.toc .toc-h3:hover { color: #555; }
+
+/* Offset main content for left TOC */
+main {
+  margin-left: 260px;
+}
+
+/* ── Sidenotes (Right Margin) ── */
+.sidenote {
+  float: right;
+  clear: right;
+  width: 220px;
+  margin-right: -260px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #666;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+/* ── Tables (Few's principles) ── */
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  width: auto;
+  min-width: 480px;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 2px solid #333;
+  color: #111;
+}
+
+tbody td {
+  padding: 0.45rem 1rem 0.45rem 0;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: 2px solid #333; }
+tbody tr:nth-child(even) { background: #f9f9f4; }
+
+caption {
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #666;
+  text-align: left;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Requirement Blocks ── */
+.req {
+  background: #f7f7f0;
+  border-left: 3px solid #999;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.req-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.req p { margin-bottom: 0.3rem; }
+
+/* ── Priority Chips (MoSCoW) ── */
+.priority {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+.priority.must { background: #111; color: #fff; }
+.priority.should { background: #bbb; color: #fff; }
+.priority.could { background: #e8e8e0; color: #666; }
+.priority.wont { background: #fff; color: #999; border: 1px solid #ccc; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  nav.toc {
+    position: static;
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  main { margin-left: 0; }
+  .sidenote {
+    float: none;
+    width: 100%;
+    margin: 0.8rem 0;
+    padding: 0.6rem 0 0.6rem 1rem;
+  }
+}
+
+/* ── Test Case Components (/gvm-test-cases) ── */
+.test-case {
+  background: #f7f7f0;
+  border-left: 3px solid #669;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.tc-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.tc-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.tc-bdd p {
+  margin-bottom: 0.2rem;
+  padding-left: 1rem;
+}
+
+.tc-trace {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+.tc-detail {
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.tc-detail h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.health-issue {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.health-issue.acknowledged {
+  opacity: 0.6;
+  border-left-color: #ccc;
+}
+
+/* ── Open Questions ── */
+.open-question {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.oq-context {
+  font-size: 0.88rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* ── Inline Code ── */
+code {
+  font-family: "Menlo", "Consolas", "Monaco", monospace;
+  font-size: 0.88rem;
+  background: #f0f0e8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* ── GVM Attribution (per shared rule 24) ── */
+.gvm-attribution {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 0;
+  max-width: none;
+}
+  </style>
+</head>
+<body>
+  <nav class="toc" id="toc">
+    <div class="toc-title">Contents</div>
+  </nav>
+  <main>
+    <p class="date">October 2026</p>
+    <h1>AI Act Lab</h1>
+    <p class="subtitle">Same method as reports 001 and 002: one pass by the session, one by a fresh agent given only names and titles, reconciled dimension by dimension.</p>
+    <table>
+      <caption>Table 1 — Report metadata</caption>
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Date</td><td>2026-10-26</td></tr>
+        <tr><td>Operation</td><td>score on discovery, during <code>/gvm-impact-map</code></td></tr>
+        <tr><td>Scope</td><td>the two authorities behind the impact-map method, unscored in the shared library: Gojko Adzic and Marty Cagan</td></tr>
+        <tr><td>Status</td><td>reconciled; owner approved; written to <code>domain/strategy.md</code> on 2026-10-26</td></tr>
+      </tbody>
+    </table>
+    <h2 id="final-scores">1. Final Scores</h2>
+    <table>
+      <caption>Table 2 — Final scores</caption>
+      <thead><tr><th>Expert</th><th>Expert scores (A P B Ad C)</th><th>Classification (avg)</th><th>Work</th><th>Work scores (S D C I)</th><th>Classification (avg)</th></tr></thead>
+      <tbody>
+        <tr><td>Gojko Adzic</td><td>4 3 4 4 3</td><td>Established (3.6)</td><td><em>Impact Mapping</em> (2012)</td><td>4 3 2 4</td><td>Recognised (3.25)</td></tr>
+        <tr><td>Marty Cagan</td><td>5 4 4 5 4</td><td>Established (4.4)</td><td><em>Inspired</em> (2nd ed., 2017)</td><td>4 4 3 5</td><td>Established (4.00)</td></tr>
+      </tbody>
+    </table>
+    <h2 id="independent-verification">2. Independent Verification</h2>
+    <table>
+      <caption>Table 3 — Primary and independent passes, reconciled</caption>
+      <thead><tr><th>Expert / work</th><th>Primary</th><th>Independent</th><th>Final</th><th>Differences</th></tr></thead>
+      <tbody>
+        <tr><td>Gojko Adzic</td><td>4 3 4 4 3</td><td>4 3 4 4 3</td><td>4 3 4 4 3</td><td>none</td></tr>
+        <tr><td>— <em>Impact Mapping</em></td><td>5 3 3 4</td><td>4 3 2 4</td><td>4 3 2 4</td><td>Specificity (1), Currency (1)</td></tr>
+        <tr><td>Marty Cagan</td><td>5 4 4 5 4</td><td>5 4 4 5 4</td><td>5 4 4 5 4</td><td>none</td></tr>
+        <tr><td>— <em>Inspired</em></td><td>4 4 3 5</td><td>4 4 3 5</td><td>4 4 3 5</td><td>none</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Overall confidence: High.</strong> No divergence of two points or more. One boundary case: <em>Impact Mapping</em>, where the primary pass averaged 3.75 (Established) and the final is Recognised.</p>
+    <p><strong>Verification.</strong> <em>Impact Mapping</em>: published 1 October 2012 (ISBN 978-0955683640) under the author's own imprint; no later English edition; a Russian translation in 2022. <em>Inspired</em> (2nd ed.): Wiley, 12 December 2017 (ISBN 978-1-119-38750-3), 368 pages, a complete rewrite; Cagan's most recent book is <em>Transformed</em> (2024).</p>
+    <h2 id="utilisation-analysis">3. Utilisation Analysis</h2>
+    <p>No usage data: both newly added.</p>
+
+    <p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
+  </main>
+  <script>
+(function () {
+  const toc = document.getElementById('toc');
+  const headings = document.querySelectorAll('h2[id], h3[id]');
+  const links = [];
+
+  headings.forEach(function (h) {
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    if (h.tagName === 'H3') a.classList.add('toc-h3');
+    toc.appendChild(a);
+    links.push({ el: a, target: h });
+  });
+
+  function onScroll() {
+    let current = links[0];
+    for (let i = 0; i < links.length; i++) {
+      if (links[i].target.getBoundingClientRect().top <= 80) current = links[i];
+    }
+    links.forEach(function (l) { l.el.classList.remove('active'); });
+    if (current) {
+      current.el.classList.add('active');
+      const tocEl = document.getElementById('toc');
+      const elTop = current.el.offsetTop - tocEl.offsetTop;
+      const elBot = elTop + current.el.offsetHeight;
+      if (elTop < tocEl.scrollTop || elBot > tocEl.scrollTop + tocEl.clientHeight) {
+        tocEl.scrollTop = elTop - tocEl.clientHeight / 2;
+      }
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+  </script>
+</body>
+</html>
