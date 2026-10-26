@@ -3,13 +3,33 @@
 What this is: read `README.md`, then `docs/00-plan.md` and `docs/01-glossary.md`.
 Those hold every decision taken so far and the reasons.
 
+**This repo is PUBLIC** at https://github.com/oza977-max/ai-act-lab, made public by
+the owner on 2026-10-26. Every push is world-readable the moment it lands, so the
+confidentiality check runs before every commit. There is no margin for a quiet fix-up.
+
 ## House rules
 
 - **The owner is non-technical on git and new to model training.** Handle all git
   mechanics. Commit and push at every meaningful milestone. Never ask the owner to
   run git commands.
-- **Teach as you go.** Every step gets a plain-English explanation the owner could
-  repeat to a colleague. This is a functional requirement, not tone.
+- **Learn as you build.** The owner is fine-tuning for the first time. Learning is a
+  deliverable alongside the model, and a functional requirement, not tone. For
+  every step:
+  - Teach just in time. Introduce a concept when the work needs it, including what
+    each GVM phase is for. No opening lectures.
+  - Before the step, give a short plain-English lesson: what we are doing, why, and
+    what usually goes wrong.
+  - The owner makes the decisions that carry the learning: label scheme, gold-set
+    judgements, base model, training settings. Give options, trade-offs and a
+    recommendation, then let the owner choose. Routine mechanics stay with Claude.
+  - After the step, give a "what you just learned" recap with two or three check
+    questions.
+  - Add an entry to `docs/learning/`, the owner's own textbook. It is separate from
+    the training-run notebook.
+  - Offer the owner the exact training and evaluation commands to run themselves.
+    Never git.
+  - Keep requirement slices thin so building starts early.
+  Every explanation must be one the owner could repeat to a colleague.
 - **Confidentiality is a hard rule.** No employer name, no internal figures, no
   internal team or committee names, anywhere in the repo or its history. Public
   regulation text and freshly written cases only.

@@ -116,7 +116,10 @@ be verified when reached.
 - 2026-10-26: no toy-GPT warm-up; start with the real task.
 - 2026-10-26: LoRA fine-tune, not retrieval-only and not full fine-tune.
 - 2026-10-26: dates and duties in a lookup table, never in the weights.
-- 2026-10-26: repo private until the owner decides otherwise.
+- 2026-10-26: repo made public by the owner the same day it was created.
+- 2026-10-26: learn as you build. The owner is fine-tuning for the first time, so
+  every step teaches just in time and the owner makes the learning-bearing
+  decisions. Full rule in `CLAUDE.md`.
 
 ## Sources
 
