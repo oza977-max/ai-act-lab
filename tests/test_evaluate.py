@@ -133,3 +133,12 @@ def test_empty_gold_set_is_an_error(eval10):
     gold.write_text("")
     with pytest.raises(EvaluationError, match="no cases"):
         load_gold(gold)
+
+
+def test_realistic_unicode_line_separator_inside_raw_answer(eval10):
+    gold, run_dir = eval10
+    path = run_dir / "outputs.jsonl"
+    lines = [json.loads(l) for l in path.read_text().splitlines() if l]
+    lines[4]["raw"] = lines[4]["raw"].replace("spam", "spam filter")
+    path.write_text("".join(json.dumps(l, ensure_ascii=False) + "\n" for l in lines), encoding="utf-8")
+    assert measures(gold, run_dir).tier_correct == 7

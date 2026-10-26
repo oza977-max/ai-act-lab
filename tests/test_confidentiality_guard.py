@@ -55,3 +55,30 @@ def test_added_line_starting_with_plus_plus_is_scanned(tmp_path):
     (repo / "case.md").write_text("++ Zebrafoo Holdings\n")
     git(repo, "add", "case.md")
     assert run_guard(repo).returncode == 1
+
+
+def test_blank_line_in_private_list_does_not_block_everything(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / ".private" / "deny-terms.txt").write_text("Zebrafoo Holdings\n\n   \n")
+    (repo / "case.md").write_text("A clean line.\n")
+    git(repo, "add", "case.md")
+    assert run_guard(repo).returncode == 0
+
+
+def test_private_list_with_windows_line_endings_still_blocks(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / ".private" / "deny-terms.txt").write_bytes(b"Zebrafoo Holdings\r\n")
+    (repo / "case.md").write_text("Built by Zebrafoo Holdings.\n")
+    git(repo, "add", "case.md")
+    assert run_guard(repo).returncode == 1
+
+
+def test_private_name_in_file_name_is_blocked_without_echo(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / ".private" / "deny-terms.txt").write_text("Zebrafoo\n")
+    (repo / "d").mkdir()
+    (repo / "d" / "Zebrafoo.md").write_text("clean text\n")
+    git(repo, "add", "d/Zebrafoo.md")
+    result = run_guard(repo)
+    assert result.returncode == 1
+    assert "Zebrafoo" not in result.stdout

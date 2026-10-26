@@ -14,11 +14,24 @@ self='scripts/confidentiality-check.sh'
 blocked=0
 report() { echo "confidentiality check: BLOCKED ($1)"; printf '%s\n' "$2"; blocked=1; }
 
+# Clean copy of the private list: no blank lines (an empty pattern matches
+# everything) and no Windows carriage returns (which would match nothing).
+terms=""
+if [ -s "$deny" ]; then
+  terms=$(mktemp)
+  trap 'rm -f "$terms"' EXIT
+  tr -d '\r' < "$deny" | grep -v -e '^[[:space:]]*$' > "$terms" || true
+  [ -s "$terms" ] || { rm -f "$terms"; terms=""; }
+fi
+
 files=$(git -c core.quotepath=off diff --cached --name-only --diff-filter=ACMR)
 bad_types=$(printf '%s\n' "$files" | grep -i -E '\.(xlsx|xls|numbers)$' || true)
 [ -n "$bad_types" ] && report "spreadsheet files must be CSV" "$bad_types"
 bad_names=$(printf '%s\n' "$files" | grep -i -E "$pattern" || true)
 [ -n "$bad_names" ] && report "file name" "$bad_names"
+if [ -n "$terms" ] && printf '%s\n' "$files" | grep -q -i -F -f "$terms"; then
+  report "a staged file name contains a term from the private list" "(name withheld)"
+fi
 
 while IFS= read -r f; do
   [ -z "$f" ] && continue
@@ -32,8 +45,8 @@ while IFS= read -r f; do
     CLAUDE.md|README.md|docs/*|specs/*) hits=$(printf '%s\n' "$hits" | grep -v -i -E "$rule_text" || true) ;;
   esac
   [ -n "$hits" ] && report "$f" "$hits"
-  if [ -s "$deny" ]; then
-    priv=$(printf '%s\n' "$added" | grep -i -F -f "$deny" || true)
+  if [ -n "$terms" ]; then
+    priv=$(printf '%s\n' "$added" | grep -i -F -f "$terms" || true)
     [ -n "$priv" ] && report "$f: a term from the private list" "(line withheld; the term is on your private list)"
   fi
 done <<EOF_FILES

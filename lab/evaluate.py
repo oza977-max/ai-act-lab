@@ -54,7 +54,10 @@ def _read_jsonl(path: Path) -> list[tuple[int, dict]]:
         text = path.read_text(encoding="utf-8")
     except UnicodeDecodeError as exc:
         raise EvaluationError(f"{path}: not valid UTF-8 text") from exc
-    for number, line in enumerate(text.splitlines(), start=1):
+    # Split on real line breaks only: str.splitlines() would also split inside
+    # answers containing Unicode separators such as U+2028.
+    for number, line in enumerate(text.split("\n"), start=1):
+        line = line.rstrip("\r")
         if not line.strip():
             continue
         try:
@@ -210,10 +213,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         run = load_run(args.run / "run.json")
         measures = evaluate(load_gold(args.gold), load_outputs(args.run / "outputs.jsonl"))
+        (args.run / "report.md").write_text(render_report(measures, run), encoding="utf-8")
     except (EvaluationError, OSError) as exc:
         print(f"evaluate: {exc}", file=sys.stderr)
         return 1
-    (args.run / "report.md").write_text(render_report(measures, run), encoding="utf-8")
     print(headline(measures))
     print(f"Report written to {args.run / 'report.md'}")
     return 0
