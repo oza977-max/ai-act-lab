@@ -44,3 +44,4 @@ def test_smoke_loads_real_model_and_reports_time_and_memory():
     assert re.search(r"Load seconds: [0-9.]+", result.stdout)
     assert re.search(r"Answer seconds: [0-9.]+", result.stdout)
     assert re.search(r"Answer readable as a record: (yes|no)", result.stdout)
+    assert "…" not in result.stdout, "the full answer should be printed"

@@ -232,3 +232,37 @@ def test_crash_reason_is_cleaned_of_control_characters():
         child('import sys; sys.stderr.write("bad \\x1b[31mred\\n"); sys.exit(1)')
     )
     assert "\x1b" not in outcome.reason
+
+
+def test_weights_that_is_not_a_table_is_a_registry_error(tmp_path):
+    text = REGISTRY.replace('[models."tiny".weights]\n', "").replace(
+        '"model.safetensors" = "' + "a" * 64 + '"', ""
+    )
+    text = text.replace(
+        'licence = "Apache-2.0"', 'licence = "Apache-2.0"\nweights = "abc"'
+    )
+    with pytest.raises(RegistryError, match=r"models.toml.*tiny.*weights"):
+        load_registry(write_registry(tmp_path, text))
+
+
+def test_template_cannot_override_reserved_arguments(tmp_path):
+    text = REGISTRY.replace(
+        "enable_thinking = false", "enable_thinking = false\ntokenize = true"
+    )
+    with pytest.raises(RegistryError, match=r"tiny.*template.*tokenize"):
+        load_registry(write_registry(tmp_path, text))
+
+
+@pytest.mark.parametrize("bad", ["w.ckpt", "w.npz", "lib.so", "lib.dylib", "m.gguf"])
+def test_other_loadable_or_native_formats_are_refused(bad):
+    with pytest.raises(BuildCheckError, match=bad):
+        check_build_files(["model.safetensors", bad])
+
+
+def test_invalid_utf8_in_child_errors_is_recorded_not_raised():
+    outcome = run_child(
+        child(
+            'import sys; sys.stderr.buffer.write(b"bad \\xff\\xfe bytes\\n"); sys.exit(1)'
+        )
+    )
+    assert not outcome.ok and "bad" in outcome.reason

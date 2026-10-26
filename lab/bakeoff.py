@@ -31,7 +31,15 @@ OVER_MEMORY_EXIT = 3
 SLUG_PATTERN = re.compile(r"^[a-z0-9._-]+$")
 REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-FORBIDDEN_SUFFIXES = (".py", ".bin", ".pt", ".pth", ".pkl", ".pickle")
+FORBIDDEN_SUFFIXES = (
+    ".py", ".bin", ".pt", ".pth", ".pkl", ".pickle", ".ckpt", ".npz", ".so", ".dylib", ".gguf",
+)  # fmt: skip
+RESERVED_TEMPLATE_KEYS = (
+    "add_generation_prompt",
+    "tokenize",
+    "conversation",
+    "messages",
+)
 REQUIRED_KEYS = (
     "repo", "revision", "original_model", "card_url", "licence", "parameters",
     "quantisation", "developer", "jurisdiction", "training_data_disclosure",
@@ -103,6 +111,14 @@ def _entry_from_toml(path: Path, slug: str, values: dict) -> ModelEntry:
     missing = [key for key in REQUIRED_KEYS if not values.get(key)]
     if missing:
         raise RegistryError(f"{path}: model {slug} is missing {', '.join(missing)}")
+    for key in ("weights", "template"):
+        if not isinstance(values[key], dict):
+            raise RegistryError(f"{path}: model {slug} {key} must be a table")
+    reserved = sorted(set(values["template"]) & set(RESERVED_TEMPLATE_KEYS))
+    if reserved:
+        raise RegistryError(
+            f"{path}: model {slug} template may not set {', '.join(reserved)}"
+        )
     if not REVISION_PATTERN.match(str(values["revision"])):
         raise RegistryError(
             f"{path}: model {slug} revision must be a full 40-character commit hash"
@@ -232,7 +248,7 @@ class ChildOutcome:
 def run_child(command: list[str]) -> ChildOutcome:
     """Run a model in a child process; turn every ending into a recorded outcome."""
     proc = subprocess.run(
-        command, check=False, capture_output=True, text=True, cwd=ROOT
+        command, check=False, capture_output=True, text=True, errors="replace", cwd=ROOT
     )
     last_line = proc.stdout.strip().splitlines()[-1] if proc.stdout.strip() else ""
     try:
@@ -306,7 +322,7 @@ def smoke(slug: str) -> int:
     print(f"Peak memory: {result['peak_memory_gb']} GB (limit {MEMORY_LIMIT_GB} GB)")
     print(f"Answer readable as a record: {'yes' if status == 'ok' else 'no'}")
     print("Answer:")
-    print(_printable(result.get("raw") or ""))
+    print(_printable(result.get("raw") or "", limit=8000))
     return 0
 
 
