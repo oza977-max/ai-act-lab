@@ -111,7 +111,7 @@ The 100 hand-checked cases everything is measured against, and the owner's blind
 
 The maintained table that supplies dates and duties. The model never learns them (Gekhman et al.; Huyen).
 
-**DT-1 (Must) [impact-deliverable: D-9]:** **[MUST]** The table shall give, for each tier label and route (including the Article 50 flag), the dates from which duties apply and the duties themselves as article references with short plain-English titles.
+**DT-1 (Must) [impact-deliverable: D-9]:** **[MUST]** The table shall give, for each tier label and route (including the Article 50 flag), the dates from which duties apply and the duties themselves as article references with short plain-English titles. For labels that carry no tier duties (out-of-scope, needs-human-review), the table shall return an explicit entry saying so and what to do next, never an empty result.
 *Check:* Every label and route in LS-1 to LS-3 has at least one entry.
 
 **DT-2 (Must) [impact-deliverable: D-9]:** **[MUST]** Every entry shall carry a link to the official text, the article, the date it was last checked, and who checked it. The initial values from the project plan shall be verified against the Official Journal before use, and any discrepancy recorded.
@@ -172,14 +172,14 @@ How results are measured and reported: two numbers for review behaviour (Geifman
 **EV-4 (Must) [impact-deliverable: D-6]:** **[MUST]** The evaluation shall report the share of cited articles that exist in a fixed table of valid articles, and the share of records whose citations overlap the gold citations.
 *Check:* An invented article number is counted as invalid.
 
-**EV-5 (Must) [impact-deliverable: D-6]:** **[MUST]** Outputs that cannot be read as the record shall be counted as wrong on every measure and reported separately; they are never excluded from the denominator.
+**EV-5 (Must) [impact-deliverable: D-6]:** **[MUST]** Outputs that cannot be read as the record, and gold cases with no output at all, shall be counted as wrong on every measure and reported separately; they are never excluded from the denominator.
 *Check:* Insert one unreadable output; every accuracy falls accordingly.
 
-**EV-6 (Must) [impact-deliverable: D-6]:** **[MUST]** Every proportion shall carry a 95% confidence interval computed by a method suited to small samples, named in the report.
+**EV-6 (Must) [impact-deliverable: D-6]:** **[MUST]** Every proportion shall carry a 95% confidence interval, and the report shall name the interval method used.
 *Check:* No reported proportion lacks an interval.
 > Miller, Adding Error Bars to Evals.
 
-**EV-7 (Must) [impact-deliverable: D-6]:** **[MUST]** Given two models' outputs on the same cases, the evaluation shall report the difference in accuracy with a 95% interval from a paired method; a gain counts only if the interval excludes zero.
+**EV-7 (Must) [impact-deliverable: D-6]:** **[MUST]** Given two models' outputs on the same cases, the evaluation shall report the difference in accuracy with a 95% interval from a paired method; a gain counts only if the interval excludes zero. If either side lacks outputs for some cases, the comparison shall refuse to run and name the missing cases.
 *Check:* Two identical output files give a difference of zero with an interval that contains zero.
 
 **EV-8 (Must) [impact-deliverable: D-6]:** **[MUST]** The evaluation shall report Article 50 flag accuracy, and shall flag any model output that contains a date.
@@ -293,6 +293,13 @@ Covered inside the domains: fits in 8 GB and is timed on this Mac (BO-3, BO-4); 
 | Should | Expected; omit only with a stated reason. |
 | Could | Include if time allows. |
 | Won't | Deliberately not in this slice. |
+
+
+## Changelog
+
+| Date | Change | Reason | Author |
+|---|---|---|---|
+| 2026-10-26 | EV-5: missing outputs count as wrong. DT-1: explicit entry for labels with no tier duties. EV-6: report names its interval method. EV-7: paired comparison refuses incomplete pairs | Requirements health report H-1 to H-4, fixes approved by the owner | owner/AI |
 
 ---
 
