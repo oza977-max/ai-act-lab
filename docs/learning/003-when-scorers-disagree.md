@@ -40,7 +40,7 @@ Five scores differed by two or more points. You settled all five:
 The independent pass also caught three factual errors before anything was
 saved: a paper's conference was wrong, a book's subtitle was wrong, and a
 benchmark we were about to rely on turned out to be written by a model with only
-partial human checks and no stated licence.
+partial human checks. (We also wrote that it had no stated licence; a later direct check found the data is licensed CC-BY-4.0. Verification has to include checking the verifier.)
 
 And one error was caught by checking the source before scoring: the reading list
 had said the Lawma paper needed "tens to a few hundred" examples per task. Its
@@ -67,7 +67,7 @@ as 135 million parameters. The list now says so.
 
 1. Why does the method keep the lower score on a one-point split, but hand a
    two-point split to you?
-2. The AI Act benchmark has no stated licence. What does that change about how
-   we may use it?
+2. The AI Act benchmark's data is licensed CC-BY-4.0. What does that allow us
+   to do with it, and what must we still do?
 3. Which of today's five decisions would you make differently if the band had
    changed, and why?

@@ -200,7 +200,7 @@ Evidence (scoring-reports/expert-scoring-002.md in the AI Act Lab project, dual-
 |-------------|-------|----------|-----------|----------------|
 | 4 | 3 | 5 | 1 | **Recognised** |
 
-Evidence: Specificity — 339 scenarios (70 prohibited, 86 high-risk, 84 limited, 99 minimal), 3,350 linked articles, 3,572 obligation points, machine-readable (split 4/5). Currency — March 2026. Caveats stated by the paper: generated with gpt-oss-120b, only qualitative human checks on some entries, legal-expert validation still needed; no dataset licence stated. Boundary case: the independent pass averaged 3.5 (Established).
+Evidence: Specificity — 339 scenarios (70 prohibited, 86 high-risk, 84 limited, 99 minimal), 3,350 linked articles, 3,572 obligation points, machine-readable (split 4/5). Currency — March 2026. Caveats stated by the paper: generated with gpt-oss-120b, only qualitative human checks on some entries, legal-expert validation still needed; the repository licenses the data CC-BY-4.0 and the code Apache 2.0 (corrected 2026-10-26; an earlier check wrongly recorded no licence). Boundary case: the independent pass averaged 3.5 (Established).
 
 **Activation signals:** EU AI Act risk-tier classification benchmark, external yardstick, AI Act scenario datasets, retrieval baselines
 
@@ -208,7 +208,7 @@ Evidence: Specificity — 339 scenarios (70 prohibited, 86 high-risk, 84 limited
 
 - **An external yardstick exists for AI Act tier classification** — 339 generated scenarios labelled prohibited, high-risk, limited or minimal, with article retrieval.
 - **The task is hard and uneven** — the retrieval baseline reached weighted F1 0.69 and was weakest on the minimal tier; that is where cases should be hardest.
-- **Generated benchmarks carry the generator's caveats** — the scenarios were written by gpt-oss-120b with only partial, qualitative human checks, and the authors say legal-expert validation is still needed; no licence is stated. Treat it as a comparison point, not ground truth, and check the licence before reusing the data.
+- **Generated benchmarks carry the generator's caveats** — the scenarios were written by gpt-oss-120b with only partial, qualitative human checks, and the authors say legal-expert validation is still needed; the data is CC-BY-4.0, reusable with attribution. Treat it as a comparison point, not ground truth.
 
 ---
 
