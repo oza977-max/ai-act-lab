@@ -10,3 +10,4 @@ This is separate from `notebook/`, which records individual training runs.
 | Entry | Step | Date |
 |---|---|---|
 | [001](001-expert-calibration.md) | Choosing the reference shelf: expert calibration (`/gvm-init`) | 2026-10-26 |
+| [002](002-finding-the-good-papers.md) | Finding the good papers: an arXiv sweep for small-model fine-tuning | 2026-10-26 |

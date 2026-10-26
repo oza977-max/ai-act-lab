@@ -16,6 +16,9 @@ Read first:
 - `docs/00-plan.md`: why this project, the design decision that matters, the stages,
   and what the research settled
 - `docs/01-glossary.md`: the words, in plain English
+- `docs/02-reading-list-slm-fine-tuning.md`: the papers worth knowing, verified and ranked
+  for this project
+- `docs/learning/`: the owner's own textbook, one entry per step
 - `notebook/`: one entry per training run, once training starts
 
 **Hardware this runs on:** Apple M2, 8 GB memory. Everything in this repo must fit that.
