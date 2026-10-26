@@ -120,6 +120,16 @@ be verified when reached.
 - 2026-10-26: learn as you build. The owner is fine-tuning for the first time, so
   every step teaches just in time and the owner makes the learning-bearing
   decisions. Full rule in `CLAUDE.md`.
+- 2026-10-26: expert roster approved (22 entries) and impact map approved: G-1 at least 90% right
+  on answered cases with at least 75% answered; G-2 the owner runs and writes up three cycles.
+  Target date 16 November 2026.
+- 2026-10-26: slice-1 requirements approved. Six labels plus an Article 50 flag; 100 gold cases,
+  boundary-weighted, drafted by Claude and judged by the owner; blind re-label of 20.
+- 2026-10-26: bake-off candidates Qwen3.5-0.8B, Llama 3.2 1B Instruct, Gemma 3 1B and
+  EuroLLM-1.7B-Instruct (EU-funded, Apache 2.0); OLMo 2 1B optional. The owner chooses after
+  seeing measured results.
+- 2026-10-26: the gold set is for the bake-off and development; a separate final test set is
+  written later and touched once.
 
 ## Sources
 

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Act Lab — Requirements, Slice 1</title>
+  <style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: "ET Book", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  color: #111;
+  background: #fffff8;
+  line-height: 1.6;
+  padding: 2rem 1rem 6rem;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+/* ── Typography ── */
+h1 {
+  font-size: 2.4rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+  color: #111;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  color: #111;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  color: #333;
+}
+
+p, li {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+  max-width: 640px;
+}
+
+ul, ol { padding-left: 1.4rem; margin-bottom: 1.2rem; }
+li { margin-bottom: 0.4rem; }
+
+.subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #555;
+  margin-bottom: 2.5rem;
+  max-width: 640px;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Floating TOC (Left Side) ── */
+nav.toc {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  width: 220px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  background: #fffff8;
+  border-right: 2px solid #ddd;
+  padding: 1rem 1rem 1rem 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  z-index: 100;
+}
+
+nav.toc .toc-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  margin-bottom: 0.6rem;
+}
+
+nav.toc a {
+  color: #555;
+  text-decoration: none;
+  display: block;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+nav.toc a:hover { color: #111; }
+nav.toc a.active { color: #111; font-weight: 600; }
+nav.toc .toc-h3 { padding-left: 0.8rem; font-size: 0.78rem; color: #888; }
+nav.toc .toc-h3:hover { color: #555; }
+
+/* Offset main content for left TOC */
+main {
+  margin-left: 260px;
+}
+
+/* ── Sidenotes (Right Margin) ── */
+.sidenote {
+  float: right;
+  clear: right;
+  width: 220px;
+  margin-right: -260px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #666;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+/* ── Tables (Few's principles) ── */
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  width: auto;
+  min-width: 480px;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 2px solid #333;
+  color: #111;
+}
+
+tbody td {
+  padding: 0.45rem 1rem 0.45rem 0;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: 2px solid #333; }
+tbody tr:nth-child(even) { background: #f9f9f4; }
+
+caption {
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #666;
+  text-align: left;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Requirement Blocks ── */
+.req {
+  background: #f7f7f0;
+  border-left: 3px solid #999;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.req-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.req p { margin-bottom: 0.3rem; }
+
+/* ── Priority Chips (MoSCoW) ── */
+.priority {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+.priority.must { background: #111; color: #fff; }
+.priority.should { background: #bbb; color: #fff; }
+.priority.could { background: #e8e8e0; color: #666; }
+.priority.wont { background: #fff; color: #999; border: 1px solid #ccc; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  nav.toc {
+    position: static;
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  main { margin-left: 0; }
+  .sidenote {
+    float: none;
+    width: 100%;
+    margin: 0.8rem 0;
+    padding: 0.6rem 0 0.6rem 1rem;
+  }
+}
+
+/* ── Test Case Components (/gvm-test-cases) ── */
+.test-case {
+  background: #f7f7f0;
+  border-left: 3px solid #669;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.tc-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.tc-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.tc-bdd p {
+  margin-bottom: 0.2rem;
+  padding-left: 1rem;
+}
+
+.tc-trace {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+.tc-detail {
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.tc-detail h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.health-issue {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.health-issue.acknowledged {
+  opacity: 0.6;
+  border-left-color: #ccc;
+}
+
+/* ── Open Questions ── */
+.open-question {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.oq-context {
+  font-size: 0.88rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* ── Inline Code ── */
+code {
+  font-family: "Menlo", "Consolas", "Monaco", monospace;
+  font-size: 0.88rem;
+  background: #f0f0e8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* ── GVM Attribution (per shared rule 24) ── */
+.gvm-attribution {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 0;
+  max-width: none;
+}
+  </style>
+</head>
+<body>
+  <nav class="toc" id="toc">
+    <div class="toc-title">Contents</div>
+    <!-- Auto-generated by script at bottom -->
+  </nav>
+
+  <main>
+    <p class="date">October 2026</p>
+    <h1>AI Act Lab</h1>
+    <p class="subtitle"><em>What the first slice must do, in testable sentences. Each requirement has an ID, a priority, a trace to a deliverable in <code>impact-map.md</code>, and a way to check it. No design or technology choices: those belong to the technical specification.</em></p>
+
+    <table>
+      <caption>Table 1 — Document metadata</caption>
+      <thead>
+        <tr><th>Field</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Date</td><td>2026-10-26</td></tr>
+        <tr><td>Status</td><td>approved by the owner, 2026-10-26</td></tr>
+        <tr><td>Scope</td><td>first slice only: label scheme and guideline (D-1), gold set (D-2), blind re-label check (D-3), base-model bake-off (D-7), dates-and-duties table (D-9), evaluation (D-6). Training is a later slice.</td></tr>
+      </tbody>
+    </table>
+    <h2 id="expert-panel">Expert Panel</h2>
+
+    <table>
+      <caption>Table 2 — Expert panel and the role each plays in this document</caption>
+      <thead>
+        <tr><th>Expert</th><th>Work</th><th>Role in This Document</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Karl Wiegers</td><td><em>Software Requirements</em> (3rd ed.)</td><td>Classification, MoSCoW priorities, ambiguity removal</td></tr>
+        <tr><td>Gause &amp; Weinberg</td><td><em>Exploring Requirements</em></td><td>"How would we know it is met?" for every requirement</td></tr>
+        <tr><td>Jeff Patton</td><td><em>User Story Mapping</em></td><td>Now-versus-later slicing; the Won't boundary</td></tr>
+        <tr><td>Alan Cooper</td><td><em>About Face</em></td><td>The owner persona</td></tr>
+        <tr><td>James Pustejovsky &amp; Amber Stubbs</td><td><em>Natural Language Annotation for Machine Learning</em></td><td>Guideline, gold set, blind re-label</td></tr>
+        <tr><td>European Commission (AI Office)</td><td>AI Act guidelines C(2025) 924 and 884</td><td>Definition-first decision order; prohibited examples</td></tr>
+        <tr><td>Yonatan Geifman &amp; Ran El-Yaniv</td><td><em>Selective Classification</em></td><td>Answered-case accuracy and coverage</td></tr>
+        <tr><td>Evan Miller</td><td><em>Adding Error Bars to Evals</em></td><td>Intervals and paired comparison</td></tr>
+        <tr><td>Percy Liang et al.</td><td><em>HELM</em></td><td>Several measures, not one headline number</td></tr>
+        <tr><td>Zhenyan Lu et al.</td><td><em>Small Language Models: Survey, Measurements, and Insights</em></td><td>Measure speed and memory on this Mac</td></tr>
+        <tr><td>Zorik Gekhman et al.</td><td><em>Fine-Tuning on New Knowledge</em></td><td>No dates in the weights or the output record</td></tr>
+        <tr><td>Athanasios Davvetas et al.</td><td><em>AI Act Evaluation Benchmark</em></td><td>Weighting the gold set to the minimal tier</td></tr>
+        <tr><td>OWASP</td><td><em>Top 10 for LLM Applications</em></td><td>Instructions hidden in descriptions as test cases</td></tr>
+      </tbody>
+    </table>
+    <h2 id="purpose-vision">Purpose &amp; Vision</h2>
+
+    <p><strong>Job statement.</strong> When I describe an AI system in plain English, I want a trustworthy first answer on its EU AI Act tier, with the article and a reason, or an honest "needs human review", so I can spend my own review time only on the hard cases, and learn to build such a model myself.</p>
+
+    <p>This slice builds the measuring stick before the model: the labels, the hand-checked cases, the dates table and the evaluation, then measures four untuned candidate models with it. It serves impact-map goals G-1 and G-2.</p>
+
+    <h2 id="target-user">Target User</h2>
+
+    <p><strong>The owner.</strong> An EU AI Act practitioner who is new to model training and to git. Goal: a triage assistant they trust on clean descriptions, and the skill to build and judge one. Context: an Apple M2 laptop with 8 GB, an hour or two a day, a deadline of 16 November 2026. Frustration to avoid: confident answers that recite outdated dates. Experience goal: never be surprised by a number they cannot explain.</p>
+
+    <h2 id="user-journeys">User Journeys</h2>
+
+    <ol>
+      <li><strong>Agree the labels.</strong> Read the guideline draft, settle open points, approve version 1.</li>
+      <li><strong>Judge the gold set.</strong> Review 100 drafted cases in batches; accept, change or mark doubt.</li>
+      <li><strong>Check yourself.</strong> Two or more days later, re-label 20 cases blind; settle disagreements into the guideline.</li>
+      <li><strong>Approve the dates table.</strong> Check each entry's source; approve.</li>
+      <li><strong>Run the bake-off.</strong> Run the given commands; read one comparison table; choose the base model.</li>
+    </ol>
+    <h2 id="label-scheme-and-guideline">Label Scheme and Guideline</h2>
+
+    <p>How a case is labelled and what the model must output. The guideline is the single source of labelling rules (Pustejovsky and Stubbs, MATTER).</p>
+
+    <div class="req"><div class="req-id">LS-1 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-1</span></div><p>The label scheme shall define exactly six tier labels: prohibited, high-risk, transparency-only, minimal, out-of-scope (not an AI system, or excluded from the Act), and needs-human-review. Each label shall have a one-sentence definition that names the article it rests on.</p><p><em>Check:</em> Read the guideline: six labels, six definitions, each citing an article.</p></div>
+
+    <div class="req"><div class="req-id">LS-2 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-1</span></div><p>Every high-risk label shall state its route: Annex III, with the area (1 to 8) and point, or Annex I, with the product legislation concerned.</p><p><em>Check:</em> Every high-risk gold case carries a route; every Annex III case carries an area and point.</p></div>
+
+    <div class="req"><div class="req-id">LS-3 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-1</span></div><p>Every record shall carry a yes/no flag stating whether Article 50 transparency duties also apply, independently of the tier.</p><p><em>Check:</em> A high-risk chatbot case can be labelled high-risk with the flag set to yes.</p></div>
+
+    <div class="req"><div class="req-id">LS-4 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-1</span></div><p>Every record shall carry the article or articles relied on and a reason of one sentence, at most 40 words.</p><p><em>Check:</em> Count words; check the article field is never empty for the first five labels.</p></div>
+
+    <div class="req"><div class="req-id">LS-5 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-1</span></div><p>The guideline shall set a fixed order of questions (is it an AI system and in scope; is it prohibited; is it high-risk through Annex I or Annex III, including the Article 6(3) exception; do Article 50 duties apply; otherwise minimal) and give at least two worked examples per label, at least one of them a boundary case.</p><p><em>Check:</em> Count the worked examples per label in the guideline.</p></div>
+
+    <div class="req"><div class="req-id">LS-6 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-1</span></div><p>The guideline shall define needs-human-review narrowly: the description lacks a fact that decides the tier, the facts conflict, or the legal text needed is unsettled (for example, a point that depends on the draft Article 6 guidelines). A case that is hard but decidable shall not be labelled needs-human-review.</p><p><em>Check:</em> Each needs-human-review gold case names which of the three reasons applies.</p></div>
+
+    <div class="req"><div class="req-id">LS-7 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-1</span></div><p>The guideline shall carry a version number and a change log; every gold label shall record the guideline version it was given under.</p><p><em>Check:</em> Every gold case has a guideline-version field that matches a version in the change log.</p></div>
+
+    <div class="req"><div class="req-id">LS-8 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-1</span></div><p>Every rule in the guideline shall cite Regulation (EU) 2024/1689 as amended by Regulation (EU) 2026/1744, with a link to the official text and the date it was checked. Where a rule rests on Commission guidance that is only a draft, the guideline shall say so.</p><p><em>Check:</em> Spot-check five rules: each has an article, a link and a checked date.</p></div>
+    <span class="sidenote">The Article 6 classification guidelines were in draft (consultation from 19 May 2026) with no final text found on 26 October 2026.</span>
+
+    <div class="req"><div class="req-id">LS-9 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-1</span></div><p>The guideline shall specify one fixed output record with named fields (tier, route, Annex III area and point, Article 50 flag, articles, reason) and one complete example. Any model output that cannot be read as this record counts as a format failure.</p><p><em>Check:</em> The example record in the guideline contains every named field.</p></div>
+
+    <div class="req"><div class="req-id">LS-10 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-1</span></div><p>The output record shall contain no application dates, deadlines or lists of obligations. These come only from the dates-and-duties table.</p><p><em>Check:</em> The record definition has no date or obligations field.</p></div>
+    <h2 id="gold-set-and-re-label-check">Gold Set and Re-label Check</h2>
+
+    <p>The 100 hand-checked cases everything is measured against, and the owner's blind check on their own consistency.</p>
+
+    <div class="req"><div class="req-id">GS-1 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-2</span></div><p>The gold set shall contain 100 cases distributed as: prohibited 10, high-risk through Annex III 30, high-risk through Annex I 5, transparency-only 20, minimal 20, needs-human-review 10, out-of-scope 5.</p><p><em>Check:</em> Count gold cases by final label.</p></div>
+    <span class="sidenote">The owner chose this distribution on 2026-10-26: heavy on the Annex III versus Article 50 boundary and on the minimal tier, where the 2026 AI Act benchmark's baseline was weakest.</span>
+
+    <div class="req"><div class="req-id">GS-2 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-2</span></div><p>Every case shall be a plain-English description of 60 to 200 words, freshly written, about a fictional organisation, built from public regulation text only. No real employer, client, product or person shall appear.</p><p><em>Check:</em> Word-count check; the confidentiality scan finds no real organisation names.</p></div>
+
+    <div class="req"><div class="req-id">GS-3 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-2</span></div><p>The 30 Annex III cases shall cover all eight Annex III areas with at least three cases each.</p><p><em>Check:</em> Count Annex III cases by area.</p></div>
+
+    <div class="req"><div class="req-id">GS-4 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-2</span></div><p>The gold set shall include at least 15 cases on the Annex III versus Article 50 boundary, at least 5 cases that turn on the Article 6(3) exception, and at least 5 cases whose description contains instructions aimed at the model (to be ignored).</p><p><em>Check:</em> Each case carries tags; count the tags.</p></div>
+
+    <div class="req"><div class="req-id">GS-5 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-2</span></div><p>Claude shall draft each case with a proposed label, articles and reason. The owner shall judge every case: accept, change, or mark as doubtful. The owner's judgement is the gold label, and every change from the draft shall be recorded.</p><p><em>Check:</em> Every case has an owner decision field; the share of changed drafts is reported.</p></div>
+
+    <div class="req"><div class="req-id">GS-6 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-2</span></div><p>Gold cases shall be marked never-train and kept apart from any training data; no later training case may paraphrase a gold case.</p><p><em>Check:</em> The gold set's location and marker are named in the guideline; the later leakage check reads them.</p></div>
+
+    <div class="req"><div class="req-id">GS-7 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-3</span></div><p>At least two days after finishing the gold set, the owner shall re-label 20 randomly chosen cases without seeing the first labels. Agreement on the tier shall be reported as Cohen's kappa with a 95% interval; the target is 0.8 or more.</p><p><em>Check:</em> The re-label record shows the sample, the date gap, the two labels per case and kappa with its interval.</p></div>
+    <span class="sidenote">Pustejovsky and Stubbs: a gold standard is adjudicated, not single-pass.</span>
+
+    <div class="req"><div class="req-id">GS-8 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-3</span></div><p>Every disagreement in the re-label check shall be settled by the owner and, where it reveals a gap, recorded as a guideline change with a new version.</p><p><em>Check:</em> Each disagreement links to a resolution and, where applicable, a guideline version.</p></div>
+    <h2 id="dates-and-duties-table">Dates-and-Duties Table</h2>
+
+    <p>The maintained table that supplies dates and duties. The model never learns them (Gekhman et al.; Huyen).</p>
+
+    <div class="req"><div class="req-id">DT-1 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-9</span></div><p>The table shall give, for each tier label and route (including the Article 50 flag), the dates from which duties apply and the duties themselves as article references with short plain-English titles.</p><p><em>Check:</em> Every label and route in LS-1 to LS-3 has at least one entry.</p></div>
+
+    <div class="req"><div class="req-id">DT-2 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-9</span></div><p>Every entry shall carry a link to the official text, the article, the date it was last checked, and who checked it. The initial values from the project plan shall be verified against the Official Journal before use, and any discrepancy recorded.</p><p><em>Check:</em> No entry lacks a source, article or checked date.</p></div>
+    <span class="sidenote">Plan values to verify: prohibitions in force; two new Article 5 prohibitions from 2 December 2026; Annex III high-risk from 2 December 2027; Annex I from 2 August 2028; Article 50(2) grace period to 2 December 2026.</span>
+
+    <div class="req"><div class="req-id">DT-3 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-9</span></div><p>Looking up the same label, route and flag shall always return the same dates and duties.</p><p><em>Check:</em> Run the same lookup twice; outputs match exactly.</p></div>
+
+    <div class="req"><div class="req-id">DT-4 <span class="priority should">Should</span> <span style="font-weight:400;color:#999">D-9</span></div><p>An entry not checked for more than 90 days shall be flagged as stale wherever it is shown.</p><p><em>Check:</em> Set a checked date 91 days back; the entry shows as stale.</p></div>
+
+    <div class="req"><div class="req-id">DT-5 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-9</span></div><p>The owner shall review and approve the table before it is used, and every later change shall be recorded with its reason.</p><p><em>Check:</em> The table carries an approval record and a change log.</p></div>
+    <h2 id="base-model-bake-off">Base-Model Bake-off</h2>
+
+    <p>Zero-shot comparison of candidate base models on the gold set; the owner chooses.</p>
+
+    <div class="req"><div class="req-id">BO-1 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-7</span></div><p>The bake-off shall compare four instruction-tuned models under 2B parameters, quantised to 4 bits: Qwen3.5-0.8B, Llama 3.2 1B Instruct, Gemma 3 1B, and EuroLLM-1.7B-Instruct.</p><p><em>Check:</em> The results table has four rows, or a recorded exclusion for each missing one (BO-4).</p></div>
+    <span class="sidenote">The owner picked the first three and asked Claude for one neither had considered; Claude proposed EuroLLM (EU-funded, Apache 2.0, all 24 official EU languages).</span>
+
+    <div class="req"><div class="req-id">BO-2 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-7</span></div><p>Every candidate shall be run zero-shot on all 100 gold cases with the same prompt (containing the label definitions and the output record) and the same settings. The prompt shall be recorded verbatim with a version.</p><p><em>Check:</em> Each result row names the same prompt version and case count.</p></div>
+
+    <div class="req"><div class="req-id">BO-3 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-7</span></div><p>Each candidate shall be scored on: tier accuracy with a 95% interval; format compliance (share of outputs readable as the record); accuracy on answered cases and share answered; mean seconds per case and peak memory on this Mac; and licence and provenance (licence name and restrictions, training-data disclosure, developer and jurisdiction).</p><p><em>Check:</em> The results table has all five measures for every candidate.</p></div>
+
+    <div class="req"><div class="req-id">BO-4 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-7</span></div><p>A candidate that cannot run within 8 GB, or has no usable 4-bit build, shall be recorded as excluded with the reason. A community-made build shall be checked against the original model card (size, licence) before use.</p><p><em>Check:</em> Every excluded candidate has a reason in the results.</p></div>
+
+    <div class="req"><div class="req-id">BO-5 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-7</span></div><p>The licence and provenance criteria for acceptability to a European compliance audience shall be written down before any candidate's results are seen.</p><p><em>Check:</em> The criteria's commit precedes the results' commit.</p></div>
+
+    <div class="req"><div class="req-id">BO-6 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-7</span></div><p>The results shall be presented to the owner as one comparison table with a recommendation and its reasons. The owner chooses the base model; the choice and reason are added to the decisions log.</p><p><em>Check:</em> The decisions log has a dated base-model entry.</p></div>
+
+    <div class="req"><div class="req-id">BO-7 <span class="priority should">Should</span> <span style="font-weight:400;color:#999">D-7</span></div><p>Running the same candidate twice on the same cases shall produce the same labels.</p><p><em>Check:</em> Repeat one candidate's run; compare labels case by case.</p></div>
+
+    <div class="req"><div class="req-id">BO-8 <span class="priority could">Could</span> <span style="font-weight:400;color:#999">D-7</span></div><p>If time allows, OLMo 2 1B Instruct (fully open training data, Apache 2.0) shall be added as a fifth candidate under the same conditions.</p><p><em>Check:</em> A fifth row exists, or a recorded decision not to run it.</p></div>
+    <h2 id="evaluation">Evaluation</h2>
+
+    <p>How results are measured and reported: two numbers for review behaviour (Geifman and El-Yaniv), intervals on everything (Miller), several measures rather than one (Liang et al.).</p>
+
+    <div class="req"><div class="req-id">EV-1 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-6</span></div><p>The evaluation shall report overall tier accuracy and a table of gold label against predicted label.</p><p><em>Check:</em> On a hand-made set of 10 outputs with known answers, the reported numbers match a hand count.</p></div>
+
+    <div class="req"><div class="req-id">EV-2 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-6</span></div><p>The evaluation shall report accuracy on answered cases and the share of cases answered, counting needs-human-review as not answered; and how often the model says needs-human-review when the gold label says so, and when it does not.</p><p><em>Check:</em> On the hand-made set, the four numbers match a hand count.</p></div>
+
+    <div class="req"><div class="req-id">EV-3 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-6</span></div><p>The evaluation shall report Annex III area accuracy on gold cases labelled high-risk through Annex III.</p><p><em>Check:</em> Matches a hand count on the hand-made set.</p></div>
+
+    <div class="req"><div class="req-id">EV-4 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-6</span></div><p>The evaluation shall report the share of cited articles that exist in a fixed table of valid articles, and the share of records whose citations overlap the gold citations.</p><p><em>Check:</em> An invented article number is counted as invalid.</p></div>
+
+    <div class="req"><div class="req-id">EV-5 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-6</span></div><p>Outputs that cannot be read as the record shall be counted as wrong on every measure and reported separately; they are never excluded from the denominator.</p><p><em>Check:</em> Insert one unreadable output; every accuracy falls accordingly.</p></div>
+
+    <div class="req"><div class="req-id">EV-6 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-6</span></div><p>Every proportion shall carry a 95% confidence interval computed by a method suited to small samples, named in the report.</p><p><em>Check:</em> No reported proportion lacks an interval.</p></div>
+    <span class="sidenote">Miller, Adding Error Bars to Evals.</span>
+
+    <div class="req"><div class="req-id">EV-7 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-6</span></div><p>Given two models' outputs on the same cases, the evaluation shall report the difference in accuracy with a 95% interval from a paired method; a gain counts only if the interval excludes zero.</p><p><em>Check:</em> Two identical output files give a difference of zero with an interval that contains zero.</p></div>
+
+    <div class="req"><div class="req-id">EV-8 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-6</span></div><p>The evaluation shall report Article 50 flag accuracy, and shall flag any model output that contains a date.</p><p><em>Check:</em> An output containing '2 August 2026' is flagged.</p></div>
+
+    <div class="req"><div class="req-id">EV-9 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-6</span></div><p>Each report shall name the model, prompt version, guideline version, gold-set version and date, be saved in the repository, and be identical when re-run on the same inputs.</p><p><em>Check:</em> Re-run on the same inputs; the two reports match apart from the run timestamp.</p></div>
+
+    <div class="req"><div class="req-id">EV-10 <span class="priority should">Should</span> <span style="font-weight:400;color:#999">D-6</span></div><p>Each report shall open with a short plain-English summary saying what each number means and what it does not show.</p><p><em>Check:</em> The owner can answer, from the summary alone, how often the model was right when it answered.</p></div>
+    <h2 id="owner-run-steps">Owner-Run Steps</h2>
+
+    <p>What makes this slice a learning step as well as a build step.</p>
+
+    <div class="req"><div class="req-id">LG-1 <span class="priority should">Should</span> <span style="font-weight:400;color:#999">D-16</span></div><p>For the bake-off and the evaluation, the owner shall be given the exact commands to run, one per step, with what to expect on screen and how long it takes.</p><p><em>Check:</em> The owner runs the evaluation on one candidate without asking how.</p></div>
+
+    <div class="req"><div class="req-id">LG-2 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-18</span></div><p>Each step in this slice shall produce a learning-log entry with a lesson, a recap and check questions.</p><p><em>Check:</em> <code>docs/learning</code> has an entry for each step.</p></div>
+    <h2 id="deferred-to-later-slices">Deferred to Later Slices</h2>
+
+    <p>Recorded so the boundary of this slice is explicit (Patton, now versus later).</p>
+
+    <div class="req"><div class="req-id">WN-1 <span class="priority wont">Won't</span></div><p>Teacher-written training data, the judge filter, training runs and the adapter, the held-out test-set procedure, the standalone citation checker, the local page, the model card and export to Ollama are not in this slice (D-4, D-5, D-8, D-10 to D-15, D-17).</p><p><em>Check:</em> Not applicable.</p></div>
+
+    <h2 id="non-functional-requirements">Non-Functional Requirements</h2>
+
+    <p>Covered inside the domains: fits in 8 GB and is timed on this Mac (BO-3, BO-4); repeatable (BO-7, DT-3, EV-9); confidentiality (GS-2); honesty about uncertainty (EV-5, EV-6).</p>
+
+    <h2 id="assumptions">Assumptions</h2>
+
+    <ul>
+      <li>Claude drafting the gold cases does not leak into training, provided the later teacher model and judge are checked against the gold set (GS-6) and the teacher is not instructed with gold cases.</li>
+      <li>The four candidates have usable 4-bit builds for this Mac; if not, BO-4 records it.</li>
+      <li>The owner can spend 3 to 6 hours judging the gold set within the deadline.</li>
+    </ul>
+
+    <h2 id="constraints">Constraints</h2>
+
+    <ul>
+      <li>Apple M2, 8 GB memory; nothing may require a cloud GPU.</li>
+      <li>Public repository: no employer names, internal figures or internal team names, ever; cases are fictional and built from public regulation text.</li>
+      <li>Deadline 16 November 2026 for the whole project.</li>
+      <li>Regulation (EU) 2024/1689 as amended by Regulation (EU) 2026/1744 is the legal basis; draft Commission guidance is marked as draft.</li>
+    </ul>
+
+    <h2 id="out-of-scope">Out of Scope</h2>
+
+    <ul>
+      <li>Legal advice. Outputs are triage, not legal opinions.</li>
+      <li>General-purpose AI model obligations (Chapter V) as a tier: the scheme classifies AI systems, not models.</li>
+      <li>Languages other than English for case descriptions in this slice.</li>
+    </ul>
+    <h2 id="open-questions">Open Questions</h2>
+
+    <div class="open-question">
+      <p><strong>OQ-1 (decided 2026-10-26 by the owner):</strong> the 100-case gold set is used in full for the bake-off and development. A separate final test set, written later under the same guideline and touched once, measures G-1 (deliverable D-8, a later slice). Reason: 40 cases would give intervals of about plus or minus 15 points, too wide to separate four candidates.</p>
+    </div>
+
+    <div class="open-question">
+      <p><strong>OQ-2:</strong> Which areas of Annex III does the owner know least, so the guideline gives them more worked examples?</p>
+    </div>
+    <h2 id="requirements-index">Requirements Index</h2>
+
+    <table>
+      <caption>Table 3 — All requirements at a glance</caption>
+      <thead>
+        <tr><th>ID</th><th>Domain</th><th>Summary</th><th>Priority</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>LS-1</td><td>Label Scheme and Guideline</td><td>Six labels, each defined against an article</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>LS-2</td><td>Label Scheme and Guideline</td><td>High-risk records its route and Annex III area</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>LS-3</td><td>Label Scheme and Guideline</td><td>Separate Article 50 flag</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>LS-4</td><td>Label Scheme and Guideline</td><td>Citation and one-sentence reason</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>LS-5</td><td>Label Scheme and Guideline</td><td>Fixed decision order with worked examples</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>LS-6</td><td>Label Scheme and Guideline</td><td>When to say needs-human-review</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>LS-7</td><td>Label Scheme and Guideline</td><td>Versioned guideline</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>LS-8</td><td>Label Scheme and Guideline</td><td>Sources for every rule</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>LS-9</td><td>Label Scheme and Guideline</td><td>One fixed output record</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>LS-10</td><td>Label Scheme and Guideline</td><td>No dates or duty lists in the label record</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>GS-1</td><td>Gold Set and Re-label Check</td><td>100 cases, boundary-weighted</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>GS-2</td><td>Gold Set and Re-label Check</td><td>Freshly written, fictional, public sources only</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>GS-3</td><td>Gold Set and Re-label Check</td><td>All eight Annex III areas covered</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>GS-4</td><td>Gold Set and Re-label Check</td><td>Hard cases are present</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>GS-5</td><td>Gold Set and Re-label Check</td><td>Claude drafts, the owner judges every case</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>GS-6</td><td>Gold Set and Re-label Check</td><td>Gold set never used for training</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>GS-7</td><td>Gold Set and Re-label Check</td><td>Blind re-label of 20 cases</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>GS-8</td><td>Gold Set and Re-label Check</td><td>Disagreements settle into the guideline</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>DT-1</td><td>Dates-and-Duties Table</td><td>Dates and duties per label</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>DT-2</td><td>Dates-and-Duties Table</td><td>Every entry sourced and dated</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>DT-3</td><td>Dates-and-Duties Table</td><td>Deterministic lookup</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>DT-4</td><td>Dates-and-Duties Table</td><td>Stale entries flagged</td><td><span class="priority should">Should</span></td></tr>
+        <tr><td>DT-5</td><td>Dates-and-Duties Table</td><td>Reviewed by a human</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>BO-1</td><td>Base-Model Bake-off</td><td>Four candidates</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>BO-2</td><td>Base-Model Bake-off</td><td>Same conditions for every model</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>BO-3</td><td>Base-Model Bake-off</td><td>Five measures per candidate</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>BO-4</td><td>Base-Model Bake-off</td><td>Failures recorded, not dropped</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>BO-5</td><td>Base-Model Bake-off</td><td>Licence criteria fixed before results</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>BO-6</td><td>Base-Model Bake-off</td><td>The owner chooses the base model</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>BO-7</td><td>Base-Model Bake-off</td><td>Repeatable runs</td><td><span class="priority should">Should</span></td></tr>
+        <tr><td>BO-8</td><td>Base-Model Bake-off</td><td>Optional fifth candidate</td><td><span class="priority could">Could</span></td></tr>
+        <tr><td>EV-1</td><td>Evaluation</td><td>Tier accuracy and confusion table</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>EV-2</td><td>Evaluation</td><td>Answered-case accuracy and coverage</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>EV-3</td><td>Evaluation</td><td>Annex III area accuracy</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>EV-4</td><td>Evaluation</td><td>Citation validity</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>EV-5</td><td>Evaluation</td><td>Format failures counted, not dropped</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>EV-6</td><td>Evaluation</td><td>Intervals on every number</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>EV-7</td><td>Evaluation</td><td>Paired comparison of two models</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>EV-8</td><td>Evaluation</td><td>Article 50 flag and dates check</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>EV-9</td><td>Evaluation</td><td>Reproducible, identified reports</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>EV-10</td><td>Evaluation</td><td>Plain-English summary for the owner</td><td><span class="priority should">Should</span></td></tr>
+        <tr><td>LG-1</td><td>Owner-Run Steps</td><td>Commands the owner can run</td><td><span class="priority should">Should</span></td></tr>
+        <tr><td>LG-2</td><td>Owner-Run Steps</td><td>Learning-log entry per step</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>WN-1</td><td>Deferred to Later Slices</td><td>Training and everything after it</td><td><span class="priority wont">Won't</span></td></tr>
+      </tbody>
+    </table>
+    <h2 id="priority-model">Priority Model</h2>
+
+    <table>
+      <caption>Table 4 — MoSCoW priority definitions</caption>
+      <thead>
+        <tr><th>Level</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="priority must">Must</span></td><td>The slice fails its purpose without this.</td></tr>
+        <tr><td><span class="priority should">Should</span></td><td>Expected; omit only with a stated reason.</td></tr>
+        <tr><td><span class="priority could">Could</span></td><td>Include if time allows.</td></tr>
+        <tr><td><span class="priority wont">Won't</span></td><td>Deliberately not in this slice.</td></tr>
+      </tbody>
+    </table>
+
+    <p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
+</main>
+
+  <script>
+(function () {
+  const toc = document.getElementById('toc');
+  const headings = document.querySelectorAll('h2[id], h3[id]');
+  const links = [];
+
+  headings.forEach(function (h) {
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    if (h.tagName === 'H3') a.classList.add('toc-h3');
+    toc.appendChild(a);
+    links.push({ el: a, target: h });
+  });
+
+  function onScroll() {
+    let current = links[0];
+    for (let i = 0; i < links.length; i++) {
+      if (links[i].target.getBoundingClientRect().top <= 80) current = links[i];
+    }
+    links.forEach(function (l) { l.el.classList.remove('active'); });
+    if (current) {
+      current.el.classList.add('active');
+      const tocEl = document.getElementById('toc');
+      const elTop = current.el.offsetTop - tocEl.offsetTop;
+      const elBot = elTop + current.el.offsetHeight;
+      if (elTop < tocEl.scrollTop || elBot > tocEl.scrollTop + tocEl.clientHeight) {
+        tocEl.scrollTop = elTop - tocEl.clientHeight / 2;
+      }
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+  </script>
+</body>
+</html>

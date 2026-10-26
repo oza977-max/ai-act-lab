@@ -13,3 +13,4 @@ This is separate from `notebook/`, which records individual training runs.
 | [002](002-finding-the-good-papers.md) | Finding the good papers: an arXiv sweep for small-model fine-tuning | 2026-10-26 |
 | [003](003-when-scorers-disagree.md) | When two scorers disagree: approving the expert roster | 2026-10-26 |
 | [004](004-impact-map.md) | The impact map: why, who, how, what (`/gvm-impact-map`) | 2026-10-26 |
+| [005](005-requirements.md) | Requirements: saying what, testably (`/gvm-requirements`, slice 1) | 2026-10-26 |
