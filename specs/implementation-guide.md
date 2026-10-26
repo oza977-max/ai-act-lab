@@ -4,7 +4,7 @@
 **Status:** approved by the owner, 2026-10-26; revised after design review 001
 **Inputs:** `specs/cross-cutting.md`, `specs/data-and-evaluation.md`, `test-cases/test-cases.md`
 
-*The build order: four phases, seventeen chunks, each small enough to finish and test in one sitting. Phase numbering starts at P1: no earlier build exists in this repository.*
+*The build order: four phases, eighteen chunks, each small enough to finish and test in one sitting. Phase numbering starts at P1: no earlier build exists in this repository.*
 
 ## Expert Panel
 
@@ -21,6 +21,7 @@
 |---|---|---|---|
 | P1-C01 Skeleton, guard hook, first evaluation | none | all | none |
 | P1-C02 Model smoke test (tracer) | P1-C01 | P4-C00, P4-C02 | P1-C03 |
+| P1-C02b Practice fine-tune (owner-run) | P1-C02 | nothing (learning only) | P1-C03, P1-C04 |
 | P1-C03 Record rules | P1-C01 | P1-C04, P3-C01, P4-C02 | P1-C02 |
 | P1-C04 Full evaluation | P1-C03 | P4-C03 | P2-C01 |
 | P2-C01 Guideline v1 | P1-C03 | P2-C02, P2-C03, P3-C02 | P1-C04 |
@@ -51,6 +52,7 @@ Track B (owner):     └─> P2-C01 ─> P2-C02       └─> P3-C02..C06 (5 bat
 | Entry point | Consumed modules | Wiring chunk | Demanded by |
 |---|---|---|---|
 | `python -m lab.evaluate` | `lab.records.parse_answer`, `lab.records.validate`, `lab.records.contains_date`, `lab.articles.is_valid`, `lab.articles.article_number`, `lab.stats.wilson`, `lab.stats.paired_bootstrap_diff` | P1-C01, P1-C04 | P1-C01 (TC-EV-1-01, TC-EV-2-01); P1-C04 (TC-EV-3 to TC-EV-10) |
+| `mlx_lm.lora` (practice run) | `scripts/prepare_benchmark.py` output under `data/practice/` | P1-C02b | P1-C02b (LG-3 notebook check) |
 | `python -m lab.bakeoff smoke` | `lab.bakeoff` child-process runner, `data/models.toml` | P1-C02 | P1-C02 (one-case smoke acceptance) |
 | `python -m lab.prompt build` | `lab.records` vocabularies and example, guideline file | P2-C02 | P2-C02 (prompt-matches-guideline test) |
 | `python -m lab.dates lookup` | `lab.dates.lookup`, `lab.records` vocabularies | P2-C03 | P2-C03 (TC-DT-1-01 to TC-DT-5-01) |
@@ -72,6 +74,8 @@ Every chunk's done-criteria: tests green, a learning-log entry (lesson, recap, c
 **P1-C01 Skeleton, guard hook, first evaluation (about 1.5 hours).** `.venv` on Python 3.13 (3.11 if MLX will not install, recorded); `requirements.txt` with every dependency pinned; package layout; `.gitignore` additions (`.private/`, weights); the guard upgraded per cross-cutting ADR-007 and installed as a pre-commit hook; the 10-case fixture; minimal `records` and `evaluate` giving tier accuracy and answered-case accuracy. Runnable: `python -m lab.evaluate --gold tests/fixtures/eval-10/gold.jsonl --run tests/fixtures/eval-10/run/` prints 7 of 10 and 6 of 8. Tests: TC-EV-1-01, TC-EV-2-01, TC-EV-2-02, TC-GS-2-03. *Needs owner permission to install packages.*
 
 **P1-C02 Model smoke test (about 1 hour).** The riskiest seam, first: download the smallest candidate (owner permission first, with name, source and size), load it in a child process, apply its chat template with thinking off, generate one answer for one sample case, print seconds and peak memory. Records the pinned generation calls for this `mlx-lm` version.
+
+**P1-C02b Practice fine-tune (owner about 1 hour; LG-3).** Download the AI Act Evaluation Benchmark data (CC-BY-4.0; owner permission first, with source and size), convert its scenarios to training lines in the answer-record shape for the labels it has (prohibited, high-risk, limited as transparency-only, minimal), hold out 20 for a before-and-after look, and give the owner the exact `mlx_lm.lora` command for one short LoRA run on the smallest candidate. The owner runs it, watches training and validation loss, and compares answers before and after on a few held-out scenarios. A notebook entry records command, settings, loss, examples and attribution. Practice only: no numbers feed any decision; the benchmark never enters the gold set; adapters are not committed.
 
 **P1-C03 Record rules (about 1 hour).** Full `validate`, `parse_answer` per ADR-005, `contains_date`. Tests: TC-LS-2-01 to TC-LS-4-03, TC-LS-9-01, TC-LS-9-02, TC-LS-10-01, TC-EV-8-01.
 
@@ -132,6 +136,7 @@ Design review 001 findings are applied; `/gvm-build` starts at P1-C01.
 
 | Date | Change | Reason | Author |
 |---|---|---|---|
+| 2026-10-26 | Added P1-C02b, an owner-run practice fine-tune on the public benchmark (LG-3) | Owner request | owner/AI |
 | 2026-10-26 | Model smoke test moved into Phase 1 (P1-C02); record rules before full evaluation (P1-C03, P1-C04, no longer parallel); prompt build chunk added (P2-C02); gold review split into five batch chunks (P3-C02 to P3-C06); comparison split from end-to-end closure (P4-C04, P4-C05); guard hook in P1-C01; learning entry in every chunk's done-criteria; wiring matrix extended | Design review 001, themes T1, T9, T10, T12, T14 | owner/AI |
 
 ---

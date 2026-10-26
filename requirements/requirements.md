@@ -201,6 +201,10 @@ What makes this slice a learning step as well as a build step.
 **LG-2 (Must) [impact-deliverable: D-18]:** **[MUST]** Each step in this slice shall produce a learning-log entry with a lesson, a recap and check questions.
 *Check:* docs/learning has an entry for each step.
 
+**LG-3 (Should) [impact-deliverable: D-16]:** **[SHOULD]** Before the gold set is built, the owner shall run one practice LoRA fine-tune of the smallest candidate on the public AI Act Evaluation Benchmark (339 scenarios, CC-BY-4.0, attributed), comparing a few answers before and after. The run is labelled practice; its numbers are not used for any decision, and benchmark scenarios are never used as gold cases.
+*Check:* A notebook entry records the command the owner ran, the loss curve, two before-and-after answers, and the attribution.
+> Added 2026-10-26 at the owner's request, so hands-on fine-tuning starts this week rather than in slice 2.
+
 ## Deferred to Later Slices
 
 Recorded so the boundary of this slice is explicit (Patton, now versus later).
@@ -283,6 +287,7 @@ Covered inside the domains: fits in 8 GB and is timed on this Mac (BO-3, BO-4); 
 | EV-10 | Evaluation | Plain-English summary for the owner | Should |
 | LG-1 | Owner-Run Steps | Commands the owner can run | Should |
 | LG-2 | Owner-Run Steps | Learning-log entry per step | Must |
+| LG-3 | Owner-Run Steps | Practice fine-tune on public benchmark data | Should |
 | WN-1 | Deferred to Later Slices | Training and everything after it | Won't |
 
 ## Priority Model
@@ -299,6 +304,7 @@ Covered inside the domains: fits in 8 GB and is timed on this Mac (BO-3, BO-4); 
 
 | Date | Change | Reason | Author |
 |---|---|---|---|
+| 2026-10-26 | Added LG-3 (Should): a practice fine-tune on the public AI Act benchmark before the gold set | Owner request: start hands-on fine-tuning this week | owner/AI |
 | 2026-10-26 | EV-5: missing outputs count as wrong. DT-1: explicit entry for labels with no tier duties. EV-6: report names its interval method. EV-7: paired comparison refuses incomplete pairs | Requirements health report H-1 to H-4, fixes approved by the owner | owner/AI |
 
 ---

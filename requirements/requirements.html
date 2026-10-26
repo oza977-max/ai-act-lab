@@ -492,7 +492,9 @@ code {
     <div class="req"><div class="req-id">LG-1 <span class="priority should">Should</span> <span style="font-weight:400;color:#999">D-16</span></div><p>For the bake-off and the evaluation, the owner shall be given the exact commands to run, one per step, with what to expect on screen and how long it takes.</p><p><em>Check:</em> The owner runs the evaluation on one candidate without asking how.</p></div>
 
     <div class="req"><div class="req-id">LG-2 <span class="priority must">Must</span> <span style="font-weight:400;color:#999">D-18</span></div><p>Each step in this slice shall produce a learning-log entry with a lesson, a recap and check questions.</p><p><em>Check:</em> <code>docs/learning</code> has an entry for each step.</p></div>
-    <h2 id="deferred-to-later-slices">Deferred to Later Slices</h2>
+    <div class="req"><div class="req-id">LG-3 <span class="priority should">Should</span> <span style="font-weight:400;color:#999">D-16</span></div><p>Before the gold set is built, the owner shall run one practice LoRA fine-tune of the smallest candidate on the public AI Act Evaluation Benchmark (339 scenarios, CC-BY-4.0, attributed), comparing a few answers before and after. The run is labelled practice; its numbers are not used for any decision, and benchmark scenarios are never used as gold cases.</p><p><em>Check:</em> A notebook entry records the command the owner ran, the loss curve, two before-and-after answers, and the attribution.</p></div>
+<span class="sidenote">Added 2026-10-26 at the owner's request, so hands-on fine-tuning starts this week rather than in slice 2.</span>
+<h2 id="deferred-to-later-slices">Deferred to Later Slices</h2>
 
     <p>Recorded so the boundary of this slice is explicit (Patton, now versus later).</p>
 
@@ -585,7 +587,7 @@ code {
         <tr><td>EV-9</td><td>Evaluation</td><td>Reproducible, identified reports</td><td><span class="priority must">Must</span></td></tr>
         <tr><td>EV-10</td><td>Evaluation</td><td>Plain-English summary for the owner</td><td><span class="priority should">Should</span></td></tr>
         <tr><td>LG-1</td><td>Owner-Run Steps</td><td>Commands the owner can run</td><td><span class="priority should">Should</span></td></tr>
-        <tr><td>LG-2</td><td>Owner-Run Steps</td><td>Learning-log entry per step</td><td><span class="priority must">Must</span></td></tr>
+        <tr><td>LG-2</td><td>Owner-Run Steps</td><td>Learning-log entry per step</td><td><span class="priority must">Must</span></td></tr><tr><td>LG-3</td><td>Owner-Run Steps</td><td>Practice fine-tune on public benchmark data</td><td>Should</td></tr>
         <tr><td>WN-1</td><td>Deferred to Later Slices</td><td>Training and everything after it</td><td><span class="priority wont">Won't</span></td></tr>
       </tbody>
     </table>
@@ -605,7 +607,7 @@ code {
     </table>
 
 <h2 id="changelog">Changelog</h2>
-<table><caption>Table 5 — Changes since approval</caption><thead><tr><th>Date</th><th>Change</th><th>Reason</th><th>Author</th></tr></thead><tbody><tr><td>2026-10-26</td><td>EV-5: missing outputs count as wrong. DT-1: explicit entry for labels with no tier duties. EV-6: report names its interval method. EV-7: paired comparison refuses incomplete pairs</td><td>Requirements health report H-1 to H-4, fixes approved by the owner</td><td>owner/AI</td></tr></tbody></table>
+<table><caption>Table 5 — Changes since approval</caption><thead><tr><th>Date</th><th>Change</th><th>Reason</th><th>Author</th></tr></thead><tbody><tr><td>2026-10-26</td><td>Added LG-3 (Should): a practice fine-tune on the public AI Act benchmark before the gold set</td><td>Owner request: start hands-on fine-tuning this week</td><td>owner/AI</td></tr><tr><td>2026-10-26</td><td>EV-5: missing outputs count as wrong. DT-1: explicit entry for labels with no tier duties. EV-6: report names its interval method. EV-7: paired comparison refuses incomplete pairs</td><td>Requirements health report H-1 to H-4, fixes approved by the owner</td><td>owner/AI</td></tr></tbody></table>
     <p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
 </main>
 

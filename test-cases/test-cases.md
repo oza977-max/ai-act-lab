@@ -26,11 +26,11 @@ Four issues were found and fixed in the requirements before tests were written (
 
 | | |
 |---|---|
-| Test cases | 63 |
-| Requirements in scope | 43 |
-| Requirements covered | 43 of 43 |
-| By priority | Must 58, Should 4, Could 1 |
-| Example-based tests | 63 |
+| Test cases | 64 |
+| Requirements in scope | 44 |
+| Requirements covered | 44 of 44 |
+| By priority | Must 58, Should 5, Could 1 |
+| Example-based tests | 64 |
 | Property tests | 3 |
 | Security tests | 1 |
 | Techniques | boundary values, equivalence classes, decision rules, a hand-countable fixture, repeatability properties |
@@ -614,6 +614,15 @@ And the output MUST NOT contain: a step without an entry
 [Requirement: LG-2] [Priority: MUST]
 [Trace: G-2 → A-3 → I-8 → D-18 → LG-2 → TC-LG-2-01]
 
+**TC-LG-3-01: Practice run is recorded with attribution** [EXAMPLE]
+Input: practice fine-tune on the benchmark
+Given the owner has run the practice LoRA command
+When the notebook entry is read
+Then the output MUST contain: the command run, the loss curve, two before-and-after answers, and attribution to the benchmark authors (CC-BY-4.0)
+And the output MUST NOT contain: benchmark scenarios in the gold set; practice numbers used in a decision
+[Requirement: LG-3] [Priority: SHOULD]
+[Trace: G-2 → A-3 → I-6 → D-16 → LG-3 → TC-LG-3-01]
+
 ## Traceability Matrix
 
 | Requirement | Priority | Test cases | Status |
@@ -661,16 +670,18 @@ And the output MUST NOT contain: a step without an entry
 | EV-10 | Should | TC-EV-10-01 | covered |
 | LG-1 | Should | TC-LG-1-01 | covered |
 | LG-2 | Must | TC-LG-2-01 | covered |
+| LG-3 | Should | TC-LG-3-01 | covered |
 | WN-1 | Won't | — | not tested: Won't |
 ## Test Summary
 
-All 43 in-scope requirements have at least one test; every Must requirement has an example-based test with both a must-contain and a must-not-contain assertion. Every test traces up the impact map to a goal. The riskiest component, the evaluation, is tested against a 10-case set small enough to count by hand.
+All 44 in-scope requirements have at least one test; every Must requirement has an example-based test with both a must-contain and a must-not-contain assertion. Every test traces up the impact map to a goal. The riskiest component, the evaluation, is tested against a 10-case set small enough to count by hand.
 
 
 ## Changelog
 
 | Date | Change | Reason | Author |
 |---|---|---|---|
+| 2026-10-26 | Added TC-LG-3-01 for the practice fine-tune | New requirement LG-3 | owner/AI |
 | 2026-10-26 | TC-LS-6-02 wording aligned with the record's review reason `missing-fact` | Design review 001, finding B-9 | AI |
 
 ---
