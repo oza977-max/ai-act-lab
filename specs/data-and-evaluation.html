@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Act Lab — Data and Evaluation Spec</title>
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: "ET Book", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  color: #111;
+  background: #fffff8;
+  line-height: 1.6;
+  padding: 2rem 1rem 6rem;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+/* ── Typography ── */
+h1 {
+  font-size: 2.4rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+  color: #111;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  color: #111;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  color: #333;
+}
+
+p, li {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+  max-width: 640px;
+}
+
+ul, ol { padding-left: 1.4rem; margin-bottom: 1.2rem; }
+li { margin-bottom: 0.4rem; }
+
+.subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #555;
+  margin-bottom: 2.5rem;
+  max-width: 640px;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Floating TOC (Left Side) ── */
+nav.toc {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  width: 220px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  background: #fffff8;
+  border-right: 2px solid #ddd;
+  padding: 1rem 1rem 1rem 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  z-index: 100;
+}
+
+nav.toc .toc-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  margin-bottom: 0.6rem;
+}
+
+nav.toc a {
+  color: #555;
+  text-decoration: none;
+  display: block;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+nav.toc a:hover { color: #111; }
+nav.toc a.active { color: #111; font-weight: 600; }
+nav.toc .toc-h3 { padding-left: 0.8rem; font-size: 0.78rem; color: #888; }
+nav.toc .toc-h3:hover { color: #555; }
+
+/* Offset main content for left TOC */
+main {
+  margin-left: 260px;
+}
+
+/* ── Sidenotes (Right Margin) ── */
+.sidenote {
+  float: right;
+  clear: right;
+  width: 220px;
+  margin-right: -260px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #666;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+/* ── Tables (Few's principles) ── */
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  width: auto;
+  min-width: 480px;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 2px solid #333;
+  color: #111;
+}
+
+tbody td {
+  padding: 0.45rem 1rem 0.45rem 0;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: 2px solid #333; }
+tbody tr:nth-child(even) { background: #f9f9f4; }
+
+caption {
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #666;
+  text-align: left;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Requirement Blocks ── */
+.req {
+  background: #f7f7f0;
+  border-left: 3px solid #999;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.req-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.req p { margin-bottom: 0.3rem; }
+
+/* ── Priority Chips (MoSCoW) ── */
+.priority {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+.priority.must { background: #111; color: #fff; }
+.priority.should { background: #bbb; color: #fff; }
+.priority.could { background: #e8e8e0; color: #666; }
+.priority.wont { background: #fff; color: #999; border: 1px solid #ccc; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  nav.toc {
+    position: static;
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  main { margin-left: 0; }
+  .sidenote {
+    float: none;
+    width: 100%;
+    margin: 0.8rem 0;
+    padding: 0.6rem 0 0.6rem 1rem;
+  }
+}
+
+/* ── Test Case Components (/gvm-test-cases) ── */
+.test-case {
+  background: #f7f7f0;
+  border-left: 3px solid #669;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.tc-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.tc-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.tc-bdd p {
+  margin-bottom: 0.2rem;
+  padding-left: 1rem;
+}
+
+.tc-trace {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+.tc-detail {
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.tc-detail h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.health-issue {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.health-issue.acknowledged {
+  opacity: 0.6;
+  border-left-color: #ccc;
+}
+
+/* ── Open Questions ── */
+.open-question {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.oq-context {
+  font-size: 0.88rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* ── Inline Code ── */
+code {
+  font-family: "Menlo", "Consolas", "Monaco", monospace;
+  font-size: 0.88rem;
+  background: #f0f0e8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* ── GVM Attribution (per shared rule 24) ── */
+.gvm-attribution {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 0;
+  max-width: none;
+}
+  </style>
+</head>
+<body>
+<nav class="toc" id="toc"><div class="toc-title">Contents</div></nav>
+<main>
+<p class="date">October 2026</p>
+<h1>AI Act Lab</h1>
+<p class="subtitle">What each part of the code is responsible for, what goes in and out of it, the statistics it uses, and which tests prove it.</p>
+<table><caption>Table 1 — Document metadata</caption><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>Date</td><td>2026-10-26</td></tr><tr><td>Status</td><td>approved by the owner, 2026-10-26</td></tr><tr><td>Scope</td><td>the guideline, gold set, re-label check, dates table, bake-off and evaluation. Requirements LS-1 to LG-2. Conventions: <code>specs/cross-cutting.md</code>.</td></tr></tbody></table>
+<h2 id="expert-panel">Expert Panel</h2>
+<table><caption>Table 2 — Expert Panel</caption><thead><tr><th>Expert</th><th>Work</th><th>Role in This Document</th></tr></thead><tbody><tr><td>George Fairbanks</td><td><em>Just Enough Software Architecture</em></td><td>Depth where the risk is: the evaluation and the bake-off runner</td></tr><tr><td>Evan Miller</td><td><em>Adding Error Bars to Evals</em></td><td>Interval and paired-comparison methods</td></tr><tr><td>James Pustejovsky &amp; Amber Stubbs</td><td><em>Natural Language Annotation for Machine Learning</em></td><td>Gold-set and re-label workflow</td></tr><tr><td>Yonatan Geifman &amp; Ran El-Yaniv</td><td><em>Selective Classification</em></td><td>Answered-case accuracy and coverage</td></tr><tr><td>Zhenyan Lu et al.</td><td><em>Small Language Models survey</em></td><td>Measuring speed and memory on the device</td></tr><tr><td>Martin Kleppmann</td><td><em>Designing Data-Intensive Applications</em></td><td>One-way data flow between files</td></tr><tr><td>OWASP</td><td><em>Top 10 for LLM Applications</em></td><td>Model output treated as untrusted text</td></tr></tbody></table>
+<h2 id="architecturally-significant-requirements">Architecturally Significant Requirements</h2>
+<ul><li><strong>EV-5, EV-7 (correct denominators).</strong> A silent bug here fakes every result: the evaluation is the riskiest component and gets the most design.</li><li><strong>BO-3, BO-4 (8 GB).</strong> The runner must load one model at a time, measure peak memory, and record failure instead of crashing the comparison.</li><li><strong>BO-7, EV-9 (repeatable).</strong> Greedy generation and fixed seeds.</li><li><strong>LS-10, DT (dates never from the model).</strong> The dates table is a separate lookup; the evaluation flags any date in a model's answer.</li></ul>
+<h2 id="data-flow">Data flow</h2>
+<p>One direction only; each step reads files and writes new files (Kleppmann).</p>
+<pre style="font-size:0.85rem;background:#f7f7f0;padding:0.8rem;overflow-x:auto"><code>guideline (md) ─┐
+                ├─&gt; review sheets (csv) ──owner──&gt; gold set (jsonl) ──┬──&gt; relabel sample (csv) ──owner──&gt; kappa report
+articles (json) ┘                                                     │
+prompt (txt) ─────────────────────────────────────────────────────────┼──&gt; bakeoff runner ──&gt; outputs (jsonl) per model
+                                                                      └──&gt; evaluate ──&gt; report (md) per model
+outputs of two models ──&gt; evaluate --paired ──&gt; difference report
+all reports ──&gt; compare ──&gt; comparison table (md) ──owner──&gt; decisions log
+dates table (toml) ──&gt; dates lookup (independent of the model)</code></pre>
+<h2 id="adr-004-statistics">ADR-004: Statistics</h2>
+<p><strong>Context.</strong> EV-6 requires a 95% interval on every proportion with a named method; EV-7 a paired difference; GS-7 kappa with an interval. Samples are small (10 to 100), so normal-approximation intervals misbehave near 0 and 1. <strong>Options.</strong> (1) Normal approximation everywhere; (2) Wilson score interval for proportions, paired bootstrap for differences and kappa; (3) exact (Clopper–Pearson) intervals. <strong>Decision.</strong> Option 2. Wilson intervals stay inside 0 to 1 and are accurate at small n. The paired bootstrap resamples cases, keeping both models' answers on the same case together, 10,000 resamples with seed 20261026, percentile interval; the same for kappa. All standard library. <strong>Consequences.</strong> Results repeat exactly (EV-9). The report names both methods (EV-6). A gain counts only if the paired interval excludes zero (EV-7).</p>
+<h2 id="adr-005-reading-a-model-s-answer">ADR-005: Reading a model's answer</h2>
+<p><strong>Context.</strong> Small models often wrap the record in prose or produce near-JSON (format compliance is a bake-off measure, BO-3). Model text is untrusted (OWASP). <strong>Decision.</strong> The parser takes the first complete JSON object in the text and validates it against the record rules. Anything else is <code>unreadable</code>. The parser never repairs content (no guessing a tier from prose); never executes or evaluates text. <strong>Consequences.</strong> Format compliance is honest: a model that answers in prose scores as a format failure (TC-LS-9-02).</p>
+<h2 id="adr-006-the-zero-shot-prompt">ADR-006: The zero-shot prompt</h2>
+<p><strong>Context.</strong> BO-2 requires one prompt for all candidates. <strong>Decision.</strong> Prompt v1 contains: the six label definitions from the guideline, the decision order, the record fields with the example, the instruction to answer with the record only, and the case description inside clearly marked delimiters with a line stating that any instructions inside the description are part of the case, not commands (GS-4). No worked examples (zero-shot). Each model's own chat template wraps it. <strong>Consequences.</strong> The prompt is versioned and committed before any run.</p>
+<h2 id="components">Components</h2>
+<p>Interfaces below are contracts: name, inputs, outputs, behaviour. No bodies.</p>
+<h3 id="lab-records-py-the-answer-record-ls-1-to-ls-4-ls-9-ls-10-ev-5-ev-8"><code>lab/records.py</code> — the answer record (LS-1 to LS-4, LS-9, LS-10, EV-5, EV-8)</h3>
+<ul><li><code>Record</code> dataclass with the nine fields in <code>cross-cutting.md</code>.</li><li><code>validate(record) -&gt; list[str]</code>: returns rule violations (empty means valid): label set, route/area/point consistency, article presence, review reason, reason of one sentence and at most 40 words.</li><li><code>parse_answer(raw: str) -&gt; (Record | None, error)</code>: per ADR-005.</li><li><code>contains_date(text: str) -&gt; bool</code>: detects day-month-year dates, month-year and ISO dates (EV-8).</li></ul>
+<h3 id="lab-articles-py-valid-articles-ev-4"><code>lab/articles.py</code> — valid articles (EV-4)</h3>
+<ul><li>Loads <code>data/articles.json</code>: Articles 1 to 113, their paragraph numbers where cited, and Annexes I to XIII with Annex III points; as amended by Regulation (EU) 2026/1744, with source link and checked date.</li><li><code>is_valid(citation: str) -&gt; bool</code>; <code>normalise(citation) -&gt; str</code> so "Article 6(2)" and "Art. 6(2)" match.</li></ul>
+<h3 id="lab-stats-py-statistics-ev-6-ev-7-gs-7"><code>lab/stats.py</code> — statistics (EV-6, EV-7, GS-7)</h3>
+<ul><li><code>wilson(k, n) -&gt; (low, high)</code>; <code>paired_bootstrap_diff(a_correct, b_correct, seed, n=10000) -&gt; (diff, low, high)</code>; <code>cohen_kappa(labels_a, labels_b) -&gt; float</code>; <code>kappa_bootstrap(labels_a, labels_b, seed) -&gt; (low, high)</code>.</li></ul>
+<h3 id="lab-evaluate-py-the-evaluation-ev-1-to-ev-10"><code>lab/evaluate.py</code> — the evaluation (EV-1 to EV-10)</h3>
+<ul><li>Command: <code>python -m lab.evaluate --gold data/gold/gold-v1.jsonl --outputs results/bakeoff/&lt;model&gt;/outputs.jsonl</code>, and <code>--paired &lt;other outputs&gt;</code>.</li><li>Joins outputs to gold by <code>id</code>; a gold case with no output line is <code>missing</code> (EV-5). Computes: tier accuracy and confusion table; answered share and answered-case accuracy (needs-human-review is not answered); review said when gold says review, and when it does not; Annex III area accuracy on gold Annex III cases; citation validity and overlap; Article 50 flag accuracy; format failures and missing outputs; dates found. Every proportion with a Wilson interval.</li><li>Paired mode refuses if either side lacks any gold case, naming them (EV-7).</li><li>Writes <code>report.md</code> next to the outputs, opening with a plain-English summary (EV-10) and a header naming model, prompt, guideline and gold-set versions (EV-9).</li></ul>
+<h3 id="lab-gold-py-gold-set-gs-1-to-gs-6-ls-7"><code>lab/gold.py</code> — gold set (GS-1 to GS-6, LS-7)</h3>
+<ul><li><code>python -m lab.gold check data/gold/review/batch-01.csv</code>: validates a review sheet: decision present, final tier in the label set, record rules, 60 to 200 words, guideline version known.</li><li><code>python -m lab.gold build</code>: merges all reviewed sheets into <code>gold-v{N}.jsonl</code>; checks the GS-1 counts, GS-3 area coverage, GS-4 tag quotas; reports the share of drafts the owner changed (GS-5); sets <code>never_train</code> on every case (GS-6).</li><li>Review sheet columns: <code>id, description, proposed_tier, proposed_route, proposed_area, proposed_point, proposed_art50, proposed_articles, proposed_reason, tags, decision, final_tier, final_route, final_area, final_point, final_art50, final_articles, final_reason, owner_note</code>. The owner fills <code>decision</code>; on <code>accept</code>, the final columns are copied from the proposals by <code>check</code>; on <code>change</code>, the owner fills them.</li></ul>
+<h3 id="lab-relabel-py-blind-re-label-gs-7-gs-8"><code>lab/relabel.py</code> — blind re-label (GS-7, GS-8)</h3>
+<ul><li><code>python -m lab.relabel sample</code>: picks 20 cases with the fixed seed, writes <code>data/gold/relabel/sheet.csv</code> with descriptions only (no labels), records the date. Refuses if fewer than 2 days have passed since the gold set's build date.</li><li><code>python -m lab.relabel score</code>: compares tiers, reports agreement, kappa and its interval against the 0.8 target, and lists each disagreement for the owner to settle into the guideline (GS-8).</li></ul>
+<h3 id="lab-dates-py-dates-and-duties-table-dt-1-to-dt-5"><code>lab/dates.py</code> — dates-and-duties table (DT-1 to DT-5)</h3>
+<ul><li>Table entries keyed by <code>tier</code>, <code>route</code> and <code>art50</code>: <code>applies_from</code> (date), <code>duties</code> (list of article references with short titles), <code>source_url</code>, <code>article</code>, <code>last_checked</code>, <code>checked_by</code>, <code>verified</code> (true only after the Official Journal check), <code>note</code>. Explicit entries for out-of-scope and needs-human-review (DT-1). Header block: <code>approved_by</code>, <code>approved_on</code>, change log (DT-5).</li><li><code>lookup(tier, route, art50, today) -&gt; list[Entry]</code>: deterministic (DT-3); marks entries stale when more than 90 days since <code>last_checked</code> (DT-4); refuses unverified entries (DT-2).</li><li>Command: <code>python -m lab.dates lookup --tier high-risk --route annex-iii</code>.</li></ul>
+<h3 id="lab-bakeoff-py-runner-bo-1-to-bo-4-bo-7"><code>lab/bakeoff.py</code> — runner (BO-1 to BO-4, BO-7)</h3>
+<ul><li>Command: <code>python -m lab.bakeoff run --model &lt;model-slug&gt;</code>, one model at a time.</li><li>Loads the model's 4-bit MLX build through <code>mlx-lm</code>, applies its chat template to prompt v1, generates greedily with a 400-token limit per case, writes one output line per gold case as it goes, records seconds per case and peak memory.</li><li>If loading fails or memory exceeds the limit, writes an <code>excluded.md</code> with the reason and the memory observed instead of outputs (BO-4).</li><li>Model registry <code>data/models.toml</code>: slug, the build to download, the original model card URL, licence, parameter count; filled and checked in the spike chunk (BO-4 community-build check).</li></ul>
+<h3 id="lab-compare-py-comparison-bo-3-bo-5-bo-6"><code>lab/compare.py</code> — comparison (BO-3, BO-5, BO-6)</h3>
+<ul><li><code>python -m lab.compare</code>: reads each model's report and the licence criteria (<code>docs/bakeoff/licence-criteria.md</code>, committed before any run, BO-5) and writes <code>results/bakeoff/comparison.md</code>: one row per candidate with the five measures, and a recommendation section that Claude writes and the owner reads before choosing (BO-6).</li></ul>
+<h2 id="integration-points">Integration points</h2>
+<ul><li><code>records.py</code> is used by <code>evaluate</code>, <code>gold</code>, <code>bakeoff</code>: one definition of the record.</li><li><code>stats.py</code> is used by <code>evaluate</code> and <code>relabel</code>.</li><li><code>dates.py</code> stands alone in slice 1; the local page (later slice) will call <code>lookup</code>.</li></ul>
+<h2 id="error-handling-and-edge-cases">Error handling and edge cases</h2>
+<ul><li>A gold id appearing twice, an unknown tier in a sheet, or a missing column stops the command with file, line and rule.</li><li>A model that times out on one case: the case is recorded as <code>missing</code> and the run continues; the count is in the report.</li><li>An answer citing an article that does not exist is valid as a record but counts as an invalid citation (EV-4).</li><li>Answered-case accuracy with zero answered is reported as "not defined", never 100% (TC-EV-2-02).</li></ul>
+<h2 id="testing-strategy">Testing strategy</h2>
+<table><caption>Table 3 — Testing strategy</caption><thead><tr><th>Component</th><th>Test cases</th></tr></thead><tbody><tr><td><code>records</code></td><td>TC-LS-1-01 to TC-LS-10-01</td></tr><tr><td><code>gold</code></td><td>TC-GS-1-01 to TC-GS-6-01</td></tr><tr><td><code>relabel</code>, <code>stats</code></td><td>TC-GS-7-01, TC-GS-7-02, TC-GS-8-01</td></tr><tr><td><code>dates</code></td><td>TC-DT-1-01 to TC-DT-5-01</td></tr><tr><td><code>bakeoff</code>, <code>compare</code></td><td>TC-BO-1-01 to TC-BO-8-01 (runner tests use a stub model; one real-model smoke test)</td></tr><tr><td><code>evaluate</code>, <code>stats</code></td><td>TC-EV-1-01 to TC-EV-10-01 on the 10-case fixture</td></tr><tr><td>owner steps</td><td>TC-LG-1-01, TC-LG-2-01 (checked at the end of each step)</td></tr></tbody></table>
+<p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
+</main>
+<script>
+(function () {
+  const toc = document.getElementById('toc');
+  const headings = document.querySelectorAll('h2[id], h3[id]');
+  const links = [];
+
+  headings.forEach(function (h) {
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    if (h.tagName === 'H3') a.classList.add('toc-h3');
+    toc.appendChild(a);
+    links.push({ el: a, target: h });
+  });
+
+  function onScroll() {
+    let current = links[0];
+    for (let i = 0; i < links.length; i++) {
+      if (links[i].target.getBoundingClientRect().top <= 80) current = links[i];
+    }
+    links.forEach(function (l) { l.el.classList.remove('active'); });
+    if (current) {
+      current.el.classList.add('active');
+      const tocEl = document.getElementById('toc');
+      const elTop = current.el.offsetTop - tocEl.offsetTop;
+      const elBot = elTop + current.el.offsetHeight;
+      if (elTop < tocEl.scrollTop || elBot > tocEl.scrollTop + tocEl.clientHeight) {
+        tocEl.scrollTop = elTop - tocEl.clientHeight / 2;
+      }
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+  </script>
+</body>
+</html>

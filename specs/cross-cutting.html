@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Act Lab — Cross-Cutting Spec</title>
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: "ET Book", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  color: #111;
+  background: #fffff8;
+  line-height: 1.6;
+  padding: 2rem 1rem 6rem;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+/* ── Typography ── */
+h1 {
+  font-size: 2.4rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+  color: #111;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  color: #111;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  color: #333;
+}
+
+p, li {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+  max-width: 640px;
+}
+
+ul, ol { padding-left: 1.4rem; margin-bottom: 1.2rem; }
+li { margin-bottom: 0.4rem; }
+
+.subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #555;
+  margin-bottom: 2.5rem;
+  max-width: 640px;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Floating TOC (Left Side) ── */
+nav.toc {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  width: 220px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  background: #fffff8;
+  border-right: 2px solid #ddd;
+  padding: 1rem 1rem 1rem 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  z-index: 100;
+}
+
+nav.toc .toc-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  margin-bottom: 0.6rem;
+}
+
+nav.toc a {
+  color: #555;
+  text-decoration: none;
+  display: block;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+nav.toc a:hover { color: #111; }
+nav.toc a.active { color: #111; font-weight: 600; }
+nav.toc .toc-h3 { padding-left: 0.8rem; font-size: 0.78rem; color: #888; }
+nav.toc .toc-h3:hover { color: #555; }
+
+/* Offset main content for left TOC */
+main {
+  margin-left: 260px;
+}
+
+/* ── Sidenotes (Right Margin) ── */
+.sidenote {
+  float: right;
+  clear: right;
+  width: 220px;
+  margin-right: -260px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #666;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+/* ── Tables (Few's principles) ── */
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  width: auto;
+  min-width: 480px;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 2px solid #333;
+  color: #111;
+}
+
+tbody td {
+  padding: 0.45rem 1rem 0.45rem 0;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: 2px solid #333; }
+tbody tr:nth-child(even) { background: #f9f9f4; }
+
+caption {
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #666;
+  text-align: left;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Requirement Blocks ── */
+.req {
+  background: #f7f7f0;
+  border-left: 3px solid #999;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.req-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.req p { margin-bottom: 0.3rem; }
+
+/* ── Priority Chips (MoSCoW) ── */
+.priority {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+.priority.must { background: #111; color: #fff; }
+.priority.should { background: #bbb; color: #fff; }
+.priority.could { background: #e8e8e0; color: #666; }
+.priority.wont { background: #fff; color: #999; border: 1px solid #ccc; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  nav.toc {
+    position: static;
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  main { margin-left: 0; }
+  .sidenote {
+    float: none;
+    width: 100%;
+    margin: 0.8rem 0;
+    padding: 0.6rem 0 0.6rem 1rem;
+  }
+}
+
+/* ── Test Case Components (/gvm-test-cases) ── */
+.test-case {
+  background: #f7f7f0;
+  border-left: 3px solid #669;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.tc-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.tc-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.tc-bdd p {
+  margin-bottom: 0.2rem;
+  padding-left: 1rem;
+}
+
+.tc-trace {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+.tc-detail {
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.tc-detail h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.health-issue {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.health-issue.acknowledged {
+  opacity: 0.6;
+  border-left-color: #ccc;
+}
+
+/* ── Open Questions ── */
+.open-question {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.oq-context {
+  font-size: 0.88rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* ── Inline Code ── */
+code {
+  font-family: "Menlo", "Consolas", "Monaco", monospace;
+  font-size: 0.88rem;
+  background: #f0f0e8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* ── GVM Attribution (per shared rule 24) ── */
+.gvm-attribution {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 0;
+  max-width: none;
+}
+  </style>
+</head>
+<body>
+<nav class="toc" id="toc"><div class="toc-title">Contents</div></nav>
+<main>
+<p class="date">October 2026</p>
+<h1>AI Act Lab</h1>
+<p class="subtitle">The shared rules: tools, folders, file formats, the one answer record everything agrees on, how errors are handled, and how tests are run.</p>
+<table><caption>Table 1 — Document metadata</caption><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>Date</td><td>2026-10-26</td></tr><tr><td>Status</td><td>approved by the owner, 2026-10-26</td></tr><tr><td>Scope</td><td>conventions every slice-1 chunk follows. Requirements: all of <code>requirements/requirements.md</code> slice 1.</td></tr></tbody></table>
+<h2 id="expert-panel">Expert Panel</h2>
+<table><caption>Table 2 — Expert Panel</caption><thead><tr><th>Expert</th><th>Work</th><th>Role in This Document</th></tr></thead><tbody><tr><td>Michael Keeling</td><td><em>Design It!</em></td><td>Decisions recorded as ADRs</td></tr><tr><td>Andrew Hunt &amp; David Thomas</td><td><em>The Pragmatic Programmer</em></td><td>One source of truth per fact; tracer bullet first</td></tr><tr><td>Steve McConnell</td><td><em>Code Complete</em> (2nd ed.)</td><td>Fail loudly on bad input</td></tr><tr><td>Robert C. Martin</td><td><em>Clean Code</em></td><td>No swallowed errors</td></tr><tr><td>Luciano Ramalho</td><td><em>Fluent Python</em> (2nd ed.)</td><td>Plain dataclasses, standard library first</td></tr><tr><td>Kent Beck</td><td><em>Test-Driven Development</em></td><td>Tests before code, in every chunk</td></tr><tr><td>Sebastian Raschka</td><td><em>Build a Large Language Model (From Scratch)</em></td><td>Deterministic generation for evaluation</td></tr></tbody></table>
+<h2 id="adr-001-plain-python-scripts-and-files-no-service">ADR-001: Plain Python scripts and files, no service</h2>
+<p><strong>Context.</strong> Slice 1 is one person on one laptop: drafting, labelling, a lookup and an evaluation. No users, no network service (constraints; BO-3 timing on this Mac). <strong>Options.</strong> (1) Python scripts with files in the repository; (2) a small web app with a database; (3) notebooks. <strong>Decision.</strong> Option 1. Each task is one command the owner can run and read. <strong>Consequences.</strong> Everything is diffable in git; datasets and results are committed (house rule). A local page is a later slice (D-13).</p>
+<h2 id="adr-002-python-3-13-in-one-project-virtual-environment-pinned-versions">ADR-002: Python 3.13 in one project virtual environment, pinned versions</h2>
+<p><strong>Context.</strong> House rule: one virtual environment, pinned versions. This Mac has Python 3.13 (Homebrew) and 3.11. <strong>Decision.</strong> Python 3.13 in <code>.venv/</code> at the repository root; dependencies pinned to exact versions in <code>requirements.txt</code>. Fallback to 3.11 if the walking skeleton finds MLX unsupported on 3.13; the fallback is recorded as a decision. <strong>Dependencies (slice 1).</strong> <code>mlx-lm</code> (model loading, 4-bit generation on Apple Silicon; brings <code>mlx</code>), <code>pytest</code> (tests). Nothing else: statistics, CSV, JSON and TOML use the standard library. Versions are chosen and pinned in the walking-skeleton chunk. <strong>Consequences.</strong> <code>.venv/</code> is git-ignored (already). Model weights are cached outside the repository and never committed.</p>
+<h2 id="adr-003-file-formats-chosen-for-the-reader">ADR-003: File formats, chosen for the reader</h2>
+<table><caption>Table 3 — ADR-003: File formats, chosen for the reader</caption><thead><tr><th>Data</th><th>Format</th><th>Why</th></tr></thead><tbody><tr><td>Labelling guideline</td><td>Markdown, <code>docs/guideline/labelling-guideline.md</code>, version in its header</td><td>The owner reads and edits it</td></tr><tr><td>Gold set (source of truth)</td><td>JSON Lines, one case per line, <code>data/gold/gold-v{N}.jsonl</code></td><td>One case per line diffs cleanly</td></tr><tr><td>Gold review sheet</td><td>CSV, <code>data/gold/review/batch-{NN}.csv</code>, opened in Numbers or Excel</td><td>Owner's choice, 2026-10-26</td></tr><tr><td>Dates-and-duties table</td><td>TOML, <code>data/dates/dates-table.toml</code></td><td>Readable by a person, parsed by the standard library</td></tr><tr><td>Valid-article table</td><td>JSON, <code>data/articles.json</code></td><td>Fixed list; EV-4</td></tr><tr><td>Prompt</td><td>Text, <code>prompts/zero-shot-v{N}.txt</code></td><td>Recorded verbatim (BO-2)</td></tr><tr><td>Model outputs</td><td>JSON Lines, <code>results/bakeoff/{model-slug}/outputs.jsonl</code></td><td>One answer per gold case</td></tr><tr><td>Reports</td><td>Markdown, <code>results/.../report.md</code></td><td>Owner reads them; committed</td></tr></tbody></table>
+<h2 id="shared-contract-the-answer-record">Shared contract: the answer record</h2>
+<p>The single shape that the guideline (LS-9), the gold set (GS), the bake-off (BO) and the evaluation (EV) all use. One source of truth: <code>lab/records.py</code> defines it; the guideline quotes it.</p>
+<table><caption>Table 4 — Shared contract: the answer record</caption><thead><tr><th>Field</th><th>Type</th><th>Rule</th></tr></thead><tbody><tr><td><code>tier</code></td><td>one of <code>prohibited</code>, <code>high-risk</code>, <code>transparency-only</code>, <code>minimal</code>, <code>out-of-scope</code>, <code>needs-human-review</code></td><td>Required (LS-1)</td></tr><tr><td><code>route</code></td><td><code>annex-iii</code>, <code>annex-i</code> or <code>null</code></td><td>Required when tier is high-risk, else null (LS-2)</td></tr><tr><td><code>annex_iii_area</code></td><td>integer 1 to 8 or <code>null</code></td><td>Required when route is annex-iii (LS-2)</td></tr><tr><td><code>annex_iii_point</code></td><td>string such as <code>4(a)</code> or <code>null</code></td><td>Required when route is annex-iii (LS-2)</td></tr><tr><td><code>annex_i_legislation</code></td><td>string or <code>null</code></td><td>Required when route is annex-i (LS-2)</td></tr><tr><td><code>art50_flag</code></td><td><code>true</code> or <code>false</code></td><td>Required (LS-3)</td></tr><tr><td><code>articles</code></td><td>list of strings such as <code>"Art. 6(2)"</code></td><td>At least one, except for needs-human-review (LS-4)</td></tr><tr><td><code>review_reason</code></td><td><code>missing-fact</code>, <code>conflicting-facts</code>, <code>unsettled-law</code> or <code>null</code></td><td>Required when tier is needs-human-review (LS-6)</td></tr><tr><td><code>reason</code></td><td>string, one sentence, at most 40 words</td><td>Required (LS-4)</td></tr></tbody></table>
+<p>No date, deadline or duties field exists (LS-10). Example:</p>
+<pre style="font-size:0.85rem;background:#f7f7f0;padding:0.8rem;overflow-x:auto"><code>{"tier": "high-risk", "route": "annex-iii", "annex_iii_area": 4, "annex_iii_point": "4(a)",
+ "annex_i_legislation": null, "art50_flag": true, "articles": ["Art. 6(2)", "Annex III 4(a)", "Art. 50(1)"],
+ "review_reason": null,
+ "reason": "The system screens job applicants, an Annex III employment use, and it talks to them directly."}</code></pre>
+<p>A gold case wraps a record: <code>id</code> (<code>GC-001</code>…), <code>description</code>, <code>gold</code> (the record), <code>tags</code> (list: <code>boundary</code>, <code>art6-3</code>, <code>hidden-instruction</code>, area tags), <code>guideline_version</code>, <code>owner_decision</code> (<code>accept</code>, <code>change</code>, <code>doubt</code>), <code>draft_label</code> (the proposed tier, kept for GS-5), <code>never_train</code> (always <code>true</code>).</p>
+<p>A model output line: <code>id</code>, <code>raw</code> (the model's text, verbatim), <code>record</code> (parsed record or <code>null</code>), <code>error</code> (<code>null</code>, <code>unreadable</code> or <code>missing</code>), <code>seconds</code>.</p>
+<h2 id="errors-fail-loudly-never-quietly-drop">Errors: fail loudly, never quietly drop</h2>
+<ul><li>Invalid input files stop the command with a message naming the file, line and rule broken (McConnell). No partial results written.</li><li>An unreadable or missing model answer is data, not an error: it is recorded with <code>error</code> set and counted as wrong (EV-5).</li><li>No bare <code>except</code> that hides a failure (Martin).</li></ul>
+<h2 id="determinism">Determinism</h2>
+<ul><li>Model generation is greedy (temperature 0) with a fixed maximum length, so a repeat run gives identical answers (BO-7).</li><li>Random sampling (the re-label sample, bootstrap intervals) uses a fixed, recorded seed (EV-9, GS-7).</li><li>Reports carry model, prompt version, guideline version, gold-set version and date (EV-9).</li></ul>
+<h2 id="repository-layout">Repository layout</h2>
+<pre style="font-size:0.85rem;background:#f7f7f0;padding:0.8rem;overflow-x:auto"><code>lab/            Python package: records, articles, stats, gold, relabel, dates, bakeoff, compare, evaluate
+tests/          pytest; fixtures/ holds the 10-case hand-counted set (EV tests)
+data/           gold/, dates/, articles.json
+docs/guideline/ labelling guideline
+prompts/        zero-shot prompt versions
+results/        bake-off outputs and reports
+scripts/        confidentiality check</code></pre>
+<h2 id="testing-conventions">Testing conventions</h2>
+<ul><li>Tests come before code in every chunk; test names follow the TC IDs (for example <code>test_tc_ev_2_01_answered_case_accuracy</code>).</li><li>Run with <code>.venv/bin/python -m pytest</code>. Every chunk ends green.</li><li>The 10-case fixture in <code>tests/fixtures/eval-10/</code> is the evaluation's ground truth (TC-EV-1-01 to TC-EV-10-01).</li></ul>
+<h2 id="owner-facing-conventions">Owner-facing conventions</h2>
+<ul><li>Every command the owner runs is a single line, given exactly, with expected output and time (LG-1).</li><li>Commands are <code>python -m lab.&lt;tool&gt;</code> from the repository root with the virtual environment active.</li></ul>
+<p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
+</main>
+<script>
+(function () {
+  const toc = document.getElementById('toc');
+  const headings = document.querySelectorAll('h2[id], h3[id]');
+  const links = [];
+
+  headings.forEach(function (h) {
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    if (h.tagName === 'H3') a.classList.add('toc-h3');
+    toc.appendChild(a);
+    links.push({ el: a, target: h });
+  });
+
+  function onScroll() {
+    let current = links[0];
+    for (let i = 0; i < links.length; i++) {
+      if (links[i].target.getBoundingClientRect().top <= 80) current = links[i];
+    }
+    links.forEach(function (l) { l.el.classList.remove('active'); });
+    if (current) {
+      current.el.classList.add('active');
+      const tocEl = document.getElementById('toc');
+      const elTop = current.el.offsetTop - tocEl.offsetTop;
+      const elBot = elTop + current.el.offsetHeight;
+      if (elTop < tocEl.scrollTop || elBot > tocEl.scrollTop + tocEl.clientHeight) {
+        tocEl.scrollTop = elTop - tocEl.clientHeight / 2;
+      }
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+  </script>
+</body>
+</html>

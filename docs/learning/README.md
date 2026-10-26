@@ -15,3 +15,4 @@ This is separate from `notebook/`, which records individual training runs.
 | [004](004-impact-map.md) | The impact map: why, who, how, what (`/gvm-impact-map`) | 2026-10-26 |
 | [005](005-requirements.md) | Requirements: saying what, testably (`/gvm-requirements`, slice 1) | 2026-10-26 |
 | [006](006-test-cases.md) | Test cases: deciding "done" before building (`/gvm-test-cases`, slice 1) | 2026-10-26 |
+| [007](007-tech-spec.md) | The technical specification: from what to how (`/gvm-tech-spec`, slice 1) | 2026-10-26 |
