@@ -9,7 +9,6 @@ import subprocess
 import sys
 
 import pytest
-
 from conftest import ROOT
 
 
@@ -27,7 +26,9 @@ def model_cached():
         return False
 
 
-@pytest.mark.skipif(not model_cached(), reason="Qwen3.5-0.8B 4-bit not in the local cache")
+@pytest.mark.skipif(
+    not model_cached(), reason="Qwen3.5-0.8B 4-bit not in the local cache"
+)
 def test_smoke_loads_real_model_and_reports_time_and_memory():
     result = subprocess.run(
         [sys.executable, "-m", "lab.bakeoff", "smoke", "--model", "qwen3.5-0.8b"],

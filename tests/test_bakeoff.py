@@ -108,22 +108,34 @@ def child(code):
 
 
 def test_child_success_returns_its_result():
-    outcome = run_child(child('import json; print(json.dumps({"seconds": 1.5, "peak_memory_gb": 1.2, "raw": "{}"}))'))
+    outcome = run_child(
+        child(
+            'import json; print(json.dumps({"seconds": 1.5, "peak_memory_gb": 1.2, "raw": "{}"}))'
+        )
+    )
     assert outcome.ok and outcome.result["peak_memory_gb"] == 1.2
 
 
 def test_child_over_memory_limit_is_excluded_with_peak():
-    outcome = run_child(child('import json, sys; print(json.dumps({"peak_memory_gb": 7.1})); sys.exit(3)'))
+    outcome = run_child(
+        child(
+            'import json, sys; print(json.dumps({"peak_memory_gb": 7.1})); sys.exit(3)'
+        )
+    )
     assert not outcome.ok
     assert "6.5" in outcome.reason and "7.1" in outcome.reason
     assert MEMORY_LIMIT_GB == 6.5
 
 
 def test_child_crash_is_excluded_with_message():
-    outcome = run_child(child('import sys; sys.stderr.write("boom: cannot load\\n"); sys.exit(1)'))
+    outcome = run_child(
+        child('import sys; sys.stderr.write("boom: cannot load\\n"); sys.exit(1)')
+    )
     assert not outcome.ok and "boom: cannot load" in outcome.reason
 
 
 def test_realistic_child_killed_by_signal_is_excluded():
-    outcome = run_child(child("import os, signal; os.kill(os.getpid(), signal.SIGKILL)"))
+    outcome = run_child(
+        child("import os, signal; os.kill(os.getpid(), signal.SIGKILL)")
+    )
     assert not outcome.ok and "killed" in outcome.reason
