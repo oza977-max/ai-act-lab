@@ -16,3 +16,6 @@ models/
 *.gguf
 *.safetensors
 *.npz
+
+# Owner-only private files: never committed
+.private/

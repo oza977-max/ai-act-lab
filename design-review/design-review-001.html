@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Act Lab — Design Review 001</title>
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: "ET Book", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  color: #111;
+  background: #fffff8;
+  line-height: 1.6;
+  padding: 2rem 1rem 6rem;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+/* ── Typography ── */
+h1 {
+  font-size: 2.4rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+  color: #111;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  color: #111;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  color: #333;
+}
+
+p, li {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+  max-width: 640px;
+}
+
+ul, ol { padding-left: 1.4rem; margin-bottom: 1.2rem; }
+li { margin-bottom: 0.4rem; }
+
+.subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #555;
+  margin-bottom: 2.5rem;
+  max-width: 640px;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Floating TOC (Left Side) ── */
+nav.toc {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  width: 220px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  background: #fffff8;
+  border-right: 2px solid #ddd;
+  padding: 1rem 1rem 1rem 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  z-index: 100;
+}
+
+nav.toc .toc-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  margin-bottom: 0.6rem;
+}
+
+nav.toc a {
+  color: #555;
+  text-decoration: none;
+  display: block;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+nav.toc a:hover { color: #111; }
+nav.toc a.active { color: #111; font-weight: 600; }
+nav.toc .toc-h3 { padding-left: 0.8rem; font-size: 0.78rem; color: #888; }
+nav.toc .toc-h3:hover { color: #555; }
+
+/* Offset main content for left TOC */
+main {
+  margin-left: 260px;
+}
+
+/* ── Sidenotes (Right Margin) ── */
+.sidenote {
+  float: right;
+  clear: right;
+  width: 220px;
+  margin-right: -260px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #666;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+/* ── Tables (Few's principles) ── */
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  width: auto;
+  min-width: 480px;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 2px solid #333;
+  color: #111;
+}
+
+tbody td {
+  padding: 0.45rem 1rem 0.45rem 0;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: 2px solid #333; }
+tbody tr:nth-child(even) { background: #f9f9f4; }
+
+caption {
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #666;
+  text-align: left;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Requirement Blocks ── */
+.req {
+  background: #f7f7f0;
+  border-left: 3px solid #999;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.req-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.req p { margin-bottom: 0.3rem; }
+
+/* ── Priority Chips (MoSCoW) ── */
+.priority {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+.priority.must { background: #111; color: #fff; }
+.priority.should { background: #bbb; color: #fff; }
+.priority.could { background: #e8e8e0; color: #666; }
+.priority.wont { background: #fff; color: #999; border: 1px solid #ccc; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  nav.toc {
+    position: static;
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  main { margin-left: 0; }
+  .sidenote {
+    float: none;
+    width: 100%;
+    margin: 0.8rem 0;
+    padding: 0.6rem 0 0.6rem 1rem;
+  }
+}
+
+/* ── Test Case Components (/gvm-test-cases) ── */
+.test-case {
+  background: #f7f7f0;
+  border-left: 3px solid #669;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.tc-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.tc-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.tc-bdd p {
+  margin-bottom: 0.2rem;
+  padding-left: 1rem;
+}
+
+.tc-trace {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+.tc-detail {
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.tc-detail h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.health-issue {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.health-issue.acknowledged {
+  opacity: 0.6;
+  border-left-color: #ccc;
+}
+
+/* ── Open Questions ── */
+.open-question {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.oq-context {
+  font-size: 0.88rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* ── Inline Code ── */
+code {
+  font-family: "Menlo", "Consolas", "Monaco", monospace;
+  font-size: 0.88rem;
+  background: #f0f0e8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* ── GVM Attribution (per shared rule 24) ── */
+.gvm-attribution {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 0;
+  max-width: none;
+}
+  </style>
+</head>
+<body>
+<nav class="toc" id="toc"><div class="toc-title">Contents</div></nav>
+<main>
+<p class="date">October 2026</p>
+<h1>AI Act Lab</h1>
+<p class="subtitle">Five independent reviewers, each looking for one class of defect only, read all four specs. Their 59 raw findings are consolidated here into 14 themes. Every quoted spec line in a six-quote sample was checked against the files and found verbatim.</p>
+<table><caption>Table 1 — Document metadata</caption><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>Date</td><td>2026-10-26</td></tr><tr><td>Scope</td><td><code>specs/</code> (4 documents) against <code>requirements/requirements.md</code> and <code>test-cases/test-cases.md</code>. Round 1, quick scan, liberal criterion.</td></tr><tr><td>Status</td><td>triaged by the owner and fixed, 2026-10-26</td></tr></tbody></table>
+<h2 id="verdict">Verdict</h2>
+<p><strong>Build from this.</strong> Given after the owner's triage, not before. All 14 themes were fixed in the specs on 2026-10-26, and a re-check confirmed both critical themes closed: the runner now has a 6.5 GB limit enforced from a child process (T1), and the review sheet carries every record field, with a checker that only validates (T2).</p>
+<h2 id="owner-triage">Owner triage</h2>
+<table><caption>Table 2 — Owner triage</caption><thead><tr><th>Decision</th><th>Choice</th></tr></thead><tbody><tr><td>Disposition of the 14 themes</td><td>Fix all now (none deferred, none dismissed)</td></tr><tr><td>Thinking modes in the bake-off</td><td>Off for every model (cross-cutting ADR-009)</td></tr><tr><td>Private list of names to block</td><td>Yes: <code>.private/deny-terms.txt</code>, git-ignored, read by the pre-commit hook (cross-cutting ADR-007)</td></tr></tbody></table>
+<table><caption>Table 3 — Owner triage</caption><thead><tr><th>Theme</th><th>Severity</th><th>Disposition</th><th>Where fixed</th></tr></thead><tbody><tr><td>T1 Running in 8 GB</td><td>Critical</td><td>Fixed</td><td>data-and-evaluation ADR-007</td></tr><tr><td>T2 Review sheet</td><td>Critical</td><td>Fixed</td><td>data-and-evaluation, <code>lab/gold.py</code> contract</td></tr><tr><td>T3 Run metadata</td><td>Important</td><td>Fixed</td><td>cross-cutting formats; <code>run.json</code>, <code>metrics.json</code></td></tr><tr><td>T4 Parsing</td><td>Important</td><td>Fixed</td><td>data-and-evaluation ADR-005</td></tr><tr><td>T5 Measure definitions</td><td>Important</td><td>Fixed</td><td>Measure definitions table; articles grammar</td></tr><tr><td>T6 Statistics edge cases</td><td>Important</td><td>Fixed</td><td>ADR-004</td></tr><tr><td>T7 Dates contract</td><td>Important</td><td>Fixed</td><td><code>lab/dates.py</code> contract</td></tr><tr><td>T8 Re-label contract</td><td>Important</td><td>Fixed</td><td><code>lab/relabel.py</code> contract</td></tr><tr><td>T9 Tracer and chunk order</td><td>Important</td><td>Fixed</td><td>implementation guide P1-C02, P1-C03, P1-C04, batch and closure splits</td></tr><tr><td>T10 Confidentiality guard</td><td>Important</td><td>Fixed and tested</td><td>cross-cutting ADR-007; <code>scripts/confidentiality-check.sh</code>, <code>scripts/install-hooks.sh</code></td></tr><tr><td>T11 Model supply chain</td><td>Important</td><td>Fixed</td><td>cross-cutting ADR-008</td></tr><tr><td>T12 Prompt drift, delimiters</td><td>Minor</td><td>Fixed</td><td>ADR-006</td></tr><tr><td>T13 Untrusted text in outputs</td><td>Minor</td><td>Fixed</td><td>evaluate report rule; gold encodings; slug rule</td></tr><tr><td>T14 Small gaps</td><td>Minor</td><td>Fixed</td><td>across specs; test TC-LS-6-02 wording</td></tr></tbody></table>
+<h2 id="executive-summary">Executive Summary</h2>
+<table><caption>Table 4 — Executive Summary</caption><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Panels run</td><td>A requirements coverage, B interface contracts, C structural soundness, D implementability, E security</td></tr><tr><td>Panel F (quality attributes)</td><td>Not run: the utility tree's only high-importance attribute, fitting in 8 GB, rated medium risk (largest candidate about 1 GB in 4-bit). The memory gap found is a design omission (theme T1), not an unachievable target</td></tr><tr><td>Raw findings</td><td>59 (A 11, B 12, C 11, D 15, E 10)</td></tr><tr><td>Consolidated themes</td><td>14: Critical 2, Important 9, Minor 3</td></tr><tr><td>Requirements with no design at all</td><td>0 (one Could requirement, BO-8, has only a test)</td></tr><tr><td>Capture-recapture estimate</td><td>about 15 themes in total; 14 found (coverage about 93%); a second round is optional</td></tr></tbody></table>
+<h2 id="requirements-coverage-matrix">Requirements Coverage Matrix</h2>
+<table><caption>Table 5 — Requirements Coverage Matrix</caption><thead><tr><th>Requirement</th><th>Status</th><th>Gap</th></tr></thead><tbody><tr><td>LS-1 to LS-4, LS-6, LS-8 to LS-10</td><td>Covered</td><td></td></tr><tr><td>LS-5, LS-7</td><td>Partial</td><td>Boundary-example rule, version and change log not in the guideline chunk (T14)</td></tr><tr><td>GS-1, GS-3 to GS-5, GS-7</td><td>Covered</td><td></td></tr><tr><td>GS-2</td><td>Partial</td><td>The confidentiality guard has no spec contract (T10)</td></tr><tr><td>GS-6</td><td>Partial</td><td>Gold location and marker not required in the guideline (T14)</td></tr><tr><td>GS-8</td><td>Partial</td><td>No artefact stores re-label resolutions (T8)</td></tr><tr><td>DT-1, DT-3 to DT-5</td><td>Covered</td><td></td></tr><tr><td>DT-2</td><td>Partial</td><td>No place to record a discrepancy (T7)</td></tr><tr><td>BO-1, BO-4, BO-5, BO-7</td><td>Covered</td><td></td></tr><tr><td>BO-2, BO-3, BO-6</td><td>Partial</td><td>Run settings, peak memory and provenance have no data path; decisions-log path unnamed (T3)</td></tr><tr><td>BO-8</td><td>Missing (Could)</td><td>One line needed (T14)</td></tr><tr><td>EV-1 to EV-10</td><td>Covered</td><td>Measure definitions need tightening (T5)</td></tr><tr><td>LG-1</td><td>Covered</td><td></td></tr><tr><td>LG-2</td><td>Partial</td><td>Only tested at the end, not produced per chunk (T14)</td></tr></tbody></table>
+<h2 id="themes">Themes</h2>
+<h3 id="t1-critical-running-in-8-gb-is-not-designed-c-3-d-1-d-14">T1 (Critical). Running in 8 GB is not designed — C-3, D-1, D-14</h3>
+<p>The spec says a model that "exceeds the limit" is excluded, but names no limit, no measurement, and no way to survive an out-of-memory kill, which ends the process before <code>excluded.md</code> can be written. The per-case timeout cannot be enforced inside one generation call. <strong>Fix:</strong> run each model in a child process; measure MLX peak memory per case; exclude above 6.5 GB; the parent records the exclusion from the exit status; replace the timeout with the token cap.</p>
+<h3 id="t2-critical-the-review-sheet-cannot-hold-a-complete-record-b-1-b-2-c-8-d-8-b-10">T2 (Critical). The review sheet cannot hold a complete record — B-1, B-2, C-8, D-8, B-10</h3>
+<p>The CSV has no columns for the Annex I legislation, the review reason or the guideline version, so the 5 Annex I and 10 needs-human-review cases can never pass the checker. Cell encodings for true/false, lists and empty values are undefined; <code>gold check</code> both validates and edits the sheet; the "doubt" decision has no defined effect; only the draft tier, not the full draft record, is kept for GS-5. <strong>Fix:</strong> add the missing columns; define encodings (<code>true</code>/<code>false</code>, <code>;</code>-separated lists, empty means none); <code>check</code> only validates, <code>build</code> copies accepted proposals; a "doubt" blocks <code>build</code> until resolved; keep the full draft record.</p>
+<h3 id="t3-important-5-panels-run-metadata-has-no-home-a-1-a-8-b-3-b-5-c-2-d-11-d-12">T3 (Important, 5 panels). Run metadata has no home — A-1, A-8, B-3, B-5, C-2, D-11, D-12</h3>
+<p>Peak memory, prompt version, settings and model provenance are not in any file the evaluation or comparison reads; <code>compare</code> would have to scrape Markdown. <strong>Fix:</strong> <code>bakeoff</code> writes <code>run.json</code> (model, build, prompt version, settings, peak memory, mean seconds, date); <code>evaluate</code> writes <code>metrics.json</code> beside <code>report.md</code>; <code>models.toml</code> gains developer, jurisdiction and training-data disclosure; <code>compare</code> reads only JSON and TOML; name <code>docs/decisions-log.md</code>.</p>
+<h3 id="t4-important-4-panels-who-parses-a-model-s-answer-and-how-b-4-c-4-d-4-e-6">T4 (Important, 4 panels). Who parses a model's answer, and how — B-4, C-4, D-4, E-6</h3>
+<p>Both the runner and the evaluation could parse; "first complete JSON object" is undefined for braces in strings, decoys and duplicate keys; whether a rule violation makes an answer unreadable is unstated; "missing" has two representations. <strong>Fix:</strong> the runner stores raw text and seconds only; the evaluation alone parses, scanning with a standard JSON decoder, rejecting duplicate keys and extra fields, and treating a rule violation as unreadable; one representation of missing.</p>
+<h3 id="t5-important-measures-lack-exact-definitions-c-1-b-8-b-11-d-5-d-6">T5 (Important). Measures lack exact definitions — C-1, B-8, B-11, D-5, D-6</h3>
+<p>Numerator and denominator are not given per measure; citation format, the article table's shape, and what counts as citation overlap are undefined; which text is scanned for dates, and with which patterns, is unstated. <strong>Fix:</strong> a table of every measure with numerator, denominator and treatment of unreadable and missing answers; a citation grammar and <code>articles.json</code> shape; overlap at article level; dates scanned in the raw text with listed must-match and must-not-match examples.</p>
+<h3 id="t6-important-statistics-edge-cases-c-7-d-7">T6 (Important). Statistics edge cases — C-7, D-7</h3>
+<p>Undefined: kappa when chance agreement is 1, Wilson at zero cases, percentile and random-generator choice, and comparing 0.79 with 0.80 on floating-point numbers. <strong>Fix:</strong> state each; report "not defined" for degenerate cases; compare kappa rounded to two decimals.</p>
+<h3 id="t7-important-dates-lookup-contract-a-7-b-6-c-9-d-10">T7 (Important). Dates lookup contract — A-7, B-6, C-9, D-10</h3>
+<p>The command lacks the Article 50 and date flags; TOML cannot hold "no route"; several dates per tier do not fit one <code>applies_from</code>; unverified entries' behaviour clashes with owner approval; no field records a discrepancy. <strong>Fix:</strong> <code>--art50</code> and <code>--today</code> flags; the string <code>none</code> for no route; a list of dated duties per entry; refuse unverified entries with a named error; <code>plan_value</code> and <code>discrepancy_note</code> fields; vocabulary imported from <code>records</code>.</p>
+<h3 id="t8-important-re-label-contract-a-4-b-7-d-9">T8 (Important). Re-label contract — A-4, B-7, D-9</h3>
+<p>No sheet columns, no stored build date or seed, no file for resolutions. <strong>Fix:</strong> <code>gold build</code> writes <code>gold-v{N}.meta.json</code> (build date, hash); <code>relabel</code> writes <code>record.json</code> (seed, date, ids) and <code>resolutions.csv</code> (id, first label, second label, resolution, guideline version); sheet columns <code>id, description, relabel_tier, note</code>.</p>
+<h3 id="t9-important-the-first-chunk-never-touches-a-model-and-chunk-order-breaks-a-5-a-11-d-2-d-13">T9 (Important). The first chunk never touches a model, and chunk order breaks — A-5, A-11, D-2, D-13</h3>
+<p>The riskiest seam (loading a model, its chat template, memory) is first exercised in Phase 4. P1-C02 needs date detection built in P1-C03, and both edit the same file. Qwen3.5 may default to "thinking" and spend the token budget before answering. <strong>Fix:</strong> move a one-case model smoke test into Phase 1; reorder P1-C02 and P1-C03; pin the generation calls and record a per-model template setting; split P3-C02 into batches and P4-C04 into two.</p>
+<h3 id="t10-important-the-confidentiality-guard-is-a-narrow-word-list-a-3-e-1-e-2-e-3">T10 (Important). The confidentiality guard is a narrow word list — A-3, E-1, E-2, E-3</h3>
+<p>No keyword list can contain the real names that matter; the check is not run automatically; it ignores file names, commit messages and spreadsheet files; the rule-text exemption can hide a leak on the same line. <strong>Fix:</strong> a git pre-commit hook; a private, never-committed file of names to block that only the owner fills; scan file names and reject <code>.xlsx</code>/<code>.numbers</code>; exempt rule text only in named documentation files; stage data by path, not everything at once.</p>
+<h3 id="t11-important-model-downloads-are-third-party-code-paths-e-4-e-10">T11 (Important). Model downloads are third-party code paths — E-4, E-10</h3>
+<p>Community builds are checked for size and licence but not format or integrity. <strong>Fix:</strong> weights in safetensors format only, never remote code, record repository, revision and file hashes in <code>models.toml</code> and load that exact revision; pin all transitive dependencies.</p>
+<h3 id="t12-minor-prompt-duplicates-the-guideline-delimiters-can-be-escaped-c-5-e-8">T12 (Minor). Prompt duplicates the guideline; delimiters can be escaped — C-5, E-8</h3>
+<p><strong>Fix:</strong> build the prompt's definitions from the guideline and <code>records</code>, with a test; record the guideline version in the prompt; reject case descriptions that contain the delimiter; state that the model has no tools, so injection can only cause a wrong label, which the evaluation measures.</p>
+<h3 id="t13-minor-untrusted-text-in-reports-and-sheets-e-5-e-7-e-9">T13 (Minor). Untrusted text in reports and sheets — E-5, E-7, E-9</h3>
+<p><strong>Fix:</strong> no raw model text in <code>report.md</code> (counts and IDs only); neutralise spreadsheet cells starting with <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code>; model names only from <code>models.toml</code>, checked against a safe pattern.</p>
+<h3 id="t14-minor-small-gaps-a-2-a-6-a-9-a-10-b-9-b-12-c-6-c-10-c-11-d-3-d-15">T14 (Minor). Small gaps — A-2, A-6, A-9, A-10, B-9, B-12, C-6, C-10, C-11, D-3, D-15</h3>
+<p>Learning entry in every chunk's done-criteria; P2-C01 content list completed; BO-8 as one line; review-reason wording aligned with the tests; paired-report path named; report date from inputs, not the clock; recommendation in its own file; one guideline version per gold set; the 10-case fixture defined row by row; the stub-model interface defined.</p>
+<h2 id="borderline-filter">Borderline filter</h2>
+<p>Six findings were tagged borderline (A-10, C-11, E-9, E-10 and two within themes). All six passed the consumer-impact test: each would make a builder guess or a check fail. Kept 6 of 6.</p>
+<h2 id="scores">Scores</h2>
+<table><caption>Table 6 — Scores</caption><thead><tr><th>Defect class</th><th>Before fixes</th><th>After fixes</th><th>What prevents a higher score</th></tr></thead><tbody><tr><td>Requirements coverage</td><td>7</td><td>9</td><td>BO-8 is designed only as a registry row</td></tr><tr><td>Interface contracts</td><td>5</td><td>9</td><td>Contracts are written but not yet proved by code</td></tr><tr><td>Structural soundness</td><td>7</td><td>9</td><td>The 6.5 GB limit is an estimate until P1-C02 measures it</td></tr><tr><td>Implementability</td><td>5</td><td>8</td><td><code>mlx-lm</code> call details are pinned only once P1-C02 runs</td></tr><tr><td>Security</td><td>6</td><td>8</td><td>The guard cannot catch a real name the owner has not listed</td></tr></tbody></table>
+<p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
+</main>
+<script>
+(function () {
+  const toc = document.getElementById('toc');
+  const headings = document.querySelectorAll('h2[id], h3[id]');
+  const links = [];
+
+  headings.forEach(function (h) {
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    if (h.tagName === 'H3') a.classList.add('toc-h3');
+    toc.appendChild(a);
+    links.push({ el: a, target: h });
+  });
+
+  function onScroll() {
+    let current = links[0];
+    for (let i = 0; i < links.length; i++) {
+      if (links[i].target.getBoundingClientRect().top <= 80) current = links[i];
+    }
+    links.forEach(function (l) { l.el.classList.remove('active'); });
+    if (current) {
+      current.el.classList.add('active');
+      const tocEl = document.getElementById('toc');
+      const elTop = current.el.offsetTop - tocEl.offsetTop;
+      const elBot = elTop + current.el.offsetHeight;
+      if (elTop < tocEl.scrollTop || elBot > tocEl.scrollTop + tocEl.clientHeight) {
+        tocEl.scrollTop = elTop - tocEl.clientHeight / 2;
+      }
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+  </script>
+</body>
+</html>

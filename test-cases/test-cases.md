@@ -140,7 +140,7 @@ And the output MUST NOT contain: needs-human-review
 Input: a 'tool that ranks people' with no stated purpose or setting
 Given a case lacking the fact that decides between Annex III and minimal
 When the rule is applied
-Then the output MUST contain: needs-human-review with reason 'missing deciding fact'
+Then the output MUST contain: needs-human-review with review reason missing-fact
 And the output MUST NOT contain: a confident tier
 [Requirement: LS-6] [Priority: MUST]
 [Trace: G-1 → A-1 → I-1 → D-1 → LS-6 → TC-LS-6-02]
@@ -665,6 +665,13 @@ And the output MUST NOT contain: a step without an entry
 ## Test Summary
 
 All 43 in-scope requirements have at least one test; every Must requirement has an example-based test with both a must-contain and a must-not-contain assertion. Every test traces up the impact map to a goal. The riskiest component, the evaluation, is tested against a 10-case set small enough to count by hand.
+
+
+## Changelog
+
+| Date | Change | Reason | Author |
+|---|---|---|---|
+| 2026-10-26 | TC-LS-6-02 wording aligned with the record's review reason `missing-fact` | Design review 001, finding B-9 | AI |
 
 ---
 

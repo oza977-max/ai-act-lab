@@ -130,6 +130,8 @@ be verified when reached.
   seeing measured results.
 - 2026-10-26: the gold set is for the bake-off and development; a separate final test set is
   written later and touched once.
+- 2026-10-26: design review 001: 14 themes, all fixed; verdict build from this. Thinking modes off
+  for every bake-off model; a private, never-committed name list feeds the pre-commit guard.
 
 ## Sources
 
