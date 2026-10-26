@@ -1,0 +1,21 @@
+# Model registry (specs/cross-cutting.md ADR-008; specs/data-and-evaluation.md lab/bakeoff.py).
+# One table per candidate, keyed by slug. Weights are cached outside the repository and never committed.
+# Only candidates checked so far are listed; the rest are added in P4-C00.
+
+[models."qwen3.5-0.8b"]
+repo = "mlx-community/Qwen3.5-0.8B-4bit"
+revision = "da28692b5f139cb0ec58a356b437486b7dac7462"
+weights_sha256 = "f5a0d9dd3efa73510542a8023d610ff26be2b4b020d181cfc4bedaa1fcc5dd9e"
+original_model = "Qwen/Qwen3.5-0.8B"
+card_url = "https://huggingface.co/Qwen/Qwen3.5-0.8B"
+licence = "Apache-2.0"
+parameters = "0.8B"
+quantisation = "4-bit (MLX)"
+developer = "Alibaba Cloud (Qwen team)"
+jurisdiction = "China"
+training_data_disclosure = "To be completed in P4-C00 from the Qwen3.5 model card and technical report"
+converted_with = "mlx-vlm 0.3.12 (vision-language conversion; text path loaded by mlx-lm)"
+checked_on = "2026-10-26"
+
+[models."qwen3.5-0.8b".template]
+enable_thinking = false
