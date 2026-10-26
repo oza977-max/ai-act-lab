@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-26
 **Phase:** `/gvm-init` (Discovery, entry point for a new project)
-**Status:** awaiting owner review
+**Status:** approved by the owner, 2026-10-26 (see Changelog)
 
 *A learning project: fine-tune a small open language model on a laptop to triage AI systems under the EU AI Act. This report records which published authorities will ground every later decision, and why.*
 
@@ -84,7 +84,7 @@ The entries on US, UK, Singaporean and Canadian banking supervision (SR 26-2, SS
 
 ### 3.2 Coverage gaps and the experts proposed to fill them
 
-The two activated files cover the regulation and the general craft of evaluation. Checked against what this project actually has to do, eight gaps remained. Ten experts are proposed to fill them. Each was scored twice, independently, and the scores reconciled; the full record with evidence is in `scoring-reports/expert-scoring-001.md`. **None has been written into the shared library yet. That happens when the owner approves this report.**
+The two activated files cover the regulation and the general craft of evaluation. Checked against what this project actually has to do, eight gaps remained. Ten experts are proposed to fill them. Each was scored twice, independently, and the scores reconciled; the full record with evidence is in `scoring-reports/expert-scoring-001.md`. **Approved by the owner on 2026-10-26 and written into the shared library the same day; see the Changelog.**
 
 | Gap | What the project needs | Proposed expert | Classification |
 |---|---|---|---|
@@ -204,16 +204,26 @@ Every expert active for this project. Downstream phases read this table.
 | Anthropic | *Responsible Scaling Policy* (as representative of frontier-lab risk policies) | tier2b | Recognised | industry/ai-evaluation.md | existing |
 | METR | Autonomous-capability evaluation methodology | tier2b | Recognised | industry/ai-evaluation.md | existing |
 | UK AI Security Institute | Inspect | tier2b | Established | industry/ai-evaluation.md | existing |
-| European Commission (AI Office) | AI Act guidelines: definition of an AI system, C(2025) 924; prohibited practices, C(2025) 884 | tier2b | Canonical | industry/ai-governance.md (proposed) | newly scored (pending owner approval) |
-| Ilias Chalkidis et al. | *LexGLUE*; *MultiEURLEX* | tier2b | Established | industry/ai-evaluation.md (proposed) | newly scored (pending owner approval) |
-| James Pustejovsky and Amber Stubbs | *Natural Language Annotation for Machine Learning* | tier2b | Recognised | industry/ai-evaluation.md (proposed) | newly scored (pending owner approval) |
-| Yonatan Geifman and Ran El-Yaniv | *Selective Classification for Deep Neural Networks*; *SelectiveNet* | tier2b | Established | industry/ai-evaluation.md (proposed) | newly scored (pending owner approval) |
-| Edward J. Hu et al. | *LoRA: Low-Rank Adaptation of Large Language Models* | tier2b | Established | industry/llm-fine-tuning.md (proposed, new file) | newly scored (pending owner approval) |
-| Tim Dettmers et al. | *QLoRA: Efficient Finetuning of Quantized LLMs* | tier2b | Established | industry/llm-fine-tuning.md (proposed, new file) | newly scored (pending owner approval) |
-| Chunting Zhou et al. | *LIMA: Less Is More for Alignment* | tier2b | Established | industry/llm-fine-tuning.md (proposed, new file) | newly scored (pending owner approval) |
-| Yizhong Wang et al. | *Self-Instruct* | tier2b | Established | industry/llm-fine-tuning.md (proposed, new file) | newly scored (pending owner approval) |
-| Sebastian Raschka | *Build a Large Language Model (From Scratch)*; *Practical Tips for Finetuning LLMs Using LoRA* | tier2b | Established | industry/llm-fine-tuning.md (proposed, new file) | newly scored (pending owner approval) |
-| Chip Huyen | *AI Engineering* | tier2b | Established | industry/llm-fine-tuning.md (proposed, new file) | newly scored (pending owner approval) |
+| European Commission (AI Office) | AI Act guidelines: definition of an AI system, C(2025) 924; prohibited practices, C(2025) 884 | tier2b | Canonical | industry/ai-governance.md | newly added |
+| Ilias Chalkidis et al. | *LexGLUE*; *MultiEURLEX* | tier2b | Established | industry/ai-evaluation.md | newly added |
+| James Pustejovsky and Amber Stubbs | *Natural Language Annotation for Machine Learning* | tier2b | Recognised | industry/ai-evaluation.md | newly added |
+| Yonatan Geifman and Ran El-Yaniv | *Selective Classification for Deep Neural Networks*; *SelectiveNet* | tier2b | Established | industry/ai-evaluation.md | newly added |
+| Edward J. Hu et al. | *LoRA: Low-Rank Adaptation of Large Language Models* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Tim Dettmers et al. | *QLoRA: Efficient Finetuning of Quantized LLMs* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Chunting Zhou et al. | *LIMA: Less Is More for Alignment* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Yizhong Wang et al. | *Self-Instruct* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Sebastian Raschka | *Build a Large Language Model (From Scratch)*; *Practical Tips for Finetuning LLMs Using LoRA* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Chip Huyen | *AI Engineering* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| METR | *Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity* | tier2a | Recognised | domain/ai-assisted-development.md (expert scored in industry/ai-evaluation.md) | existing expert, newly added work |
+| Addy Osmani | *Beyond Vibe Coding: From Coder to AI-Era Developer*; *The 70% problem* | tier2a | Established | domain/ai-assisted-development.md | newly added |
+| Zhenyan Lu et al. | *Small Language Models: Survey, Measurements, and Insights* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Ricardo Dominguez-Olmedo et al. | *Lawma: The Power of Specialization for Legal Annotation* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Zorik Gekhman et al. | *Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations?* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Dan Biderman et al. | *LoRA Learns Less and Forgets Less* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Yu-Ang Lee et al. | *Learning Rate Matters: Vanilla LoRA May Suffice for LLM Fine-tuning* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Hanning Zhang et al. | *R-Tuning: Instructing Large Language Models to Say "I Don't Know"* | tier2b | Established | industry/llm-fine-tuning.md | newly added |
+| Evan Miller | *Adding Error Bars to Evals* | tier2b | Recognised | industry/ai-evaluation.md | newly added |
+| Athanasios Davvetas et al. | *AI Act Evaluation Benchmark* | tier2b | Emerging | industry/ai-evaluation.md | newly added |
 
 Reference files live in the methodology's shared library on this machine, outside the repository; the paths are relative to its `references/` folder.
 
@@ -237,6 +247,15 @@ The activation log already existed on this machine, created on 2026-05-31 by an 
 **Learning log.** The lesson for this step, the terms it introduced, the decision that is the owner's, and three check questions are in `docs/learning/001-expert-calibration.md`, the first entry of the owner's own textbook.
 
 **Configured later.** Stack specialists (Tier 3) at `/gvm-tech-spec`; software-pattern specialists (Tier 2a) as requirements expose them.
+
+
+## Changelog
+
+| Date | Change | Reason | Author |
+|---|---|---|---|
+| 2026-10-26 | Saved a mirror of all twenty library entries as `init/expert-library-additions-001.md` | The shared library lives outside this repository; the mirror makes this repository's history record exactly what was added | AI |
+| 2026-10-26 | Added ten rows to section 4: METR's randomised trial and Addy Osmani, in a new Tier 2a file `domain/ai-assisted-development.md` loaded on every phase of this project; and eight papers from the arXiv reading list (Lu et al., Dominguez-Olmedo et al., Gekhman et al., Biderman et al., Lee et al., Zhang et al. in `industry/llm-fine-tuning.md`; Miller and Davvetas et al. in `industry/ai-evaluation.md`). Scores in `scoring-reports/expert-scoring-002.md`; five divergences of two points or more decided by the owner | The owner asked for one or two post-2023 authorities on AI-assisted development, and for the strongest arXiv papers on fine-tuning small models | owner/AI |
+| 2026-10-26 | Approved the ten proposed experts in section 3.2 and wrote them into the shared library; removed the "proposed" markers and set their status to "newly added" in section 4; updated the status line and the approval sentence in section 3.2 | Owner approval | owner/AI |
 
 ---
 

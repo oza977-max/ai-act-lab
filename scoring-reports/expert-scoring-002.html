@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Act Lab — Expert Scoring Report 002</title>
+  <style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: "ET Book", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  color: #111;
+  background: #fffff8;
+  line-height: 1.6;
+  padding: 2rem 1rem 6rem;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+/* ── Typography ── */
+h1 {
+  font-size: 2.4rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+  color: #111;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  color: #111;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  color: #333;
+}
+
+p, li {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+  max-width: 640px;
+}
+
+ul, ol { padding-left: 1.4rem; margin-bottom: 1.2rem; }
+li { margin-bottom: 0.4rem; }
+
+.subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #555;
+  margin-bottom: 2.5rem;
+  max-width: 640px;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Floating TOC (Left Side) ── */
+nav.toc {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  width: 220px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  background: #fffff8;
+  border-right: 2px solid #ddd;
+  padding: 1rem 1rem 1rem 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  z-index: 100;
+}
+
+nav.toc .toc-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  margin-bottom: 0.6rem;
+}
+
+nav.toc a {
+  color: #555;
+  text-decoration: none;
+  display: block;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+nav.toc a:hover { color: #111; }
+nav.toc a.active { color: #111; font-weight: 600; }
+nav.toc .toc-h3 { padding-left: 0.8rem; font-size: 0.78rem; color: #888; }
+nav.toc .toc-h3:hover { color: #555; }
+
+/* Offset main content for left TOC */
+main {
+  margin-left: 260px;
+}
+
+/* ── Sidenotes (Right Margin) ── */
+.sidenote {
+  float: right;
+  clear: right;
+  width: 220px;
+  margin-right: -260px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #666;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+/* ── Tables (Few's principles) ── */
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  width: auto;
+  min-width: 480px;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 2px solid #333;
+  color: #111;
+}
+
+tbody td {
+  padding: 0.45rem 1rem 0.45rem 0;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: 2px solid #333; }
+tbody tr:nth-child(even) { background: #f9f9f4; }
+
+caption {
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #666;
+  text-align: left;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Requirement Blocks ── */
+.req {
+  background: #f7f7f0;
+  border-left: 3px solid #999;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.req-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.req p { margin-bottom: 0.3rem; }
+
+/* ── Priority Chips (MoSCoW) ── */
+.priority {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+.priority.must { background: #111; color: #fff; }
+.priority.should { background: #bbb; color: #fff; }
+.priority.could { background: #e8e8e0; color: #666; }
+.priority.wont { background: #fff; color: #999; border: 1px solid #ccc; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  nav.toc {
+    position: static;
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  main { margin-left: 0; }
+  .sidenote {
+    float: none;
+    width: 100%;
+    margin: 0.8rem 0;
+    padding: 0.6rem 0 0.6rem 1rem;
+  }
+}
+
+/* ── Test Case Components (/gvm-test-cases) ── */
+.test-case {
+  background: #f7f7f0;
+  border-left: 3px solid #669;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.tc-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.tc-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.tc-bdd p {
+  margin-bottom: 0.2rem;
+  padding-left: 1rem;
+}
+
+.tc-trace {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+.tc-detail {
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.tc-detail h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.health-issue {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.health-issue.acknowledged {
+  opacity: 0.6;
+  border-left-color: #ccc;
+}
+
+/* ── Open Questions ── */
+.open-question {
+  background: #fff8f0;
+  border-left: 3px solid #e8a850;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0 1.2rem;
+  max-width: 640px;
+}
+
+.oq-context {
+  font-size: 0.88rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* ── Inline Code ── */
+code {
+  font-family: "Menlo", "Consolas", "Monaco", monospace;
+  font-size: 0.88rem;
+  background: #f0f0e8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* ── GVM Attribution (per shared rule 24) ── */
+.gvm-attribution {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 0;
+  max-width: none;
+}
+  </style>
+</head>
+<body>
+  <nav class="toc" id="toc">
+    <div class="toc-title">Contents</div>
+    <!-- Auto-generated by script at bottom -->
+  </nav>
+
+  <main>
+    <p class="date">October 2026</p>
+    <h1>AI Act Lab</h1>
+    <p class="subtitle"><em>Same method as report 001: one assessment by the session, one by a fresh agent given only names and titles, reconciled dimension by dimension. Equal scores stand; a one-point split records the lower score; a split of two or more goes to the owner. This time five did, and the owner decided each.</em></p>
+
+    <table>
+      <caption>Table 1 — Report metadata</caption>
+      <tbody>
+        <tr><td><strong>Date:</strong></td><td>2026-10-26</td></tr>
+        <tr><td><strong>Operation:</strong></td><td>score on discovery, during <code>/gvm-init</code>, after the owner approved the first ten</td></tr>
+        <tr><td><strong>Scope:</strong></td><td>ten further additions, eleven works: two authorities on AI-assisted development requested by the owner, and eight papers recommended from the arXiv reading list (<code>docs/02-reading-list-slm-fine-tuning.md</code>)</td></tr>
+        <tr><td><strong>Status:</strong></td><td>reconciled; five divergences of two points or more decided by the owner; all ten written to the shared library on 2026-10-26</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="executive-summary">1. Executive Summary</h2>
+    <table>
+      <caption>Table 2 — Executive summary of the operation</caption>
+      <tbody>
+        <tr><td>Experts assessed</td><td>9 (METR's expert score already exists and was not re-scored)</td></tr>
+        <tr><td>Works assessed</td><td>11</td></tr>
+        <tr><td>Divergences of 2+ points</td><td>5, all decided by the owner (section 3)</td></tr>
+        <tr><td>Boundary cases</td><td>8 (listed in section 3)</td></tr>
+        <tr><td>Factual corrections found by the independent pass</td><td>3: the learning-rate paper is not an ICML 2026 main-conference paper (listed as a NeurIPS 2026 poster and at two ICML workshops); Osmani's book is <em>Beyond Vibe Coding: From Coder to AI-Era Developer</em> (August 2025); the AI Act benchmark was generated by gpt-oss-120b with only partial human checks and states no licence</td></tr>
+        <tr><td>Existence verification</td><td>all 11 works confirmed on arxiv.org or the publisher's page</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="final-scores">2. Final Scores</h2>
+    <table>
+      <caption>Table 3 — Final scores by expert and work</caption>
+      <thead>
+        <tr><th>Expert</th><th>Expert scores (A P B Ad C)</th><th>Classification (avg)</th><th>Work</th><th style="text-align:right">Work scores (S D C I)</th><th>Classification (avg)</th><th>Library file</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>METR</td><td>cross-reference</td><td>Recognised (3.0), scored in ai-evaluation.md</td><td><em>Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity</em></td><td style="text-align:right">4 4 3 4</td><td>Established (3.75)</td><td><code>domain/ai-assisted-development.md</code></td></tr>
+        <tr><td>Addy Osmani</td><td>4 4 4 4 5</td><td>Established (4.2)</td><td><em>The 70% problem: Hard truths about AI-assisted coding</em></td><td style="text-align:right">3 2 3 4</td><td>Recognised (3.00)</td><td><code>domain/ai-assisted-development.md</code></td></tr>
+        <tr><td></td><td></td><td></td><td><em>Beyond Vibe Coding: From Coder to AI-Era Developer</em></td><td style="text-align:right">4 4 4 3</td><td>Established (3.75)</td><td></td></tr>
+        <tr><td>Zhenyan Lu et al.</td><td>4 4 3 3 4</td><td>Established (3.6)</td><td><em>Small Language Models: Survey, Measurements, and Insights</em></td><td style="text-align:right">4 4 3 3</td><td>Established (3.50)</td><td><code>industry/llm-fine-tuning.md</code></td></tr>
+        <tr><td>Ricardo Dominguez-Olmedo et al.</td><td>4 5 3 2 4</td><td>Established (3.6)</td><td><em>Lawma: The Power of Specialization for Legal Annotation</em></td><td style="text-align:right">5 4 4 3</td><td>Established (4.00)</td><td><code>industry/llm-fine-tuning.md</code></td></tr>
+        <tr><td>Zorik Gekhman et al.</td><td>4 4 3 3 4</td><td>Established (3.6)</td><td><em>Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations?</em></td><td style="text-align:right">4 4 3 4</td><td>Established (3.75)</td><td><code>industry/llm-fine-tuning.md</code></td></tr>
+        <tr><td>Athanasios Davvetas et al.</td><td>2 2 2 1 5</td><td>Emerging (2.4)</td><td><em>AI Act Evaluation Benchmark</em></td><td style="text-align:right">4 3 5 1</td><td>Recognised (3.25)</td><td><code>industry/ai-evaluation.md</code></td></tr>
+        <tr><td>Evan Miller</td><td>3 2 3 4 4</td><td>Recognised (3.2)</td><td><em>Adding Error Bars to Evals</em></td><td style="text-align:right">5 3 4 4</td><td>Established (4.00)</td><td><code>industry/ai-evaluation.md</code></td></tr>
+        <tr><td>Dan Biderman et al.</td><td>4 4 3 3 4</td><td>Established (3.6)</td><td><em>LoRA Learns Less and Forgets Less</em></td><td style="text-align:right">4 4 3 4</td><td>Established (3.75)</td><td><code>industry/llm-fine-tuning.md</code></td></tr>
+        <tr><td>Yu-Ang Lee et al.</td><td>4 4 4 3 5</td><td>Established (4.0)</td><td><em>Learning Rate Matters: Vanilla LoRA May Suffice for LLM Fine-tuning</em></td><td style="text-align:right">4 3 5 2</td><td>Established (3.50)</td><td><code>industry/llm-fine-tuning.md</code></td></tr>
+        <tr><td>Hanning Zhang et al.</td><td>4 5 3 3 4</td><td>Established (3.8)</td><td><em>R-Tuning: Instructing Large Language Models to Say 'I Don't Know'</em></td><td style="text-align:right">4 3 3 4</td><td>Established (3.50)</td><td><code>industry/llm-fine-tuning.md</code></td></tr>
+      </tbody>
+    </table>
+    <p>Full evidence for every score of 4 or 5, and the key principles, are in each entry: <code>init/expert-library-additions-001.md</code> mirrors them exactly as written to the library.</p>
+
+    <h2 id="independent-verification">3. Independent Verification</h2>
+    <p>Primary pass (P) by the session, saved before the independent pass (I) was read. Divergences of two or more points are in bold in the Differences column.</p>
+
+    <table>
+      <caption>Table 4 — Primary (P), independent (I) and final scores by expert and work</caption>
+      <thead>
+        <tr><th>Expert / work</th><th style="text-align:right">P</th><th style="text-align:right">I</th><th style="text-align:right">Final</th><th>Differences</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>— <em>Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity</em></td><td style="text-align:right">4 4 5 4</td><td style="text-align:right">4 5 3 5</td><td style="text-align:right">4 4 3 4</td><td>Depth (1), <strong>Currency (2)</strong>, Influence (1)</td></tr>
+        <tr><td>Addy Osmani</td><td style="text-align:right">4 4 4 4 5</td><td style="text-align:right">4 4 4 5 5</td><td style="text-align:right">4 4 4 4 5</td><td>Adoption (1)</td></tr>
+        <tr><td>— <em>The 70% problem: Hard truths about AI-assisted coding</em></td><td style="text-align:right">4 2 5 4</td><td style="text-align:right">3 2 3 4</td><td style="text-align:right">3 2 3 4</td><td>Specificity (1), <strong>Currency (2)</strong></td></tr>
+        <tr><td>— <em>Beyond Vibe Coding: From Coder to AI-Era Developer</em></td><td style="text-align:right">4 4 5 3</td><td style="text-align:right">4 4 4 3</td><td style="text-align:right">4 4 4 3</td><td>Currency (1)</td></tr>
+        <tr><td>Zhenyan Lu et al.</td><td style="text-align:right">4 2 3 3 5</td><td style="text-align:right">4 4 3 4 4</td><td style="text-align:right">4 4 3 3 4</td><td><strong>Publication (2)</strong>, Adoption (1), Currency (1)</td></tr>
+        <tr><td>— <em>Small Language Models: Survey, Measurements, and Insights</em></td><td style="text-align:right">4 4 4 3</td><td style="text-align:right">4 4 3 3</td><td style="text-align:right">4 4 3 3</td><td>Currency (1)</td></tr>
+        <tr><td>Ricardo Dominguez-Olmedo et al.</td><td style="text-align:right">4 5 3 2 5</td><td style="text-align:right">5 5 4 3 4</td><td style="text-align:right">4 5 3 2 4</td><td>Authority (1), Breadth (1), Adoption (1), Currency (1)</td></tr>
+        <tr><td>— <em>Lawma: The Power of Specialization for Legal Annotation</em></td><td style="text-align:right">5 4 5 3</td><td style="text-align:right">5 4 4 3</td><td style="text-align:right">5 4 4 3</td><td>Currency (1)</td></tr>
+        <tr><td>Zorik Gekhman et al.</td><td style="text-align:right">4 5 3 3 4</td><td style="text-align:right">4 4 3 4 5</td><td style="text-align:right">4 4 3 3 4</td><td>Publication (1), Adoption (1), Currency (1)</td></tr>
+        <tr><td>— <em>Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations?</em></td><td style="text-align:right">4 4 4 4</td><td style="text-align:right">4 4 3 4</td><td style="text-align:right">4 4 3 4</td><td>Currency (1)</td></tr>
+        <tr><td>Athanasios Davvetas et al.</td><td style="text-align:right">2 2 2 1 5</td><td style="text-align:right">3 3 3 2 5</td><td style="text-align:right">2 2 2 1 5</td><td>Authority (1), Publication (1), Breadth (1), Adoption (1)</td></tr>
+        <tr><td>— <em>AI Act Evaluation Benchmark</em></td><td style="text-align:right">4 3 5 1</td><td style="text-align:right">5 3 5 1</td><td style="text-align:right">4 3 5 1</td><td>Specificity (1)</td></tr>
+        <tr><td>Evan Miller</td><td style="text-align:right">3 2 3 4 5</td><td style="text-align:right">4 2 3 5 4</td><td style="text-align:right">3 2 3 4 4</td><td>Authority (1), Adoption (1), Currency (1)</td></tr>
+        <tr><td>— <em>Adding Error Bars to Evals</em></td><td style="text-align:right">5 3 5 4</td><td style="text-align:right">5 4 4 4</td><td style="text-align:right">5 3 4 4</td><td>Depth (1), Currency (1)</td></tr>
+        <tr><td>Dan Biderman et al.</td><td style="text-align:right">4 4 3 3 5</td><td style="text-align:right">5 5 4 5 4</td><td style="text-align:right">4 4 3 3 4</td><td>Authority (1), Publication (1), Breadth (1), <strong>Adoption (2)</strong>, Currency (1)</td></tr>
+        <tr><td>— <em>LoRA Learns Less and Forgets Less</em></td><td style="text-align:right">5 4 4 4</td><td style="text-align:right">4 5 3 5</td><td style="text-align:right">4 4 3 4</td><td>Specificity (1), Depth (1), Currency (1), Influence (1)</td></tr>
+        <tr><td>Yu-Ang Lee et al.</td><td style="text-align:right">2 4 2 1 5</td><td style="text-align:right">4 4 4 3 5</td><td style="text-align:right">4 4 4 3 5</td><td><strong>Authority (2)</strong>, <strong>Breadth (2)</strong>, <strong>Adoption (2)</strong></td></tr>
+        <tr><td>— <em>Learning Rate Matters: Vanilla LoRA May Suffice for LLM Fine-tuning</em></td><td style="text-align:right">4 3 5 2</td><td style="text-align:right">5 4 5 2</td><td style="text-align:right">4 3 5 2</td><td>Specificity (1), Depth (1)</td></tr>
+        <tr><td>Hanning Zhang et al.</td><td style="text-align:right">4 5 3 3 4</td><td style="text-align:right">5 5 4 4 5</td><td style="text-align:right">4 5 3 3 4</td><td>Authority (1), Breadth (1), Adoption (1), Currency (1)</td></tr>
+        <tr><td>— <em>R-Tuning: Instructing Large Language Models to Say 'I Don't Know'</em></td><td style="text-align:right">4 3 4 4</td><td style="text-align:right">4 4 3 5</td><td style="text-align:right">4 3 3 4</td><td>Depth (1), Currency (1), Influence (1)</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The five owner decisions, 2026-10-26.</strong></p>
+    <table>
+      <caption>Table 5 — The five owner decisions on divergences of two or more points</caption>
+      <thead>
+        <tr><th>Divergence</th><th style="text-align:right">Primary</th><th style="text-align:right">Independent</th><th>Owner's decision</th><th>Reason given with the recommendation</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Lee et al., expert Authority, Breadth, Adoption</td><td style="text-align:right">2, 2, 1</td><td style="text-align:right">4, 4, 3</td><td>Independent</td><td>The primary pass had not identified the authors; the senior author is Pin-Yu Chen (IBM Research)</td></tr>
+        <tr><td>Lu et al., expert Publication</td><td style="text-align:right">2</td><td style="text-align:right">4</td><td>Independent</td><td>The dimension rates the team's usual venues (MobiCom, MobiSys), not this one preprint</td></tr>
+        <tr><td>Osmani, <em>The 70% problem</em>, Currency</td><td style="text-align:right">5</td><td style="text-align:right">3</td><td>Independent</td><td>The argument holds but its late-2024 examples have aged; the 2025 book carries the current version</td></tr>
+        <tr><td>METR trial, Currency</td><td style="text-align:right">5</td><td style="text-align:right">3</td><td>Lower (3)</td><td>METR's own 2026 follow-up says the effect has probably moved; band unchanged</td></tr>
+        <tr><td>Biderman et al., expert Adoption</td><td style="text-align:right">3</td><td style="text-align:right">5</td><td>Lower (3)</td><td>Most cautious reading; band unchanged</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Boundary cases</strong> (either pass's own average sat in a different band from the final classification): Osmani's <em>The 70% problem</em> (primary 3.75, Established; final Recognised); Lu et al. expert (primary 3.4, Recognised; final Established); Lee et al. expert (primary 2.8, Recognised; final Established); Davvetas et al. expert (independent 3.2, Recognised; final Emerging) and work (independent 3.5, Established; final Recognised); Miller expert (independent 3.6, Established; final Recognised); Biderman et al. expert (independent 4.6, Canonical; final Established); Zhang et al. expert (independent 4.6, Canonical; final Established).</p>
+
+    <p><strong>Overall confidence: Flagged, then resolved.</strong> Five divergences went to the owner as the method requires. Convergence elsewhere shows stability between two passes of the same model family, not correctness; the owner's approval is the correctness check.</p>
+
+    <p><strong>One lesson from this round.</strong> The largest divergence (Lee et al.) came from the primary pass not knowing who the authors were and scoring that ignorance as low authority. The independent pass looked them up. Unknown is not the same as weak; the fix is to verify before scoring, which the independent pass did.</p>
+
+    <h2 id="utilisation-analysis">4. Utilisation Analysis</h2>
+    <p>No activation data exists for any of the ten; all are newly added. METR has earlier activation rows from this project as an existing entry; its expert score was not reassessed.</p>
+
+    <h2 id="notes">5. Notes</h2>
+    <ul>
+      <li>An academic citation database's API asked automated agents to register an account using the user's email address. The verification agent declined, and nothing was sent.</li>
+      <li>Citation counts were hard to obtain (one database rate-limited, another undercounts arXiv papers), so Influence scores rest mainly on awards, certifications and documented uptake.</li>
+    </ul>
+
+    <p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
+</main>
+
+  <script>
+(function () {
+  const toc = document.getElementById('toc');
+  const headings = document.querySelectorAll('h2[id], h3[id]');
+  const links = [];
+
+  headings.forEach(function (h) {
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    if (h.tagName === 'H3') a.classList.add('toc-h3');
+    toc.appendChild(a);
+    links.push({ el: a, target: h });
+  });
+
+  function onScroll() {
+    let current = links[0];
+    for (let i = 0; i < links.length; i++) {
+      if (links[i].target.getBoundingClientRect().top <= 80) current = links[i];
+    }
+    links.forEach(function (l) { l.el.classList.remove('active'); });
+    if (current) {
+      current.el.classList.add('active');
+      const tocEl = document.getElementById('toc');
+      const elTop = current.el.offsetTop - tocEl.offsetTop;
+      const elBot = elTop + current.el.offsetHeight;
+      if (elTop < tocEl.scrollTop || elBot > tocEl.scrollTop + tocEl.clientHeight) {
+        tocEl.scrollTop = elTop - tocEl.clientHeight / 2;
+      }
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+  </script>
+</body>
+</html>

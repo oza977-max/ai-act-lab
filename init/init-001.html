@@ -337,7 +337,7 @@ code {
       <tbody>
         <tr><td>Date</td><td>2026-10-26</td></tr>
         <tr><td>Phase</td><td><code>/gvm-init</code> (Discovery, entry point for a new project)</td></tr>
-        <tr><td>Status</td><td>awaiting owner review</td></tr>
+        <tr><td>Status</td><td>approved by the owner, 2026-10-26 (see Changelog)</td></tr>
       </tbody>
     </table>
       <h2 id="executive-summary">1. Executive Summary</h2>
@@ -428,7 +428,7 @@ code {
     <p><strong>Two housekeeping notes on the shared library, flagged, not changed.</strong> The EU AI Act entry describes the Digital Omnibus as a "provisional agreement, May 2026"; it has since been adopted as Regulation (EU) 2026/1744, in force 27 July 2026. This is exactly why the project keeps dates in a lookup table and not in prose or weights; the project's table, not the library entry, is the source of truth for dates. Second, Margaret Mitchell and the NIST AI RMF each carry a full score block in both files, which the methodology's single-canonical-source rule says should be a cross-reference. Noted for <code>/gvm-experts</code>.</p>
     <h3 id="coverage-gaps">3.2 Coverage gaps and the experts proposed to fill them</h3>
 
-    <p>The two activated files cover the regulation and the general craft of evaluation. Checked against what this project actually has to do, eight gaps remained. Ten experts are proposed to fill them. Each was scored twice, independently, and the scores reconciled; the full record with evidence is in <code>scoring-reports/expert-scoring-001.md</code>. <strong>None has been written into the shared library yet. That happens when the owner approves this report.</strong></p>
+    <p>The two activated files cover the regulation and the general craft of evaluation. Checked against what this project actually has to do, eight gaps remained. Ten experts are proposed to fill them. Each was scored twice, independently, and the scores reconciled; the full record with evidence is in <code>scoring-reports/expert-scoring-001.md</code>. <strong>Approved by the owner on 2026-10-26 and written into the shared library the same day; see the Changelog.</strong></p>
 
     <table>
       <caption>Table 3 — Coverage gaps, the experts proposed to fill them, and their classification</caption>
@@ -563,16 +563,26 @@ code {
         <tr><td>Anthropic</td><td><em>Responsible Scaling Policy</em> (as representative of frontier-lab risk policies)</td><td>tier2b</td><td>Recognised</td><td>industry/ai-evaluation.md</td><td>existing</td></tr>
         <tr><td>METR</td><td>Autonomous-capability evaluation methodology</td><td>tier2b</td><td>Recognised</td><td>industry/ai-evaluation.md</td><td>existing</td></tr>
         <tr><td>UK AI Security Institute</td><td>Inspect</td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md</td><td>existing</td></tr>
-        <tr><td>European Commission (AI Office)</td><td>AI Act guidelines: definition of an AI system, C(2025) 924; prohibited practices, C(2025) 884</td><td>tier2b</td><td>Canonical</td><td>industry/ai-governance.md (proposed)</td><td>newly scored (pending owner approval)</td></tr>
-        <tr><td>Ilias Chalkidis et al.</td><td><em>LexGLUE</em>; <em>MultiEURLEX</em></td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md (proposed)</td><td>newly scored (pending owner approval)</td></tr>
-        <tr><td>James Pustejovsky and Amber Stubbs</td><td><em>Natural Language Annotation for Machine Learning</em></td><td>tier2b</td><td>Recognised</td><td>industry/ai-evaluation.md (proposed)</td><td>newly scored (pending owner approval)</td></tr>
-        <tr><td>Yonatan Geifman and Ran El-Yaniv</td><td><em>Selective Classification for Deep Neural Networks</em>; <em>SelectiveNet</em></td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md (proposed)</td><td>newly scored (pending owner approval)</td></tr>
-        <tr><td>Edward J. Hu et al.</td><td><em>LoRA: Low-Rank Adaptation of Large Language Models</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
-        <tr><td>Tim Dettmers et al.</td><td><em>QLoRA: Efficient Finetuning of Quantized LLMs</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
-        <tr><td>Chunting Zhou et al.</td><td><em>LIMA: Less Is More for Alignment</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
-        <tr><td>Yizhong Wang et al.</td><td><em>Self-Instruct</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
-        <tr><td>Sebastian Raschka</td><td><em>Build a Large Language Model (From Scratch)</em>; <em>Practical Tips for Finetuning LLMs Using LoRA</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
-        <tr><td>Chip Huyen</td><td><em>AI Engineering</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md (proposed, new file)</td><td>newly scored (pending owner approval)</td></tr>
+        <tr><td>European Commission (AI Office)</td><td>AI Act guidelines: definition of an AI system, C(2025) 924; prohibited practices, C(2025) 884</td><td>tier2b</td><td>Canonical</td><td>industry/ai-governance.md</td><td>newly added</td></tr>
+        <tr><td>Ilias Chalkidis et al.</td><td><em>LexGLUE</em>; <em>MultiEURLEX</em></td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md</td><td>newly added</td></tr>
+        <tr><td>James Pustejovsky and Amber Stubbs</td><td><em>Natural Language Annotation for Machine Learning</em></td><td>tier2b</td><td>Recognised</td><td>industry/ai-evaluation.md</td><td>newly added</td></tr>
+        <tr><td>Yonatan Geifman and Ran El-Yaniv</td><td><em>Selective Classification for Deep Neural Networks</em>; <em>SelectiveNet</em></td><td>tier2b</td><td>Established</td><td>industry/ai-evaluation.md</td><td>newly added</td></tr>
+        <tr><td>Edward J. Hu et al.</td><td><em>LoRA: Low-Rank Adaptation of Large Language Models</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+        <tr><td>Tim Dettmers et al.</td><td><em>QLoRA: Efficient Finetuning of Quantized LLMs</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+        <tr><td>Chunting Zhou et al.</td><td><em>LIMA: Less Is More for Alignment</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+        <tr><td>Yizhong Wang et al.</td><td><em>Self-Instruct</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+        <tr><td>Sebastian Raschka</td><td><em>Build a Large Language Model (From Scratch)</em>; <em>Practical Tips for Finetuning LLMs Using LoRA</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+        <tr><td>Chip Huyen</td><td><em>AI Engineering</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+<tr><td>METR</td><td><em>Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity</em></td><td>tier2a</td><td>Recognised</td><td>domain/ai-assisted-development.md (expert scored in industry/ai-evaluation.md)</td><td>existing expert, newly added work</td></tr>
+<tr><td>Addy Osmani</td><td><em>Beyond Vibe Coding: From Coder to AI-Era Developer</em>; <em>The 70% problem</em></td><td>tier2a</td><td>Established</td><td>domain/ai-assisted-development.md</td><td>newly added</td></tr>
+<tr><td>Zhenyan Lu et al.</td><td><em>Small Language Models: Survey, Measurements, and Insights</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+<tr><td>Ricardo Dominguez-Olmedo et al.</td><td><em>Lawma: The Power of Specialization for Legal Annotation</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+<tr><td>Zorik Gekhman et al.</td><td><em>Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations?</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+<tr><td>Dan Biderman et al.</td><td><em>LoRA Learns Less and Forgets Less</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+<tr><td>Yu-Ang Lee et al.</td><td><em>Learning Rate Matters: Vanilla LoRA May Suffice for LLM Fine-tuning</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+<tr><td>Hanning Zhang et al.</td><td><em>R-Tuning: Instructing Large Language Models to Say "I Don't Know"</em></td><td>tier2b</td><td>Established</td><td>industry/llm-fine-tuning.md</td><td>newly added</td></tr>
+<tr><td>Evan Miller</td><td><em>Adding Error Bars to Evals</em></td><td>tier2b</td><td>Recognised</td><td>industry/ai-evaluation.md</td><td>newly added</td></tr>
+<tr><td>Athanasios Davvetas et al.</td><td><em>AI Act Evaluation Benchmark</em></td><td>tier2b</td><td>Emerging</td><td>industry/ai-evaluation.md</td><td>newly added</td></tr>
       </tbody>
     </table>
 
@@ -597,6 +607,18 @@ code {
 
     <p><strong>Learning log.</strong> The lesson for this step, the terms it introduced, the decision that is the owner's, and three check questions are in <code>docs/learning/001-expert-calibration.md</code>, the first entry of the owner's own textbook.</p>
 <p><strong>Configured later.</strong> Stack specialists (Tier 3) at <code>/gvm-tech-spec</code>; software-pattern specialists (Tier 2a) as requirements expose them.</p>
+
+
+    <h2 id="changelog">Changelog</h2>
+    <table>
+      <caption>Table 6 — Changes to this report since it was first written</caption>
+      <thead><tr><th>Date</th><th>Change</th><th>Reason</th><th>Author</th></tr></thead>
+      <tbody>
+        <tr><td>2026-10-26</td><td>Saved a mirror of all twenty library entries as <code>init/expert-library-additions-001.md</code></td><td>The shared library lives outside this repository; the mirror makes this repository's history record exactly what was added</td><td>AI</td></tr>
+        <tr><td>2026-10-26</td><td>Added ten rows to section 4: METR's randomised trial and Addy Osmani, in a new Tier 2a file <code>domain/ai-assisted-development.md</code> loaded on every phase of this project; and eight papers from the arXiv reading list (Lu et al., Dominguez-Olmedo et al., Gekhman et al., Biderman et al., Lee et al., Zhang et al. in <code>industry/llm-fine-tuning.md</code>; Miller and Davvetas et al. in <code>industry/ai-evaluation.md</code>). Scores in <code>scoring-reports/expert-scoring-002.md</code>; five divergences of two points or more decided by the owner</td><td>The owner asked for one or two post-2023 authorities on AI-assisted development, and for the strongest arXiv papers on fine-tuning small models</td><td>owner/AI</td></tr>
+        <tr><td>2026-10-26</td><td>Approved the ten proposed experts in section 3.2 and wrote them into the shared library; removed the "proposed" markers and set their status to "newly added" in section 4; updated the status line and the approval sentence in section 3.2</td><td>Owner approval</td><td>owner/AI</td></tr>
+      </tbody>
+    </table>
 
     <p class="gvm-attribution">Developed using the Grounded Vibe Methodology</p>
 </main>

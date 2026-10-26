@@ -59,8 +59,9 @@ from the sixty-one listed.
 ## What you just learned
 
 - A reference is only a reference once it has been checked at the source.
-- The two findings that most change this project: small open models, lightly
-  fine-tuned, beat GPT-4 on legal classification with few examples per task; and
+- The two findings that most change this project: open models as small as 135
+  million parameters, lightly fine-tuned, beat commercial models on legal
+  annotation with a few hundred to a thousand examples per task; and
   teaching a model facts it does not already know makes it hallucinate more.
 - A benchmark of AI Act risk-tier scenarios already exists, and its baseline was
   weakest on the minimal tier. That is where our cases should be hardest.
@@ -68,8 +69,8 @@ from the sixty-one listed.
 ## Check questions
 
 1. Why is "verified on arXiv" a different claim from "peer-reviewed"?
-2. Lawma found that tens to a few hundred examples per task were enough. What
-   does that suggest about a 2,000-case set spread over five tiers and the Annex
-   III categories?
+2. Lawma found that a few hundred to a thousand examples per task were usually
+   enough. What does that suggest about a 2,000-case set spread over five tiers
+   and the eight Annex III areas?
 3. If the judge that filters our teacher-written cases is from the same model
    family as the teacher, what goes wrong, and what is the fix?

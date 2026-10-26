@@ -26,7 +26,7 @@ Ten papers, in reading order. Each line says what you get from it. Together they
 4. **Biderman et al., LoRA Learns Less and Forgets Less** (2405.09673). The honest limits of LoRA and the settings that work.
 5. **Lee et al., Learning Rate Matters** (2602.04998). Tune the learning rate; do not chase LoRA variants.
 6. **Zhou et al., LIMA** (2305.11206). Quality beats volume. The case for a small, careful dataset.
-7. **Dominguez-Olmedo et al., Lawma** (2407.16615). Small open models, lightly fine-tuned, beat GPT-4 on legal classification with few examples per task. The closest evidence to this project.
+7. **Dominguez-Olmedo et al., Lawma** (2407.16615). Open models from 135 million parameters up, lightly fine-tuned, beat commercial models on 260 legal annotation tasks with a few hundred to a thousand examples per task. The closest evidence to this project.
 8. **Gekhman et al., Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations?** (2405.05904). Why dates and duties stay in a table: teaching a model facts it lacks makes it hallucinate more.
 9. **Zhang et al., R-Tuning** (2311.09677). How to train a model to say "I don't know", which is what "needs human review" is.
 10. **Davvetas et al., AI Act Evaluation Benchmark** (2603.09435). The nearest external yardstick: 339 scenarios labelled by AI Act tier. The baseline's weak spot was the minimal tier.
@@ -43,7 +43,7 @@ What this theme settles: which knobs matter (rank, scaling factor, learning rate
 | 1 | LoRA: Low-Rank Adaptation of Large Language Models | Hu et al., 2021 | 2106.09685; ICLR 2022 | The method `mlx-lm` implements; defines rank, scaling factor, target modules and the merge step | H |
 | 2 | QLoRA: Efficient Finetuning of Quantized LLMs | Dettmers et al., 2023 | 2305.14314; NeurIPS 2023 | Establishes that LoRA on a frozen 4-bit base recovers near-16-bit quality, which is the 8 GB recipe | H |
 | 3 | LoRA Learns Less and Forgets Less | Biderman et al., 2024 | 2405.09673; TMLR 2024 | Best empirical guide to rank, scaling factor of twice the rank, targeting all modules, and why LoRA preserves base-model behaviour | H |
-| 4 | Learning Rate Matters: Vanilla LoRA May Suffice for LLM Fine-tuning | Lee et al., 2026 | 2602.04998; ICML 2026 | Nine LoRA variants tie with plain LoRA once the learning rate is swept; tune the learning rate, do not chase variants | H |
+| 4 | Learning Rate Matters: Vanilla LoRA May Suffice for LLM Fine-tuning | Lee et al., 2026 | 2602.04998; listed as a NeurIPS 2026 poster and at two ICML 2026 workshops | Once the learning rate is swept, the LoRA variants tested land within one to two points of plain LoRA, including on Qwen3-0.6B; tune the learning rate, do not chase variants | H |
 | 5 | LoRA vs Full Fine-tuning: An Illusion of Equivalence | Shuttleworth et al., 2024 | 2410.21228; NeurIPS 2025 (venue from one listing; arXiv page shows none) | Explains "intruder dimensions" and why a higher rank with rank-stabilised scaling generalises better off-distribution | M |
 | 6 | A Rank Stabilization Scaling Factor for Fine-Tuning with LoRA (rsLoRA) | Kalajdzievski, 2023 | 2312.03732; preprint, adopted in Hugging Face PEFT | Replaces alpha/r with alpha/sqrt(r) so raising the rank actually helps; cheap to replicate by setting the scaling factor | M |
 | 7 | LoRA+: Efficient Low Rank Adaptation of Large Models | Hayou et al., 2024 | 2402.12354; ICML 2024 | Argues the B matrix should get a much larger learning rate than A; informs the learning-rate choice even with one rate | M |
@@ -88,13 +88,13 @@ What this theme settles: what the candidate base models are, as their makers des
 
 ## C. Training data: curation, teacher-written cases and their failure modes
 
-What this theme settles: how many cases are enough, what makes a case good, how a judge filter should work and how it can fail, and what fine-tuning does to a base model that nobody asked for. The two findings that change this project most are that lightly fine-tuned small open models beat GPT-4 on legal classification with tens to a few hundred examples per task (entry 3), and that a judge from the same model family as the teacher waves the teacher's flaws through (entry 10).
+What this theme settles: how many cases are enough, what makes a case good, how a judge filter should work and how it can fail, and what fine-tuning does to a base model that nobody asked for. The two findings that change this project most are that lightly fine-tuned small open models, down to 135 million parameters, beat commercial models on legal classification with a few hundred to a thousand examples per task (entry 3), and that a judge from the same model family as the teacher waves the teacher's flaws through (entry 10).
 
 | Rank | Title | Authors and year | arXiv id and venue | Why it matters for this project | Relevance |
 |---|---|---|---|---|---|
 | 1 | LIMA: Less Is More for Alignment | Zhou et al., 2023 | 2305.11206; NeurIPS 2023 | 1,000 carefully curated examples taught format and judgement; effort belongs in case quality, not volume | H |
 | 2 | Self-Instruct: Aligning Language Models with Self-Generated Instructions | Wang et al., 2022 | 2212.10560; ACL 2023 | The template for teacher-written cases with automatic filtering; its finding that about half of raw generations have flaws is why the judge filter exists | H |
-| 3 | Lawma: The Power of Specialization for Legal Annotation | Dominguez-Olmedo et al., 2024 | 2407.16615; ICLR 2025 | On 260 legal classification tasks, lightly fine-tuned small open models beat GPT-4, and tens to a few hundred labelled examples per task were enough; the closest evidence for this project's data budget | H |
+| 3 | Lawma: The Power of Specialization for Legal Annotation | Dominguez-Olmedo et al., 2024 | 2407.16615; ICLR 2025 | On 260 legal annotation tasks, fine-tuned open models from 135M to 70B parameters (including Llama 3.2 1B) beat commercial models such as GPT-4.5 and Claude 3.7 Sonnet; a few hundred to a thousand labelled examples per task were usually enough. The closest evidence for this project's data budget (figures from v2, April 2025) | H |
 | 4 | AlpaGasus: Training A Better Alpaca with Fewer Data | Chen et al., 2023 | 2307.08701; ICLR 2024 | A judge scored teacher-written data and keeping 9,000 of 52,000 beat training on all of it; the project's judge filter, measured | H |
 | 5 | Synthetic Data Generation with Large Language Models for Text Classification: Potential and Limitations | Li et al., 2023 | 2310.07849; EMNLP 2023 | Synthetic training data works for objective classification and degrades as the task gets subjective; borderline tier cases are where "needs human review" must fire | H |
 | 6 | The False Promise of Imitating Proprietary LLMs | Gudibande et al., 2023 | 2305.15717; ICLR 2024 (spotlight) | Imitation data teaches a small student the teacher's style but not its knowledge, and the student fabricates confidently; supports the lookup table and targeted gold cases | H |
@@ -128,7 +128,7 @@ What this theme settles: that a small decoder model with LoRA is a credible clas
 | 6 | Evaluation | With Little Power Comes Great Responsibility | Card et al., 2020 | 2010.06595; EMNLP 2020 | Typical test sets are underpowered to detect small gains; sets honest expectations for a small, once-touched test set | H |
 | 7 | Classification | Fine-Tuned "Small" LLMs (Still) Significantly Outperform Zero-Shot Generative AI Models in Text Classification | Bucher and Martini, 2024 | 2406.08660; preprint, widely cited | Fine-tuned small models beat zero-shot large models on text classification across datasets; the models are encoders, so the evidence transfers in spirit, not detail | H |
 | 8 | Evaluation | Lessons from the Trenches on Reproducible Evaluation of Language Models | Biderman et al., 2024 | 2405.14782; preprint | The evaluation-harness authors' checklist on prompt and format sensitivity, scoring choices and reporting | H |
-| 9 | Legal | AI Act Evaluation Benchmark: An Open, Transparent, and Reproducible Evaluation Dataset for NLP and RAG Systems | Davvetas et al., 2026 | 2603.09435; preprint | 339 generated scenarios labelled prohibited, high-risk, limited or minimal, plus article retrieval; a retrieval baseline scored weighted F1 0.69, weakest on minimal | H |
+| 9 | Legal | AI Act Evaluation Benchmark: An Open, Transparent, and Reproducible Evaluation Dataset for NLP and RAG Systems | Davvetas et al., 2026 | 2603.09435; preprint | 339 scenarios labelled prohibited, high-risk, limited or minimal, plus article retrieval; a retrieval baseline scored weighted F1 0.69, weakest on minimal. Caveats: written by gpt-oss-120b, only partial human checks, no licence stated | H |
 | 10 | Legal | COMPL-AI Framework: A Technical Interpretation and LLM Benchmarking Suite for the EU Artificial Intelligence Act | Guldimann et al., 2024 | 2410.07959; preprint, widely cited | Maps Act articles to concrete technical checks; grounds article citations and what a classifier can honestly claim | M |
 | 11 | Abstention | Alignment for Honesty | Yang et al., 2023 | 2312.07000; NeurIPS 2024 | Defines honesty as declining what the model does not know, with data recipes and metrics (prudence, over-conservativeness) that fit the review option | M |
 | 12 | Legal | LegalBench: A Collaboratively Built Benchmark for Measuring Legal Reasoning in Large Language Models | Guha et al., 2023 | 2308.11462; NeurIPS 2023 Datasets and Benchmarks | 162 legal tasks including rule application and issue spotting; a template for case-style evaluation and a check on a base model's legal ability | M |
@@ -150,7 +150,7 @@ The reading list is for reading. The roster is for citing in decisions, and ever
 | Paper | What it decides | Phase it enters |
 |---|---|---|
 | Lu et al., Small Language Models survey | The bake-off's frame: which measurements to take on this Mac | Requirements |
-| Dominguez-Olmedo et al., Lawma | The data budget: how many cases per label are needed | Requirements |
+| Dominguez-Olmedo et al., Lawma | The data budget: a few hundred to a thousand examples per task, and evidence that even sub-1B models can beat commercial ones on narrow legal labelling | Requirements |
 | Gekhman et al., fine-tuning on new knowledge | The design rule's published evidence: facts in a table, judgement in weights | Requirements |
 | Davvetas et al., AI Act Evaluation Benchmark | An external yardstick for the evaluation, and a warning about the minimal tier | Requirements |
 | Miller, Adding Error Bars to Evals | How every result is reported: with an interval | Requirements |
@@ -170,4 +170,11 @@ Held for the tech spec, when the data pipeline is designed: Hsieh et al. (ration
 | Marked "(unverified)" | 0 |
 | Gaps the sweeps could not fill | No arXiv paper on `mlx-lm` fine-tuning or on Apple's MLX framework itself; no Qwen3.5 or Granite 4.0 technical report on arXiv; no strong-venue head-to-head of judge-filtered against unfiltered synthetic data; no paper isolating label-noise effects in language-model fine-tuning |
 
-Two entries are younger than six months (2606.22606, 2607.03801) and one is from the venue's current year (2602.04998, ICML 2026). Young papers are kept because they are the only ones that test sub-1B Qwen models on classification-style tasks, and they are marked as preprints where no venue exists. They are evidence to weigh, not settled results.
+Two entries are younger than six months (2606.22606, 2607.03801), and one (2602.04998) is from February 2026 and listed as a NeurIPS 2026 poster. Young papers are kept because they are the only ones that test sub-1B Qwen models on classification-style tasks, and they are marked as preprints where no venue exists. They are evidence to weigh, not settled results.
+
+## Changelog
+
+| Date | Change | Reason | Author |
+|---|---|---|---|
+| 2026-10-26 | Corrected the venue for Lee et al. (2602.04998): not an ICML 2026 main-conference paper; listed as a NeurIPS 2026 poster and at two ICML 2026 workshops. Added the AI Act benchmark's stated caveats (generated by gpt-oss-120b, partial human checks, no licence) | Found by the independent scoring pass before these papers joined the roster | AI |
+| 2026-10-26 | Corrected the Lawma entry (section C, rank 3), the start-here line and the roster table: example count is "a few hundred to a thousand" per task, not "tens to a few hundred"; the comparison is with GPT-4.5 and Claude 3.7 Sonnet, not GPT-4; the tested models run from 135M to 70B parameters | Re-checked against the paper's current version (v2, April 2025) before scoring it for the roster; the sweep had reported figures from an earlier version | AI |
