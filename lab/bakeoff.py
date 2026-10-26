@@ -29,12 +29,15 @@ MEMORY_LIMIT_GB = 6.5
 MAX_TOKENS = 400
 OVER_MEMORY_EXIT = 3
 SLUG_PATTERN = re.compile(r"^[a-z0-9._-]+$")
+REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 FORBIDDEN_SUFFIXES = (".py", ".bin", ".pt", ".pth", ".pkl", ".pickle")
 REQUIRED_KEYS = (
-    "repo", "revision", "weights_sha256", "original_model", "card_url", "licence",
-    "parameters", "quantisation", "developer", "jurisdiction", "training_data_disclosure",
-    "converted_with", "checked_on",
+    "repo", "revision", "original_model", "card_url", "licence", "parameters",
+    "quantisation", "developer", "jurisdiction", "training_data_disclosure",
+    "converted_with", "checked_on", "template", "weights",
 )  # fmt: skip
+RESULT_KEYS = ("load_seconds", "answer_seconds", "peak_memory_gb")
 
 # Interim prompt for the smoke test only; the real prompt is generated from the
 # guideline in P2-C02 (ADR-006).
@@ -62,15 +65,21 @@ class ModelEntry:
     slug: str
     repo: str
     revision: str
-    weights_sha256: str
+    weights: dict = field(default_factory=dict)
     template: dict = field(default_factory=dict)
 
 
 class Registry(dict):
+    """Model entries keyed by slug, remembering which file they came from."""
+
+    def __init__(self, path: Path):
+        super().__init__()
+        self.path = path
+
     def get_entry(self, slug: str) -> ModelEntry:
         if slug not in self:
             raise RegistryError(
-                f"model {slug!r} is not in the registry ({', '.join(self)})"
+                f"{self.path}: model {slug!r} is not in the registry ({', '.join(self)})"
             )
         return self[slug]
 
@@ -80,27 +89,51 @@ def load_registry(path: Path = REGISTRY_PATH) -> Registry:
         data = tomllib.loads(path.read_text(encoding="utf-8"))
     except (OSError, tomllib.TOMLDecodeError) as exc:
         raise RegistryError(f"{path}: cannot read ({exc})") from exc
-    registry = Registry()
+    registry = Registry(path)
     for slug, values in data.get("models", {}).items():
-        if not SLUG_PATTERN.match(slug):
-            raise RegistryError(
-                f"{path}: model key {slug!r} must match {SLUG_PATTERN.pattern}"
-            )
-        missing = [k for k in REQUIRED_KEYS if not values.get(k)]
-        if missing:
-            raise RegistryError(f"{path}: model {slug} is missing {', '.join(missing)}")
-        registry[slug] = ModelEntry(
-            slug=slug,
-            repo=values["repo"],
-            revision=values["revision"],
-            weights_sha256=values["weights_sha256"],
-            template=dict(values.get("template", {})),
-        )
+        registry[slug] = _entry_from_toml(path, slug, values)
     return registry
 
 
+def _entry_from_toml(path: Path, slug: str, values: dict) -> ModelEntry:
+    if not SLUG_PATTERN.match(slug):
+        raise RegistryError(
+            f"{path}: model key {slug!r} must match {SLUG_PATTERN.pattern}"
+        )
+    missing = [key for key in REQUIRED_KEYS if not values.get(key)]
+    if missing:
+        raise RegistryError(f"{path}: model {slug} is missing {', '.join(missing)}")
+    if not REVISION_PATTERN.match(str(values["revision"])):
+        raise RegistryError(
+            f"{path}: model {slug} revision must be a full 40-character commit hash"
+        )
+    bad = [
+        name
+        for name, h in values["weights"].items()
+        if not SHA256_PATTERN.match(str(h))
+    ]
+    if bad:
+        raise RegistryError(
+            f"{path}: model {slug} weights hash for {', '.join(bad)} is not 64 hex characters"
+        )
+    return ModelEntry(
+        slug=slug,
+        repo=values["repo"],
+        revision=values["revision"],
+        weights=dict(values["weights"]),
+        template=dict(values["template"]),
+    )
+
+
+def snapshot_files(root: Path) -> list[str]:
+    """Every file in a downloaded build, including subfolders, as relative paths."""
+    return sorted(
+        p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file()
+    )
+
+
 def check_build_files(names: list[str]) -> None:
-    """Safetensors weights only; no code or pickle files (ADR-008)."""
+    """Safetensors weights only; no code or pickle files anywhere in the build (ADR-008)."""
     bad = [n for n in names if n.lower().endswith(FORBIDDEN_SUFFIXES)]
     if bad:
         raise BuildCheckError(f"build contains code or pickle files: {', '.join(bad)}")
@@ -114,6 +147,21 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def verify_weights(root: Path, registered: dict[str, str]) -> None:
+    """Every weights file must be registered, and every registered hash must match."""
+    present = {n for n in snapshot_files(root) if n.endswith(".safetensors")}
+    unregistered = sorted(present - set(registered))
+    absent = sorted(set(registered) - present)
+    if unregistered or absent:
+        raise BuildCheckError(
+            "weights files differ from the registry: "
+            f"unregistered {unregistered or 'none'}, missing {absent or 'none'}"
+        )
+    for name in sorted(present):
+        if _sha256(root / name) != registered[name]:
+            raise BuildCheckError(f"{name}: hash differs from the registry")
 
 
 class Generator(Protocol):
@@ -138,12 +186,8 @@ class MlxGenerator:
 
         mx.reset_peak_memory()
         path = Path(snapshot_download(self.entry.repo, revision=self.entry.revision))
-        check_build_files([p.name for p in path.iterdir()])
-        weights = path / "model.safetensors"
-        if weights.exists() and _sha256(weights) != self.entry.weights_sha256:
-            raise BuildCheckError(
-                f"{self.entry.slug}: weights hash differs from the registry"
-            )
+        check_build_files(snapshot_files(path))
+        verify_weights(path, self.entry.weights)
         self.model, self.tokenizer = load(str(path), trust_remote_code=False)
 
     def render(self, prompt: str) -> str:
@@ -172,6 +216,12 @@ class MlxGenerator:
         return mx.get_peak_memory() / 1e9
 
 
+def _printable(text: str, limit: int = 600) -> str:
+    """Untrusted text (model output, library errors): drop control characters before printing."""
+    cleaned = "".join(c for c in text if c in "\n\t" or c.isprintable())
+    return cleaned[:limit] + ("…" if len(cleaned) > limit else "")
+
+
 @dataclass
 class ChildOutcome:
     ok: bool
@@ -189,13 +239,18 @@ def run_child(command: list[str]) -> ChildOutcome:
         result = json.loads(last_line) if last_line else {}
     except json.JSONDecodeError:
         result = {}
+    if not isinstance(result, dict):
+        result = {}
     if proc.returncode == 0:
-        return ChildOutcome(ok=True, result=result)
-    if proc.returncode < 0:
+        if all(key in result for key in RESULT_KEYS):
+            return ChildOutcome(ok=True, result=result)
         return ChildOutcome(
-            ok=False,
-            reason=f"killed by signal {-proc.returncode} (likely out of memory)",
+            ok=False, reason="the model process finished but printed no result"
         )
+    if proc.returncode < 0:
+        signal_number = -proc.returncode
+        cause = " (SIGKILL, likely out of memory)" if signal_number == 9 else ""
+        return ChildOutcome(ok=False, reason=f"killed by signal {signal_number}{cause}")
     if proc.returncode == OVER_MEMORY_EXIT:
         peak = result.get("peak_memory_gb", "unknown")
         return ChildOutcome(
@@ -205,7 +260,8 @@ def run_child(command: list[str]) -> ChildOutcome:
         )
     tail = proc.stderr.strip().splitlines()[-1] if proc.stderr.strip() else "no message"
     return ChildOutcome(
-        ok=False, reason=f"exited with status {proc.returncode}: {tail}"
+        ok=False,
+        reason=f"exited with status {proc.returncode}: {_printable(tail, 300)}",
     )
 
 
@@ -214,17 +270,18 @@ def _child_smoke(slug: str) -> int:
     generator = MlxGenerator(load_registry().get_entry(slug))
     start = time.perf_counter()
     generator.load()
+    loaded = time.perf_counter()
     raw = generator.generate(SMOKE_PROMPT)
-    seconds = round(time.perf_counter() - start, 2)
+    done = time.perf_counter()
     peak = round(generator.peak_memory_gb(), 2)
-    print(json.dumps({"seconds": seconds, "peak_memory_gb": peak, "raw": raw}))
+    result = {
+        "load_seconds": round(loaded - start, 2),
+        "answer_seconds": round(done - loaded, 2),
+        "peak_memory_gb": peak,
+        "raw": raw,
+    }
+    print(json.dumps(result))
     return OVER_MEMORY_EXIT if peak > MEMORY_LIMIT_GB else 0
-
-
-def _printable(text: str, limit: int = 600) -> str:
-    """Model text is untrusted: drop control characters before printing it."""
-    cleaned = "".join(c for c in text if c in "\n\t" or c.isprintable())
-    return cleaned[:limit] + ("…" if len(cleaned) > limit else "")
 
 
 def smoke(slug: str) -> int:
@@ -240,7 +297,12 @@ def smoke(slug: str) -> int:
     result = outcome.result
     _, status = parse_answer(result.get("raw"))
     print(f"Model: {slug}")
-    print(f"Seconds: {result['seconds']} (load plus one answer)")
+    print(
+        f"Load seconds: {result['load_seconds']} (checks, hash and loading the weights)"
+    )
+    print(
+        f"Answer seconds: {result['answer_seconds']} (one answer, up to {MAX_TOKENS} tokens)"
+    )
     print(f"Peak memory: {result['peak_memory_gb']} GB (limit {MEMORY_LIMIT_GB} GB)")
     print(f"Answer readable as a record: {'yes' if status == 'ok' else 'no'}")
     print("Answer:")
@@ -259,7 +321,7 @@ def main(argv: list[str] | None = None) -> int:
             return _child_smoke(args.model)
         return smoke(args.model)
     except (RegistryError, BuildCheckError) as exc:
-        print(f"bakeoff: {exc}", file=sys.stderr)
+        print(f"bakeoff: {_printable(str(exc), 300)}", file=sys.stderr)
         return 1
 
 

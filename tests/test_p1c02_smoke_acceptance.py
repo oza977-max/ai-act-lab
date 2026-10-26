@@ -41,5 +41,6 @@ def test_smoke_loads_real_model_and_reports_time_and_memory():
     assert result.returncode == 0, result.stderr[-2000:]
     peak = float(re.search(r"Peak memory: ([0-9.]+) GB", result.stdout).group(1))
     assert 0 < peak < 6.5
-    assert re.search(r"Seconds: [0-9.]+", result.stdout)
+    assert re.search(r"Load seconds: [0-9.]+", result.stdout)
+    assert re.search(r"Answer seconds: [0-9.]+", result.stdout)
     assert re.search(r"Answer readable as a record: (yes|no)", result.stdout)

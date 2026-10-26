@@ -13,14 +13,15 @@ from lab.bakeoff import (
     check_build_files,
     load_registry,
     run_child,
+    snapshot_files,
+    verify_weights,
 )
 
 REGISTRY = textwrap.dedent(
     """
     [models."tiny"]
     repo = "org/tiny-4bit"
-    revision = "abc123"
-    weights_sha256 = "00"
+    revision = "0123456789abcdef0123456789abcdef01234567"
     original_model = "org/tiny"
     card_url = "https://example.org"
     licence = "Apache-2.0"
@@ -33,6 +34,8 @@ REGISTRY = textwrap.dedent(
     checked_on = "2026-10-26"
     [models."tiny".template]
     enable_thinking = false
+    [models."tiny".weights]
+    "model.safetensors" = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     """
 )
 
@@ -45,7 +48,8 @@ def write_registry(tmp_path, text=REGISTRY):
 
 def test_registry_loads_entry_with_template(tmp_path):
     entry = load_registry(write_registry(tmp_path))["tiny"]
-    assert entry.revision == "abc123"
+    assert entry.revision == "0123456789abcdef0123456789abcdef01234567"
+    assert entry.weights == {"model.safetensors": "a" * 64}
     assert entry.template == {"enable_thinking": False}
 
 
@@ -62,7 +66,9 @@ def test_realistic_slug_with_path_characters_is_refused(tmp_path):
 
 
 def test_missing_revision_is_refused_naming_file_and_key(tmp_path):
-    text = REGISTRY.replace('revision = "abc123"\n', "")
+    text = REGISTRY.replace(
+        'revision = "0123456789abcdef0123456789abcdef01234567"\n', ""
+    )
     with pytest.raises(RegistryError, match=r"models.toml.*tiny.*revision"):
         load_registry(write_registry(tmp_path, text))
 
@@ -110,7 +116,8 @@ def child(code):
 def test_child_success_returns_its_result():
     outcome = run_child(
         child(
-            'import json; print(json.dumps({"seconds": 1.5, "peak_memory_gb": 1.2, "raw": "{}"}))'
+            "import json; print(json.dumps({'load_seconds': 1.0, 'answer_seconds': 0.5,"
+            " 'peak_memory_gb': 1.2, 'raw': '{}'}))"
         )
     )
     assert outcome.ok and outcome.result["peak_memory_gb"] == 1.2
@@ -139,3 +146,89 @@ def test_realistic_child_killed_by_signal_is_excluded():
         child("import os, signal; os.kill(os.getpid(), signal.SIGKILL)")
     )
     assert not outcome.ok and "killed" in outcome.reason
+
+
+def test_floating_revision_is_refused(tmp_path):
+    text = REGISTRY.replace('"0123456789abcdef0123456789abcdef01234567"', '"main"')
+    with pytest.raises(RegistryError, match=r"models.toml.*tiny.*revision"):
+        load_registry(write_registry(tmp_path, text))
+
+
+def test_malformed_weights_hash_is_refused(tmp_path):
+    text = REGISTRY.replace('"' + "a" * 64 + '"', '"abc"')
+    with pytest.raises(RegistryError, match=r"models.toml.*tiny.*weights"):
+        load_registry(write_registry(tmp_path, text))
+
+
+def test_missing_template_is_refused(tmp_path):
+    text = REGISTRY.replace('[models."tiny".template]\nenable_thinking = false\n', "")
+    with pytest.raises(RegistryError, match=r"models.toml.*tiny.*template"):
+        load_registry(write_registry(tmp_path, text))
+
+
+def test_unknown_slug_error_names_the_registry_file(tmp_path):
+    registry = load_registry(write_registry(tmp_path))
+    with pytest.raises(RegistryError, match=r"models.toml"):
+        registry.get_entry("missing")
+
+
+def make_snapshot(tmp_path, files):
+    snap = tmp_path / "snap"
+    for name, content in files.items():
+        (snap / name).parent.mkdir(parents=True, exist_ok=True)
+        (snap / name).write_bytes(content)
+    return snap
+
+
+def test_every_safetensors_file_must_match_its_registered_hash(tmp_path):
+    import hashlib
+
+    data = b"weights"
+    snap = make_snapshot(tmp_path, {"model.safetensors": data})
+    good = {"model.safetensors": hashlib.sha256(data).hexdigest()}
+    verify_weights(snap, good)
+    with pytest.raises(BuildCheckError, match="hash"):
+        verify_weights(snap, {"model.safetensors": "b" * 64})
+
+
+def test_realistic_sharded_build_with_unregistered_shard_is_refused(tmp_path):
+    import hashlib
+
+    snap = make_snapshot(
+        tmp_path,
+        {
+            "model-00001-of-00002.safetensors": b"a",
+            "model-00002-of-00002.safetensors": b"b",
+        },
+    )
+    registered = {"model-00001-of-00002.safetensors": hashlib.sha256(b"a").hexdigest()}
+    with pytest.raises(BuildCheckError, match="model-00002-of-00002"):
+        verify_weights(snap, registered)
+
+
+def test_realistic_code_file_in_subfolder_is_refused(tmp_path):
+    snap = make_snapshot(
+        tmp_path, {"model.safetensors": b"w", "extra/modeling.py": b"x"}
+    )
+    with pytest.raises(BuildCheckError, match="modeling.py"):
+        check_build_files(snapshot_files(snap))
+
+
+def test_child_success_without_measurements_is_not_ok():
+    outcome = run_child(child("print('no json here')"))
+    assert not outcome.ok and "no result" in outcome.reason
+
+
+def test_child_interrupted_is_not_called_out_of_memory():
+    outcome = run_child(
+        child("import os, signal; os.kill(os.getpid(), signal.SIGTERM)")
+    )
+    assert not outcome.ok and "signal 15" in outcome.reason
+    assert "memory" not in outcome.reason
+
+
+def test_crash_reason_is_cleaned_of_control_characters():
+    outcome = run_child(
+        child('import sys; sys.stderr.write("bad \\x1b[31mred\\n"); sys.exit(1)')
+    )
+    assert "\x1b" not in outcome.reason
