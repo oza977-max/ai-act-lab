@@ -4,6 +4,7 @@ This module owns the label vocabulary. In this chunk it parses a model's raw
 answer and checks only that the tier is known; full rule validation arrives
 in P1-C03 (`validate`).
 """
+
 from __future__ import annotations
 
 import json
@@ -37,7 +38,7 @@ class Record:
     reason: str
 
     @classmethod
-    def from_json(cls, data: dict) -> "Record":
+    def from_json(cls, data: dict) -> Record:
         """Build a record from a decoded JSON object. Raises KeyError or TypeError if malformed."""
         return cls(
             tier=data["tier"],

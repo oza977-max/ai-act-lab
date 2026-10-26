@@ -2,6 +2,7 @@
 
 TC-EV-1-01 and TC-EV-2-01, from the owner's command line.
 """
+
 import subprocess
 import sys
 
@@ -10,8 +11,19 @@ from conftest import ROOT
 
 def run_cli(gold, run_dir):
     return subprocess.run(
-        [sys.executable, "-m", "lab.evaluate", "--gold", str(gold), "--run", str(run_dir)],
-        capture_output=True, text=True, cwd=ROOT,
+        [
+            sys.executable,
+            "-m",
+            "lab.evaluate",
+            "--gold",
+            str(gold),
+            "--run",
+            str(run_dir),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
     )
 
 
@@ -24,11 +36,16 @@ def test_tc_ev_1_01_and_2_01_cli_prints_hand_counts_and_writes_report(eval10):
     report = (run_dir / "report.md").read_text(encoding="utf-8")
     first_section = report.split("\n## ", 2)[1]
     assert first_section.startswith("Summary")
-    assert "fixture-model" in report and "zero-shot-v0" in report and "2026-10-26" in report
+    assert (
+        "fixture-model" in report
+        and "zero-shot-v0" in report
+        and "2026-10-26" in report
+    )
 
 
 def test_report_and_stdout_never_contain_raw_model_text(eval10):
     import json
+
     gold, run_dir = eval10
     path = run_dir / "outputs.jsonl"
     lines = [json.loads(l) for l in path.read_text().splitlines()]
@@ -42,11 +59,14 @@ def test_report_and_stdout_never_contain_raw_model_text(eval10):
 
 def test_zero_answered_renders_not_defined(eval10):
     import json
+
     gold, run_dir = eval10
     path = run_dir / "outputs.jsonl"
     lines = [json.loads(l) for l in path.read_text().splitlines()]
     for l in lines:
-        r = json.loads(l["raw"]); r["tier"] = "needs-human-review"; l["raw"] = json.dumps(r)
+        r = json.loads(l["raw"])
+        r["tier"] = "needs-human-review"
+        l["raw"] = json.dumps(r)
     path.write_text("".join(json.dumps(l) + "\n" for l in lines))
     result = run_cli(gold, run_dir)
     assert "Correct when answered: not defined" in result.stdout

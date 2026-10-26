@@ -1,4 +1,5 @@
 """TC-GS-2-03: the pre-commit guard blocks a planted private name (cross-cutting ADR-007)."""
+
 import shutil
 import subprocess
 
@@ -8,7 +9,9 @@ GUARD = ROOT / "scripts" / "confidentiality-check.sh"
 
 
 def git(repo, *args):
-    return subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True)
+    return subprocess.run(
+        ["git", "-C", str(repo), *args], check=False, capture_output=True, text=True
+    )
 
 
 def make_repo(tmp_path):
@@ -22,8 +25,13 @@ def make_repo(tmp_path):
 
 
 def run_guard(repo):
-    return subprocess.run(["sh", "scripts/confidentiality-check.sh"], cwd=repo,
-                          capture_output=True, text=True)
+    return subprocess.run(
+        ["sh", "scripts/confidentiality-check.sh"],
+        check=False,
+        cwd=repo,
+        capture_output=True,
+        text=True,
+    )
 
 
 def test_tc_gs_2_03_planted_private_name_is_blocked(tmp_path):

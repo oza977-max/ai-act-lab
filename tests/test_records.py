@@ -1,16 +1,31 @@
 """Parsing a model's raw answer (ADR-005; this chunk checks the tier only)."""
+
 import json
 
 from lab.records import TIERS, parse_answer
 
-GOOD = {"tier": "minimal", "route": None, "annex_iii_area": None, "annex_iii_point": None,
-        "annex_i_legislation": None, "art50_flag": False, "articles": ["Art. 95"],
-        "review_reason": None, "reason": "It filters spam."}
+GOOD = {
+    "tier": "minimal",
+    "route": None,
+    "annex_iii_area": None,
+    "annex_iii_point": None,
+    "annex_i_legislation": None,
+    "art50_flag": False,
+    "articles": ["Art. 95"],
+    "review_reason": None,
+    "reason": "It filters spam.",
+}
 
 
 def test_six_tiers():
-    assert TIERS == ("prohibited", "high-risk", "transparency-only", "minimal",
-                     "out-of-scope", "needs-human-review")
+    assert TIERS == (
+        "prohibited",
+        "high-risk",
+        "transparency-only",
+        "minimal",
+        "out-of-scope",
+        "needs-human-review",
+    )
 
 
 def test_plain_record_is_readable():
@@ -40,7 +55,10 @@ def test_tc_ls_9_02_prose_only_is_unreadable():
 
 
 def test_unknown_tier_is_unreadable():
-    assert parse_answer(json.dumps({**GOOD, "tier": "limited-risk"})) == (None, "unreadable")
+    assert parse_answer(json.dumps({**GOOD, "tier": "limited-risk"})) == (
+        None,
+        "unreadable",
+    )
 
 
 def test_overlong_answer_is_unreadable():

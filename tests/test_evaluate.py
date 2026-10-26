@@ -1,4 +1,5 @@
 """Measures on the 10-case fixture and its variants (measure definitions table)."""
+
 import json
 
 import pytest
@@ -33,10 +34,14 @@ def test_tc_ev_2_01_answered_measures(eval10):
 
 def test_tc_ev_2_02_all_review_has_zero_coverage_and_undefined_accuracy(eval10):
     gold, run_dir = eval10
+
     def all_review(lines):
         for l in lines:
-            r = json.loads(l["raw"]); r["tier"] = "needs-human-review"; l["raw"] = json.dumps(r)
+            r = json.loads(l["raw"])
+            r["tier"] = "needs-human-review"
+            l["raw"] = json.dumps(r)
         return lines
+
     rewrite_outputs(run_dir, all_review)
     m = measures(gold, run_dir)
     assert m.answered == 0
@@ -52,11 +57,13 @@ def test_realistic_missing_line_counts_as_wrong(eval10):
 
 def test_realistic_missing_marker_equals_absent_line(eval10):
     gold, run_dir = eval10
+
     def mark(lines):
         for l in lines:
             if l["id"] == "E05":
                 l.update(raw=None, seconds=None, error="missing")
         return lines
+
     rewrite_outputs(run_dir, mark)
     m = measures(gold, run_dir)
     assert (m.tier_correct, m.missing, m.unreadable) == (6, 1, 0)
@@ -64,11 +71,13 @@ def test_realistic_missing_marker_equals_absent_line(eval10):
 
 def test_realistic_unreadable_counts_as_wrong_and_not_answered(eval10):
     gold, run_dir = eval10
+
     def garble(lines):
         for l in lines:
             if l["id"] == "E05":
                 l["raw"] = "I cannot answer that"
         return lines
+
     rewrite_outputs(run_dir, garble)
     m = measures(gold, run_dir)
     assert (m.tier_correct, m.unreadable, m.answered) == (6, 1, 7)
@@ -89,7 +98,7 @@ def test_duplicate_output_id_is_an_error(eval10):
 
 
 def test_malformed_gold_line_names_file_and_line(eval10):
-    gold, run_dir = eval10
+    gold, _run_dir = eval10
     gold.write_text(gold.read_text() + "{not json\n")
     with pytest.raises(EvaluationError, match=r"gold.jsonl.*line 11"):
         load_gold(gold)
@@ -98,7 +107,9 @@ def test_malformed_gold_line_names_file_and_line(eval10):
 def test_duplicate_id_error_names_the_line(eval10):
     gold, run_dir = eval10
     rewrite_outputs(run_dir, lambda lines: lines + [lines[0]])
-    with pytest.raises(EvaluationError, match=r"outputs.jsonl: line 11: duplicate id E01"):
+    with pytest.raises(
+        EvaluationError, match=r"outputs.jsonl: line 11: duplicate id E01"
+    ):
         measures(gold, run_dir)
 
 
@@ -112,24 +123,28 @@ def test_non_object_line_is_an_error_with_line(eval10):
 
 def test_non_string_raw_counts_as_unreadable(eval10):
     gold, run_dir = eval10
+
     def numeric(lines):
         for l in lines:
             if l["id"] == "E05":
                 l["raw"] = 5
         return lines
+
     rewrite_outputs(run_dir, numeric)
     assert measures(gold, run_dir).unreadable == 1
 
 
 def test_unknown_gold_tier_is_an_error(eval10):
-    gold, run_dir = eval10
-    gold.write_text(gold.read_text().replace('"tier": "prohibited"', '"tier": "limited-risk"', 1))
+    gold, _run_dir = eval10
+    gold.write_text(
+        gold.read_text().replace('"tier": "prohibited"', '"tier": "limited-risk"', 1)
+    )
     with pytest.raises(EvaluationError, match="limited-risk"):
         load_gold(gold)
 
 
 def test_empty_gold_set_is_an_error(eval10):
-    gold, run_dir = eval10
+    gold, _run_dir = eval10
     gold.write_text("")
     with pytest.raises(EvaluationError, match="no cases"):
         load_gold(gold)
@@ -140,5 +155,8 @@ def test_realistic_unicode_line_separator_inside_raw_answer(eval10):
     path = run_dir / "outputs.jsonl"
     lines = [json.loads(l) for l in path.read_text().splitlines() if l]
     lines[4]["raw"] = lines[4]["raw"].replace("spam", "spam filter")
-    path.write_text("".join(json.dumps(l, ensure_ascii=False) + "\n" for l in lines), encoding="utf-8")
+    path.write_text(
+        "".join(json.dumps(l, ensure_ascii=False) + "\n" for l in lines),
+        encoding="utf-8",
+    )
     assert measures(gold, run_dir).tier_correct == 7

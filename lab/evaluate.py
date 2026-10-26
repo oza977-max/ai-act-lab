@@ -8,6 +8,7 @@ numbers, and writes `report.md` into the run folder. This chunk covers tier
 accuracy, share answered, answered-case accuracy and the review rates; the
 remaining measures and intervals arrive in P1-C04.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -63,7 +64,9 @@ def _read_jsonl(path: Path) -> list[tuple[int, dict]]:
         try:
             row = json.loads(line)
         except json.JSONDecodeError as exc:
-            raise EvaluationError(f"{path}: line {number} is not valid JSON ({exc.msg})") from exc
+            raise EvaluationError(
+                f"{path}: line {number} is not valid JSON ({exc.msg})"
+            ) from exc
         if not isinstance(row, dict):
             raise EvaluationError(f"{path}: line {number}: not a JSON object")
         rows.append((number, row))
@@ -89,14 +92,23 @@ def load_gold(path: Path) -> dict[str, str]:
         record = row.get("gold")
         tier = record.get("tier") if isinstance(record, dict) else None
         if tier not in TIERS:
-            raise EvaluationError(f"{path}: case {case_id} has unknown gold tier {tier!r}")
+            raise EvaluationError(
+                f"{path}: case {case_id} has unknown gold tier {tier!r}"
+            )
         gold[case_id] = tier
     if not gold:
         raise EvaluationError(f"{path}: the gold set has no cases")
     return gold
 
 
-RUN_FIELDS = ("model", "build_revision", "prompt_version", "guideline_version", "gold_version", "run_date")
+RUN_FIELDS = (
+    "model",
+    "build_revision",
+    "prompt_version",
+    "guideline_version",
+    "gold_version",
+    "run_date",
+)
 
 
 def load_run(path: Path) -> dict:
@@ -169,17 +181,22 @@ def render_report(m: Measures, run: dict) -> str:
     lines = [
         f"# Evaluation report: {run['model']}",
         "",
-        f"Model build: {run['build_revision']} | Prompt: {run['prompt_version']} | "
-        f"Guideline: {run['guideline_version']} | Gold set: {run['gold_version']} | "
-        f"Run date: {run['run_date']}",
+        (
+            f"Model build: {run['build_revision']} | Prompt: {run['prompt_version']} | "
+            f"Guideline: {run['guideline_version']} | Gold set: {run['gold_version']} | "
+            f"Run date: {run['run_date']}"
+        ),
         "",
         "## Summary",
         "",
-        f"The model gave the right tier on {_fraction(m.tier_correct, m.total)} cases. "
-        f"It answered {_fraction(m.answered, m.total)} cases itself and sent the rest to human "
-        f"review; when it answered, it was right on {_fraction(m.answered_correct, m.answered)}. "
-        f"Unreadable ({m.unreadable}) and missing ({m.missing}) answers count as wrong. "
-        "These numbers have no confidence intervals yet, so small differences mean little.",
+        (
+            f"The model gave the right tier on {_fraction(m.tier_correct, m.total)} cases. "
+            f"It answered {_fraction(m.answered, m.total)} cases itself and sent the rest "
+            f"to human review; when it answered, it was right on "
+            f"{_fraction(m.answered_correct, m.answered)}. "
+            f"Unreadable ({m.unreadable}) and missing ({m.missing}) answers count as wrong. "
+            "These numbers have no confidence intervals yet, so small differences mean little."
+        ),
         "",
         "## Measures",
         "",
@@ -201,19 +218,32 @@ def render_report(m: Measures, run: dict) -> str:
     lines.append("|---" * (len(columns) + 1) + "|")
     for gold_tier in TIERS:
         row = m.confusion.get(gold_tier, {})
-        lines.append(f"| {gold_tier} | " + " | ".join(str(row.get(c, 0)) for c in columns) + " |")
+        lines.append(
+            f"| {gold_tier} | " + " | ".join(str(row.get(c, 0)) for c in columns) + " |"
+        )
     return "\n".join(lines) + "\n"
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Evaluate a model run against the gold set.")
+    parser = argparse.ArgumentParser(
+        description="Evaluate a model run against the gold set."
+    )
     parser.add_argument("--gold", type=Path, required=True)
-    parser.add_argument("--run", type=Path, required=True, help="run folder with outputs.jsonl and run.json")
+    parser.add_argument(
+        "--run",
+        type=Path,
+        required=True,
+        help="run folder with outputs.jsonl and run.json",
+    )
     args = parser.parse_args(argv)
     try:
         run = load_run(args.run / "run.json")
-        measures = evaluate(load_gold(args.gold), load_outputs(args.run / "outputs.jsonl"))
-        (args.run / "report.md").write_text(render_report(measures, run), encoding="utf-8")
+        measures = evaluate(
+            load_gold(args.gold), load_outputs(args.run / "outputs.jsonl")
+        )
+        (args.run / "report.md").write_text(
+            render_report(measures, run), encoding="utf-8"
+        )
     except (EvaluationError, OSError) as exc:
         print(f"evaluate: {exc}", file=sys.stderr)
         return 1
