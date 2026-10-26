@@ -1,0 +1,15 @@
+{
+  "model": "fixture-model",
+  "build_revision": "fixture",
+  "prompt_version": "zero-shot-v0",
+  "guideline_version": "v1",
+  "gold_version": "eval-10",
+  "settings": {
+    "greedy": true,
+    "max_tokens": 400,
+    "thinking": false
+  },
+  "peak_memory_gb": null,
+  "mean_seconds": 1.0,
+  "run_date": "2026-10-26"
+}

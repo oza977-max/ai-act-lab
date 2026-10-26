@@ -1,0 +1,43 @@
+"""TC-GS-2-03: the pre-commit guard blocks a planted private name (cross-cutting ADR-007)."""
+import shutil
+import subprocess
+
+from conftest import ROOT
+
+GUARD = ROOT / "scripts" / "confidentiality-check.sh"
+
+
+def git(repo, *args):
+    return subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True)
+
+
+def make_repo(tmp_path):
+    repo = tmp_path / "repo"
+    (repo / "scripts").mkdir(parents=True)
+    git(repo, "init", "-q")
+    shutil.copy(GUARD, repo / "scripts" / "confidentiality-check.sh")
+    (repo / ".private").mkdir()
+    (repo / ".private" / "deny-terms.txt").write_text("Zebrafoo Holdings\n")
+    return repo
+
+
+def run_guard(repo):
+    return subprocess.run(["sh", "scripts/confidentiality-check.sh"], cwd=repo,
+                          capture_output=True, text=True)
+
+
+def test_tc_gs_2_03_planted_private_name_is_blocked(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / "case.md").write_text("A recruitment tool built by Zebrafoo Holdings.\n")
+    git(repo, "add", "case.md")
+    result = run_guard(repo)
+    assert result.returncode == 1
+    assert "BLOCKED" in result.stdout
+    assert "Zebrafoo" not in result.stdout, "the private term must not be echoed"
+
+
+def test_clean_change_passes(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / "case.md").write_text("A recruitment tool built by a fictional company.\n")
+    git(repo, "add", "case.md")
+    assert run_guard(repo).returncode == 0
