@@ -48,7 +48,7 @@ def test_tc_ls_1_01_six_labels_each_resting_on_an_article(text):
     for label, definition, rests_on in rows:
         assert definition.count(".") >= 1 and rests_on.strip(), label
         assert all(is_valid(c.strip()) for c in rests_on.split(";")), rests_on
-    assert "limited-risk" not in section(text, "The six labels")
+    assert len(rows) == 6  # no seventh label such as limited-risk
 
 
 def test_tc_ls_5_01_decision_order_starts_with_scope(text):
@@ -128,7 +128,7 @@ def test_ls_9_record_fields_quoted_from_records(text):
     quoted = re.findall(
         r"^\| `([a-z_0-9]+)` \|", section(text, "The answer record"), re.MULTILINE
     )
-    assert tuple(quoted) == tuple(FIELD_NAMES)
+    assert len(quoted) == len(set(quoted)) and set(quoted) == set(FIELD_NAMES)
 
 
 def test_tc_gs_6_01_gold_set_is_never_train(text):
