@@ -6,6 +6,7 @@ github.com/davidath/ai-act-evaluation-benchmark at commit d323167f.
 
 Commands:
     python -m lab.practice prepare                 build training files
+    python -m lab.practice train                   run the owner's LoRA training
     python -m lab.practice ask [--adapter DIR]     answer the 20 held-out cases
 """
 
@@ -20,6 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "data" / "practice" / "source" / "scenarios.json"
 OUT = ROOT / "data" / "practice"
+CONFIG = ROOT / "data" / "practice" / "lora-config.yaml"
 SEED = 20261027
 HELDOUT_PER_TIER = 5
 VALID_PER_TIER = 8
@@ -166,16 +168,53 @@ def ask(adapter: str | None, label: str) -> int:
     return 0
 
 
+def train_command(model_path: str) -> list[str]:
+    return [
+        sys.executable,
+        "-m",
+        "mlx_lm",
+        "lora",
+        "-c",
+        str(CONFIG),
+        "--model",
+        model_path,
+    ]
+
+
+def train() -> int:
+    """Run mlx-lm's LoRA training with the owner's settings on the pinned model."""
+    import subprocess
+
+    from huggingface_hub import snapshot_download
+
+    from lab.bakeoff import load_registry
+
+    entry = load_registry().get_entry("qwen3.5-0.8b")
+    model_path = snapshot_download(
+        entry.repo, revision=entry.revision, local_files_only=True
+    )
+    print(
+        f"Training with the settings in {CONFIG.relative_to(ROOT)} (about 20 minutes)."
+    )
+    print(
+        "Watch the 'val' lines: when they stop falling, the model has started memorising.\n"
+    )
+    return subprocess.run(train_command(model_path), check=False, cwd=ROOT).returncode
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Practice fine-tune helpers.")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("prepare")
+    sub.add_parser("train")
     ask_parser = sub.add_parser("ask")
     ask_parser.add_argument("--adapter", default=None, help="trained adapter folder")
     ask_parser.add_argument("--label", default=None, help="name for the results file")
     args = parser.parse_args(argv)
     if args.command == "prepare":
         return prepare()
+    if args.command == "train":
+        return train()
     return ask(args.adapter, args.label or ("after" if args.adapter else "before"))
 
 

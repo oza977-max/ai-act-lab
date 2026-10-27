@@ -90,3 +90,12 @@ def test_realistic_answer_with_unknown_or_missing_tier_is_unreadable():
     assert parse_practice_answer('{"tier": "limited-risk"}') is None
     assert parse_practice_answer("It is high risk.") is None
     assert parse_practice_answer(None) is None
+
+
+def test_train_command_uses_pinned_snapshot_and_owner_settings():
+    from lab.practice import CONFIG, train_command
+
+    cmd = train_command("/cache/snapshots/da28692b")
+    assert cmd[1:4] == ["-m", "mlx_lm", "lora"]
+    assert cmd[cmd.index("-c") + 1] == str(CONFIG)
+    assert cmd[cmd.index("--model") + 1] == "/cache/snapshots/da28692b"
