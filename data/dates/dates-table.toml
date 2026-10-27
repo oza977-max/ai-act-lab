@@ -1,0 +1,371 @@
+# Dates-and-duties table: the dates from which AI Act duties apply, per label.
+#
+# The model never learns dates; this table does. Every date was read from the
+# Official Journal text of Regulation (EU) 2024/1689 (Article 113) and of
+# Regulation (EU) 2026/1744 (which replaced Article 113, points (a) and (c), and
+# added Article 111(4)). Duties are article references with the Act's own short
+# titles, not obligation text. The lookup (`python -m lab.dates lookup`) refuses
+# to serve the table until the owner has approved it.
+#
+# Learning project, not legal advice.
+
+version = "v1"
+approved_by = ""
+approved_on = ""
+
+[[changes]]
+version = "v1"
+date = 2026-10-27
+change = "First version: nine entries; every plan date checked against the Official Journal, no discrepancy found."
+reason = "Build chunk P2-C03"
+
+# --- prohibited ------------------------------------------------------------
+
+[[entry]]
+tier = "prohibited"
+route = "none"
+art50 = "any"
+source_url = "https://eur-lex.europa.eu/eli/reg/2026/1744/oj/eng"
+last_checked = 2026-10-27
+checked_by = "Claude (AI assistant), against the Official Journal"
+verified = true
+plan_value = "2026-12-02"
+discrepancy_note = ""
+note = "The practice must not be placed on the market, put into service or used. The two bans added in 2026 apply later than the rest of Article 5 (Regulation (EU) 2026/1744, Article 113(a) as replaced)."
+
+  [[entry.duties]]
+  article = "Art. 5(1)"
+  title = "Prohibited AI practices"
+  applies_from = 2025-02-02
+
+  [[entry.duties]]
+  article = "Art. 5(1)(ba)"
+  title = "Ban on non-consensual intimate imagery"
+  applies_from = 2026-12-02
+
+  [[entry.duties]]
+  article = "Art. 5(1)(bb)"
+  title = "Ban on child sexual abuse material"
+  applies_from = 2026-12-02
+
+# --- high-risk, Annex III --------------------------------------------------
+
+[[entry]]
+tier = "high-risk"
+route = "annex-iii"
+art50 = "any"
+source_url = "https://eur-lex.europa.eu/eli/reg/2026/1744/oj/eng"
+last_checked = 2026-10-27
+checked_by = "Claude (AI assistant), against the Official Journal"
+verified = true
+plan_value = "2027-12-02"
+discrepancy_note = ""
+note = "Chapter III, Sections 1 to 3 apply to Annex III systems from this date (Article 113(c)(i) as replaced in 2026). The impact assessment of Article 27 applies only to certain deployers: public bodies, private entities providing public services, and deployers of Annex III 5(b) and 5(c) systems, never area 2. Systems already on the market before this date are covered only after a significant change in design (Article 111(2)); those used by public authorities must comply by 2 August 2030."
+
+  [[entry.duties]]
+  article = "Art. 4"
+  title = "AI literacy"
+  applies_from = 2025-02-02
+
+  [[entry.duties]]
+  article = "Art. 9"
+  title = "Risk management system"
+  applies_from = 2027-12-02
+
+  [[entry.duties]]
+  article = "Art. 10"
+  title = "Data and data governance"
+  applies_from = 2027-12-02
+
+  [[entry.duties]]
+  article = "Art. 11"
+  title = "Technical documentation"
+  applies_from = 2027-12-02
+
+  [[entry.duties]]
+  article = "Art. 12"
+  title = "Record-keeping"
+  applies_from = 2027-12-02
+
+  [[entry.duties]]
+  article = "Art. 13"
+  title = "Transparency and provision of information to deployers"
+  applies_from = 2027-12-02
+
+  [[entry.duties]]
+  article = "Art. 14"
+  title = "Human oversight"
+  applies_from = 2027-12-02
+
+  [[entry.duties]]
+  article = "Art. 15"
+  title = "Accuracy, robustness and cybersecurity"
+  applies_from = 2027-12-02
+
+  [[entry.duties]]
+  article = "Art. 16"
+  title = "Obligations of providers of high-risk AI systems"
+  applies_from = 2027-12-02
+
+  [[entry.duties]]
+  article = "Art. 17"
+  title = "Quality management system"
+  applies_from = 2027-12-02
+
+  [[entry.duties]]
+  article = "Art. 26"
+  title = "Obligations of deployers of high-risk AI systems"
+  applies_from = 2027-12-02
+
+  [[entry.duties]]
+  article = "Art. 27"
+  title = "Fundamental rights impact assessment (certain deployers)"
+  applies_from = 2027-12-02
+
+# --- high-risk, Annex I ----------------------------------------------------
+
+[[entry]]
+tier = "high-risk"
+route = "annex-i"
+art50 = "any"
+source_url = "https://eur-lex.europa.eu/eli/reg/2026/1744/oj/eng"
+last_checked = 2026-10-27
+checked_by = "Claude (AI assistant), against the Official Journal"
+verified = true
+plan_value = "2028-08-02"
+discrepancy_note = ""
+note = "Chapter III, Sections 1 to 3 apply to Annex I systems from this date (Article 113(c)(ii) as replaced in 2026). These duties apply to products under Annex I Section A. For Section B products only Articles 6(1), 102 to 109 and 112 apply (Article 2(2)); their requirements come through the sector legislation. Systems already on the market are covered only after a significant change in design (Article 111(2))."
+
+  [[entry.duties]]
+  article = "Art. 4"
+  title = "AI literacy"
+  applies_from = 2025-02-02
+
+  [[entry.duties]]
+  article = "Art. 9"
+  title = "Risk management system"
+  applies_from = 2028-08-02
+
+  [[entry.duties]]
+  article = "Art. 10"
+  title = "Data and data governance"
+  applies_from = 2028-08-02
+
+  [[entry.duties]]
+  article = "Art. 11"
+  title = "Technical documentation"
+  applies_from = 2028-08-02
+
+  [[entry.duties]]
+  article = "Art. 12"
+  title = "Record-keeping"
+  applies_from = 2028-08-02
+
+  [[entry.duties]]
+  article = "Art. 13"
+  title = "Transparency and provision of information to deployers"
+  applies_from = 2028-08-02
+
+  [[entry.duties]]
+  article = "Art. 14"
+  title = "Human oversight"
+  applies_from = 2028-08-02
+
+  [[entry.duties]]
+  article = "Art. 15"
+  title = "Accuracy, robustness and cybersecurity"
+  applies_from = 2028-08-02
+
+  [[entry.duties]]
+  article = "Art. 16"
+  title = "Obligations of providers of high-risk AI systems"
+  applies_from = 2028-08-02
+
+  [[entry.duties]]
+  article = "Art. 17"
+  title = "Quality management system"
+  applies_from = 2028-08-02
+
+  [[entry.duties]]
+  article = "Art. 26"
+  title = "Obligations of deployers of high-risk AI systems"
+  applies_from = 2028-08-02
+
+# --- Article 50 duties, added to any tier with the flag set ------------------
+
+[[entry]]
+tier = "high-risk"
+route = "annex-iii"
+art50 = "true"
+source_url = "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng"
+last_checked = 2026-10-27
+checked_by = "Claude (AI assistant), against the Official Journal"
+verified = true
+plan_value = "2026-12-02"
+discrepancy_note = ""
+note = "Article 50 applies from the general date (Article 113). Which paragraph applies depends on the system: 50(1) and 50(2) bind providers, 50(3) and 50(4) bind deployers. Generative systems placed on the market before 2 August 2026 have until 2 December 2026 for 50(2) (Article 111(4), added in 2026)."
+
+  [[entry.duties]]
+  article = "Art. 50(1)"
+  title = "Tell people they are interacting with an AI system"
+  applies_from = 2026-08-02
+
+  [[entry.duties]]
+  article = "Art. 50(2)"
+  title = "Mark synthetic content as artificially generated"
+  applies_from = 2026-08-02
+
+  [[entry.duties]]
+  article = "Art. 111(4)"
+  title = "Article 50(2) for generative systems already on the market"
+  applies_from = 2026-12-02
+
+  [[entry.duties]]
+  article = "Art. 50(3)"
+  title = "Inform people exposed to emotion recognition or biometric categorisation"
+  applies_from = 2026-08-02
+
+  [[entry.duties]]
+  article = "Art. 50(4)"
+  title = "Disclose deep fakes and AI-generated public-interest text"
+  applies_from = 2026-08-02
+
+[[entry]]
+tier = "high-risk"
+route = "annex-i"
+art50 = "true"
+source_url = "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng"
+last_checked = 2026-10-27
+checked_by = "Claude (AI assistant), against the Official Journal"
+verified = true
+plan_value = "2026-12-02"
+discrepancy_note = ""
+note = "Article 50 applies from the general date (Article 113). Which paragraph applies depends on the system: 50(1) and 50(2) bind providers, 50(3) and 50(4) bind deployers. Generative systems placed on the market before 2 August 2026 have until 2 December 2026 for 50(2) (Article 111(4), added in 2026)."
+
+  [[entry.duties]]
+  article = "Art. 50(1)"
+  title = "Tell people they are interacting with an AI system"
+  applies_from = 2026-08-02
+
+  [[entry.duties]]
+  article = "Art. 50(2)"
+  title = "Mark synthetic content as artificially generated"
+  applies_from = 2026-08-02
+
+  [[entry.duties]]
+  article = "Art. 111(4)"
+  title = "Article 50(2) for generative systems already on the market"
+  applies_from = 2026-12-02
+
+  [[entry.duties]]
+  article = "Art. 50(3)"
+  title = "Inform people exposed to emotion recognition or biometric categorisation"
+  applies_from = 2026-08-02
+
+  [[entry.duties]]
+  article = "Art. 50(4)"
+  title = "Disclose deep fakes and AI-generated public-interest text"
+  applies_from = 2026-08-02
+
+# --- transparency-only ------------------------------------------------------
+
+[[entry]]
+tier = "transparency-only"
+route = "none"
+art50 = "true"
+source_url = "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng"
+last_checked = 2026-10-27
+checked_by = "Claude (AI assistant), against the Official Journal"
+verified = true
+plan_value = "2026-12-02"
+discrepancy_note = ""
+note = "Article 50 applies from the general date (Article 113). Which paragraph applies depends on the system: 50(1) and 50(2) bind providers, 50(3) and 50(4) bind deployers. Generative systems placed on the market before 2 August 2026 have until 2 December 2026 for 50(2) (Article 111(4), added in 2026)."
+
+  [[entry.duties]]
+  article = "Art. 4"
+  title = "AI literacy"
+  applies_from = 2025-02-02
+
+  [[entry.duties]]
+  article = "Art. 50(1)"
+  title = "Tell people they are interacting with an AI system"
+  applies_from = 2026-08-02
+
+  [[entry.duties]]
+  article = "Art. 50(2)"
+  title = "Mark synthetic content as artificially generated"
+  applies_from = 2026-08-02
+
+  [[entry.duties]]
+  article = "Art. 111(4)"
+  title = "Article 50(2) for generative systems already on the market"
+  applies_from = 2026-12-02
+
+  [[entry.duties]]
+  article = "Art. 50(3)"
+  title = "Inform people exposed to emotion recognition or biometric categorisation"
+  applies_from = 2026-08-02
+
+  [[entry.duties]]
+  article = "Art. 50(4)"
+  title = "Disclose deep fakes and AI-generated public-interest text"
+  applies_from = 2026-08-02
+
+# --- minimal -----------------------------------------------------------------
+
+[[entry]]
+tier = "minimal"
+route = "none"
+art50 = "false"
+source_url = "https://eur-lex.europa.eu/eli/reg/2026/1744/oj/eng"
+last_checked = 2026-10-27
+checked_by = "Claude (AI assistant), against the Official Journal"
+verified = true
+plan_value = ""
+discrepancy_note = ""
+note = "No tier duties: codes of conduct are voluntary (Article 95). If the label rests on the Article 6(3) exception, the provider must document that assessment before placing the system on the market (Article 6(4)), which applies with Chapter III Section 1 for Annex III systems."
+
+  [[entry.duties]]
+  article = "Art. 4"
+  title = "AI literacy"
+  applies_from = 2025-02-02
+
+  [[entry.duties]]
+  article = "Art. 95"
+  title = "Codes of conduct (voluntary)"
+  applies_from = 2026-08-02
+
+  [[entry.duties]]
+  article = "Art. 6(4)"
+  title = "Document the Article 6(3) assessment (only if relied on)"
+  applies_from = 2027-12-02
+
+# --- out-of-scope ------------------------------------------------------------
+
+[[entry]]
+tier = "out-of-scope"
+route = "none"
+art50 = "any"
+duties = []
+source_url = "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng"
+last_checked = 2026-10-27
+checked_by = "Claude (AI assistant), against the Official Journal"
+verified = true
+plan_value = ""
+discrepancy_note = ""
+note = "No AI Act tier duties: the system is not an AI system under Article 3(1), or Article 2 excludes it. Other law, such as data protection or sector rules, may still apply; check with a person if in doubt."
+
+# --- needs-human-review ------------------------------------------------------
+
+[[entry]]
+tier = "needs-human-review"
+route = "none"
+art50 = "any"
+duties = []
+source_url = "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng"
+last_checked = 2026-10-27
+checked_by = "Claude (AI assistant), against the Official Journal"
+verified = true
+plan_value = ""
+discrepancy_note = ""
+note = "No AI Act tier duties can be given until the tier is decided. Refer the case to a person, with the review reason: a missing fact, conflicting facts, or unsettled law."
