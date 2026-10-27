@@ -15,8 +15,9 @@ human, and runs with no data leaving the laptop. This is a learning project, not
 legal advice.
 
 **Status (2026-10-27):** planning complete and reviewed; build in progress. The
-evaluation tool works and a first model runs on the laptop. Next: a practice
-fine-tune. Target date 16 November 2026.
+evaluation tool works, a first model runs on the laptop, and the owner has run a
+first practice fine-tune. Next: the labelling guideline and dates table. Target
+date 16 November 2026.
 
 ---
 
@@ -83,6 +84,17 @@ loop in the first week. It is labelled practice: its numbers decide nothing.
 | Peak memory while answering | 0.67 GB |
 | Untrained answer to a simple case | Wrong tier, garbled fields (the starting point) |
 
+**Practice fine-tune** (public benchmark data; 20 held-out cases, far too few to be a
+measurement):
+
+| | Result |
+|---|---|
+| Training memory | Batch size 4 ran out of memory; batch 1 with gradient checkpointing and 8 layers peaked at 6.4 GB |
+| Training time | 12 minutes for 300 steps; trainable share 0.24%; adapter 7.2 MB |
+| Validation loss | 1.003 at the start, 0.149 at the end, still falling |
+| Held-out label accuracy | 5 of 20 untrained (it said "high-risk" every time); 16 of 20 after training |
+| Halfway snapshot (step 200) | Good loss (0.176) but 0 usable answers: every answer looped repeating article numbers |
+
 ## What went wrong, and how it was caught
 
 Kept here on purpose: these are the most useful lessons.
@@ -102,6 +114,12 @@ Kept here on purpose: these are the most useful lessons.
 - **Download listings need checking.** The first model is a vision-and-text model
   converted with a different tool, and its listing named a base model. Both were
   checked before downloading; every weights file is now fingerprint-verified.
+- **Loss is not the result.** Halfway through practice training, the validation loss
+  looked good while every answer was stuck in a loop. Only reading real answers
+  showed it. Messy article lists in the practice data had taught the habit.
+- **Borrowed memory estimates.** A figure from another project (3.9 GB to train a 0.8B
+  model) did not hold here; a two-step test run found the real limits before the
+  owner's run.
 - **Time estimates.** Early deadline options suggested months; the honest estimate
   is 15 to 20 hours of the owner's time over two to three weeks.
 
