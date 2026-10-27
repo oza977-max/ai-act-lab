@@ -53,17 +53,23 @@ _FILE_NOTE = re.compile(
 _OWNER_NOTE = re.compile(
     r"Owner decision D-[A-Z]+-\d+\s+\(\d{4}-\d{2}-\d{2}\):\s*|\s*\(owner decision D-[A-Z]+-\d+\)"
 )
-_BOLD_START = re.compile(r"(^|\. )\*\*([a-z])", re.MULTILINE)
+# A bold phrase left starting a sentence once an owner label is removed; a phrase
+# with a space only, so bold field names and JSON values keep their case.
+_BOLD_START = re.compile(r"(^|\. )\*\*([a-z])(?=[^*\n]* [^*\n]*\*\*)", re.MULTILINE)
+# Chat-template control tokens of the candidate families: Qwen and Llama 3 (<|...|>),
+# DeepSeek (fullwidth bars), Gemma (<start_of_turn>, <eos>...), Llama 2 ([INST], <s>).
 _SPECIAL_TOKEN = re.compile(
-    r"<\|[^|<>]*\|>"
-)  # chat-template control tokens such as <|im_end|>
+    r"<\|[^|<>]*\|>|<｜[^｜]*｜>|</?(?:start_of_turn|end_of_turn|bos|eos|pad|unk|s)>"
+    r"|\[/?INST\]|<</?SYS>>",
+    re.IGNORECASE,
+)
 # Things for people that must never reach a model: checked on every rendered prompt.
 _LEFTOVERS = {
     "a source paragraph": re.compile(r"\bSource:"),
     "a link": re.compile(r"https?://"),
     "a worked-example reference": re.compile(r"\b(?:PR|HR|TO|MI|OS|NR)-\d\b"),
     "an owner-decision label": re.compile(r"\bD-[A-Z]+-\d"),
-    "a file path": re.compile(r"\blab/\w+\.py\b"),
+    "a file path": re.compile(r"\blab/[\w/]+\.py\b|\b\w+\.py\b"),
 }
 _PROMPT_FILE = re.compile(r"^zero-shot-v(\d+)\.txt$")
 
@@ -89,11 +95,15 @@ def guideline_version(text: str) -> str:
 
 def _plain(body: str) -> str:
     """Section text for a model: no source paragraphs, links or example references."""
-    paragraphs = [
-        p
-        for p in re.split(r"\n\s*\n", body.strip())
-        if not p.lstrip().startswith("Source:")
-    ]
+    paragraphs = []
+    for p in re.split(r"\n\s*\n", body.strip()):
+        if not p.lstrip().startswith("Source:"):
+            paragraphs.append(p)
+        elif re.search(r"^\s*(?:[-*]|\d+\.)\s", p, re.MULTILINE):
+            # A rule line glued to a source paragraph would vanish with it.
+            raise PromptError(
+                "a 'Source:' paragraph contains a list item; separate it with a blank line"
+            )
     text = "\n\n".join(paragraphs)
     text = _LINK.sub(r"\1", text)
     text = _EXAMPLE_REF.sub("", text)
@@ -221,7 +231,11 @@ def check_matches(prompt_text: str, guideline_text: str) -> list[str]:
     for label, definition, _ in _LABEL_ROW.findall(labels):
         if f"- {label}: {definition}" not in prompt_text:
             problems.append(f"the definition of {label} differs from the guideline")
-    if prompt_text != render(guideline_text):
+    try:
+        expected = render(guideline_text)
+    except PromptError as exc:
+        return [*problems, f"the guideline cannot be rendered: {exc}"]
+    if prompt_text != expected:
         problems.append(
             "the prompt differs from what the guideline generates: run `python -m lab.prompt build`"
         )
@@ -256,8 +270,11 @@ def build(
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"zero-shot-v{max(versions, default=0) + 1}.txt"
     partial = path.with_suffix(".partial")
-    partial.write_text(text, encoding="utf-8")
-    os.replace(partial, path)  # a crash never leaves a truncated version behind
+    try:
+        partial.write_text(text, encoding="utf-8")
+        os.replace(partial, path)  # a crash never leaves a truncated version behind
+    finally:
+        partial.unlink(missing_ok=True)
     return path, True
 
 
@@ -281,7 +298,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         previous = _versions(args.out)
         path, written = build(args.guideline, args.out)
-    except (PromptError, OSError) as exc:
+    except (PromptError, OSError, ValueError) as exc:  # ValueError: a file is not UTF-8
         print(f"prompt build refused: {exc}", file=sys.stderr)
         return 1
     if written and previous:

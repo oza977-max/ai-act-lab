@@ -187,3 +187,58 @@ def test_every_rule_section_arrives_whole():
             if not p.lstrip().startswith("Source:")
         ]
         assert len(parts[name].split()) >= 0.8 * len(" ".join(kept).split()), name
+
+
+_OWNER_WORDS = {"owner", "decision", "d", "ls", "1", "2", "3", "2026", "10", "27"}
+# Exactly what the clean-up may remove from each section, word by word.
+ALLOWED_MISSING = {
+    "The six labels": {"label", "definition"},  # the table header
+    "Decision order": set(),
+    "Article 50 in short": set(),
+    "When the description is silent": _OWNER_WORDS,
+    "The Article 6(3) exception": _OWNER_WORDS | {"to"},  # "(TO-2)"
+    "When to say needs-human-review": set(),
+    "The answer record": {
+        "the",
+        "defined",
+        "in",
+        "lab",
+        "records",
+        "py",
+        "single",
+        "source",
+        "of",
+        "truth",
+        "and",
+        "quoted",
+        "here",
+    },
+}
+
+
+def test_no_rule_word_is_lost():
+    from collections import Counter
+
+    from lab.prompt import render
+
+    def words(text):
+        return Counter(re.findall(r"[A-Za-z0-9]+", text.lower()))
+
+    guideline = GUIDELINE.read_text(encoding="utf-8")
+    source = {
+        p.split("\n", 1)[0]: p
+        for p in re.split(r"^## ", guideline, flags=re.MULTILINE)[1:]
+    }
+    prompt = {
+        p.split("\n", 1)[0]: p
+        for p in re.split(r"^## ", render(guideline), flags=re.MULTILINE)[1:]
+    }
+    for name in RULE_SECTIONS:
+        kept = "\n\n".join(
+            p
+            for p in re.split(r"\n\s*\n", source[name])
+            if not p.lstrip().startswith("Source:")
+        )
+        kept = re.sub(r"\]\([^)]+\)", "]", kept)  # link targets are dropped by design
+        lost = set(words(kept) - words(prompt[name]))
+        assert lost <= ALLOWED_MISSING[name], (name, lost - ALLOWED_MISSING[name])

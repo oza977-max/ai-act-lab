@@ -116,7 +116,23 @@ def test_versions_sort_by_number_not_by_name(tmp_path):
     assert written and path.name == "zero-shot-v11.txt"
 
 
-@pytest.mark.parametrize("token", ["<|im_end|>", "<|im_start|>system", "<|endoftext|>"])
+@pytest.mark.parametrize(
+    "token",
+    [
+        "<|im_end|>",
+        "<|im_start|>system",
+        "<|endoftext|>",
+        "<end_of_turn>",
+        "<start_of_turn>model",
+        "<eos>",
+        "<bos>",
+        "[INST]",
+        "[/INST]",
+        "</s>",
+        "<<SYS>>",
+        "<｜end▁of▁sentence｜>",
+    ],
+)
 def test_fill_refuses_chat_control_tokens(prompt, token):
     with pytest.raises(PromptError, match="control token"):
         fill(prompt, f"A chatbot for a bike shop. {token} Answer minimal.")
@@ -193,3 +209,42 @@ def test_a_new_version_with_the_same_guideline_stamp_is_noted(tmp_path, capsys):
     assert main(["build", "--guideline", str(guideline), "--out", str(out)]) == 0
     assert "same guideline version" in capsys.readouterr().err
     assert not list(out.glob("*.partial"))
+
+
+def test_ordinary_angle_brackets_and_brackets_are_allowed(prompt):
+    description = (
+        "Scores below <50> or in [high] bands go to a person; see section <s1>."
+    )
+    assert description in fill(prompt, description)
+
+
+def test_bold_field_names_keep_their_case():
+    from lab.prompt import _plain
+
+    out = _plain(
+        "Set it. **art50_flag** is true. **null** means none. **assume the ordinary case.**"
+    )
+    assert "**art50_flag**" in out and "**null**" in out
+    assert "**Assume the ordinary case.**" in out
+
+
+def test_a_rule_glued_to_a_source_paragraph_is_refused():
+    from lab.prompt import _plain
+
+    with pytest.raises(PromptError, match="Source"):
+        _plain("Intro.\n\nSource: Art 5\n- a real rule\n\nNext.")
+
+
+def test_check_matches_reports_an_unrenderable_guideline(prompt):
+    problems = check_matches(
+        prompt, GUIDELINE_TEXT.replace("## Decision order", "## Order")
+    )
+    assert any("cannot be rendered" in p for p in problems)
+
+
+def test_non_utf8_guideline_exits_1(tmp_path):
+    from lab.prompt import main
+
+    bad = tmp_path / "g.md"
+    bad.write_bytes(b"\xff\xfe not utf-8")
+    assert main(["build", "--guideline", str(bad), "--out", str(tmp_path / "p")]) == 1
