@@ -18,8 +18,10 @@ legal advice.
 evaluation tool works and now marks answers strictly (a wrong field, a missing box
 or a second sentence makes an answer count as wrong, and any date in an answer is
 flagged), a first model runs on the laptop, and the owner has run a first practice
-fine-tune. Next: the full evaluation report, then the labelling guideline and dates
-table. Target
+fine-tune. The evaluation report is complete: every number carries a 95% interval,
+cited articles are checked against the official text (including the July 2026
+amendment), and two models can be compared case by case. Next: the labelling
+guideline and dates table, where the owner's decisions start. Target
 date 16 November 2026.
 
 ---
@@ -128,6 +130,12 @@ Kept here on purpose: these are the most useful lessons.
   one-sentence check rejected "Example Ltd. screens CVs." because of the period in
   "Ltd.". An independent reviewer found all three by throwing about 60 odd inputs
   at the code; each now has a test.
+- **The law's structure is not uniform.** The first valid-article table, read from
+  the Official Journal, gave Article 3 no entries because it has numbered
+  definitions rather than paragraphs. A model citing "Art. 3(1)" (the definition of
+  an AI system) would have been marked as inventing law. A reviewer caught it.
+- **Ten cases say little.** The 10-case practice exam scores 7 of 10, with a 95%
+  interval of 40% to 89%. Every number in the report now carries its interval.
 - **Time estimates.** Early deadline options suggested months; the honest estimate
   is 15 to 20 hours of the owner's time over two to three weeks.
 
