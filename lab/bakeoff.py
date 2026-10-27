@@ -202,7 +202,16 @@ class MlxGenerator:
         from mlx_lm import load
 
         mx.reset_peak_memory()
-        path = Path(snapshot_download(self.entry.repo, revision=self.entry.revision))
+        try:  # use the cached pinned revision first; fetch only if it is missing
+            path = Path(
+                snapshot_download(
+                    self.entry.repo, revision=self.entry.revision, local_files_only=True
+                )
+            )
+        except Exception:  # noqa: BLE001 - any cache miss falls back to a pinned download
+            path = Path(
+                snapshot_download(self.entry.repo, revision=self.entry.revision)
+            )
         check_build_files(snapshot_files(path))
         verify_weights(path, self.entry.weights)
         self.model, self.tokenizer = load(
