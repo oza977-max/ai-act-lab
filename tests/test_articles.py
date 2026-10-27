@@ -3,8 +3,8 @@
 import json
 
 import pytest
-
 from conftest import ROOT
+
 from lab.articles import article_number, is_valid, normalise
 
 
@@ -35,6 +35,11 @@ def test_table_matches_the_official_text_shape():
         "Annex III 4(a)",
         "Annex I 21",
         "Annex XIII (a)",
+        "Art. 3(1)",  # definitions are cited by numbered point
+        "Art. 3(14a)",  # inserted in 2026
+        "Art. 16(a)",  # lettered point, no numbered paragraph
+        "Art. 6(1A)",
+        "Annex III 4(A)",
     ],
 )
 def test_real_citations_are_valid(citation):
@@ -47,6 +52,7 @@ def test_real_citations_are_valid(citation):
         "Art. 147",  # TC-EV-4-01: the Act has 113 articles
         "Article 147",
         "Art. 6(9)",
+        "Art. 3(69)",
         "Art. 10(5)",  # deleted in 2026
         "Art. 113(1)",  # Article 113 has no numbered paragraphs
         "Annex XV",

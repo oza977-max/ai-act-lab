@@ -194,3 +194,199 @@ def test_realistic_date_is_flagged_even_in_an_unreadable_answer(eval10):
     m = measures(gold, run_dir)
     assert "E05" in m.unreadable_ids and m.date_ids == ["E05"]
     assert m.with_raw == 9
+
+
+# ---------- P1-C04: every measure ----------
+
+from lab.evaluate import metrics_json, render_report
+
+BASE = {
+    "tier": "minimal",
+    "route": None,
+    "annex_iii_area": None,
+    "annex_iii_point": None,
+    "annex_i_legislation": None,
+    "art50_flag": False,
+    "articles": ["Art. 95"],
+    "review_reason": None,
+    "reason": "It has no listed use.",
+}
+
+
+def annex_iii(area, point, **extra):
+    return {
+        **BASE,
+        "tier": "high-risk",
+        "route": "annex-iii",
+        "annex_iii_area": area,
+        "annex_iii_point": point,
+        "articles": ["Art. 6(2)", f"Annex III {point}"],
+        **extra,
+    }
+
+
+def hand_made(tmp_path, pairs):
+    """Write a gold file and outputs from (gold record, output record or raw) pairs."""
+    gold_lines, out_lines = [], []
+    for i, (g, o) in enumerate(pairs, start=1):
+        case_id = f"H{i:02d}"
+        gold_lines.append({"id": case_id, "description": "x", "gold": g})
+        if o is not None:
+            raw = o if isinstance(o, str) else json.dumps(o)
+            out_lines.append({"id": case_id, "raw": raw, "seconds": 1.0, "error": None})
+    gold = tmp_path / "gold.jsonl"
+    gold.write_text("".join(json.dumps(l) + "\n" for l in gold_lines))
+    run = tmp_path / "run"
+    run.mkdir()
+    (run / "outputs.jsonl").write_text("".join(json.dumps(l) + "\n" for l in out_lines))
+    return gold, run
+
+
+def test_tc_ev_3_01_area_accuracy_only_on_annex_iii_cases(tmp_path):
+    pairs = [
+        (annex_iii(4, "4(a)"), annex_iii(4, "4(a)")),
+        (annex_iii(5, "5(b)"), annex_iii(5, "5(b)")),
+        (annex_iii(1, "1(a)"), annex_iii(1, "1(a)")),
+        (annex_iii(8, "8(a)"), annex_iii(4, "4(a)")),  # wrong area
+    ] + [(BASE, BASE)] * 6
+    m = measures(*hand_made(tmp_path, pairs))
+    assert (m.area_correct, m.gold_annex_iii) == (3, 4)
+
+
+def test_tc_ev_4_01_invented_article_is_an_invalid_citation(tmp_path):
+    pairs = [(BASE, {**BASE, "articles": ["Art. 147"]}), (BASE, BASE)]
+    m = measures(*hand_made(tmp_path, pairs))
+    assert (m.citations_valid, m.citations) == (1, 2)
+    assert m.invalid_citation_ids == ["H01"]
+
+
+def test_tc_ev_4_02_overlap_with_gold_citations_counted(tmp_path):
+    gold = {**BASE, "articles": ["Art. 6(2)"]}
+    pairs = [
+        (gold, {**BASE, "articles": ["Art. 6", "Art. 50(1)"]}),
+        (gold, {**BASE, "articles": ["Art. 95"]}),
+    ]
+    m = measures(*hand_made(tmp_path, pairs))
+    assert (m.overlap, m.gold_with_citation) == (1, 2)
+    assert m.overlap_ids == ["H01"]
+
+
+def test_tc_ev_5_01_unreadable_output_stays_in_the_denominator(eval10):
+    gold, run_dir = eval10
+
+    def prose(lines):
+        lines[4]["raw"] = "I cannot answer that"
+        return lines
+
+    rewrite_outputs(run_dir, prose)
+    m = measures(gold, run_dir)
+    assert (m.tier_correct, m.total, m.unreadable) == (6, 10, 1)
+
+
+def test_tc_ev_5_02_missing_output_counted_as_wrong(eval10):
+    gold, run_dir = eval10
+    rewrite_outputs(run_dir, lambda lines: lines[:4] + lines[5:])
+    m = measures(gold, run_dir)
+    assert (m.tier_correct, m.total, m.missing) == (6, 10, 1)
+
+
+def test_tc_ev_6_01_every_proportion_has_an_interval_and_the_method_is_named(eval10):
+    gold, run_dir = eval10
+    report = render_report(measures(gold, run_dir), {})
+    assert "Wilson score interval, 95%" in report
+    table = report.split("## Measures", 1)[1].split("## Confusion", 1)[0]
+    rows = [r for r in table.splitlines() if r.startswith("| ") and " of " in r]
+    assert len(rows) >= 12
+    for row in rows:
+        result, interval = row.split(" | ")[1:3]
+        assert "not defined" in result or "%" in interval, row
+
+
+def test_tc_ev_8_02_article_50_flag_accuracy_reported(tmp_path):
+    yes = {
+        **BASE,
+        "tier": "transparency-only",
+        "art50_flag": True,
+        "articles": ["Art. 50(1)"],
+    }
+    pairs = (
+        [(yes, yes)] * 4 + [(yes, {**yes, "art50_flag": False})] + [(BASE, BASE)] * 5
+    )
+    m = measures(*hand_made(tmp_path, pairs))
+    assert (m.flag_yes_correct, m.gold_flag_yes) == (4, 5)
+    assert (m.flag_correct, m.total) == (9, 10)
+    assert "| Article 50 flag accuracy | 9 of 10 (90%) |" in render_report(m, {})
+
+
+def test_tc_ev_9_01_same_inputs_give_the_same_report_and_metrics(eval10):
+    import random
+
+    gold, run_dir = eval10
+    rng = random.Random(20261027)
+    run = {
+        "model": "m",
+        "prompt_version": "p",
+        "guideline_version": "g",
+        "gold_version": "v",
+        "run_date": "2026-10-27",
+        "build_revision": "b",
+    }
+    for _ in range(20):  # property: any variant of the answers repeats exactly
+
+        def shuffle_answers(lines):
+            raws = [l["raw"] for l in lines]
+            rng.shuffle(raws)
+            for l, r in zip(lines, raws):
+                l["raw"] = r
+            return lines
+
+        rewrite_outputs(run_dir, shuffle_answers)
+        first = (
+            render_report(measures(gold, run_dir), run),
+            metrics_json(measures(gold, run_dir), run),
+        )
+        second = (
+            render_report(measures(gold, run_dir), run),
+            metrics_json(measures(gold, run_dir), run),
+        )
+        assert first == second
+        assert all(v in first[0] for v in ("m", "p", "g", "v", "2026-10-27"))
+
+
+def test_tc_ev_10_01_report_opens_with_a_plain_english_summary(eval10):
+    gold, run_dir = eval10
+    report = render_report(measures(gold, run_dir), {})
+    first = report.split("\n## ", 2)[1]
+    assert first.startswith("Summary")
+    assert "when it answered" in first and "does not show" in first
+    assert "|" not in first
+
+
+def test_realistic_unreadable_answers_cite_nothing_and_overlap_nothing(tmp_path):
+    gold = {**BASE, "articles": ["Art. 95"]}
+    pairs = [(gold, "Minimal risk under Art. 95."), (gold, None)]
+    m = measures(*hand_made(tmp_path, pairs))
+    assert (m.citations, m.overlap, m.gold_with_citation) == (0, 0, 2)
+
+
+def test_realistic_invalid_gold_record_is_an_error(eval10):
+    gold, _run_dir = eval10
+    gold.write_text(
+        gold.read_text().replace('"articles": ["Art. 95"]', '"articles": []', 1)
+    )
+    with pytest.raises(EvaluationError, match="articles required"):
+        load_gold(gold)
+
+
+def test_realistic_empty_raw_text_is_not_counted_as_text(tmp_path):
+    pairs = [(BASE, "   "), (BASE, BASE)]
+    m = measures(*hand_made(tmp_path, pairs))
+    assert (m.with_raw, m.unreadable) == (1, 1)
+
+
+def test_realistic_rounding_never_shows_all_or_none_falsely():
+    from lab.evaluate import _fraction
+
+    assert _fraction(199, 200) == "199 of 200 (99%)"
+    assert _fraction(1, 200) == "1 of 200 (1%)"
+    assert _fraction(200, 200) == "200 of 200 (100%)"

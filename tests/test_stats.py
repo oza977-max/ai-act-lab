@@ -57,7 +57,7 @@ def test_paired_bootstrap_known_answer_one_model_always_better():
     # B is right only where A is: every resample gives a difference >= 0.
     a = [True] * 10
     b = [True] * 5 + [False] * 5
-    diff, low, high = paired_bootstrap_diff(a, b, seed=20261026)
+    diff, low, _high = paired_bootstrap_diff(a, b, seed=20261026)
     assert diff == 0.5 and low > 0
 
 

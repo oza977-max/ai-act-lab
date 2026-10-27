@@ -37,5 +37,5 @@ def test_rule_breaking_answer_is_unreadable_and_dates_are_flagged(eval10):
     assert result.returncode == 0, result.stderr
     assert "Tier correct: 6 of 10" in result.stdout
     report = (run_dir / "report.md").read_text(encoding="utf-8")
-    assert "| Unreadable answers | 1 (E01) |" in report
-    assert "| Dates found | 1 of 10 (E02) |" in report
+    assert "| Format failures | 1 of 10 (10%) | 2% to 40% | E01 |" in report
+    assert "| Dates found | 1 of 10 (10%) | 2% to 40% | E02 |" in report

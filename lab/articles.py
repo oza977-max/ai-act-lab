@@ -38,9 +38,11 @@ def _parse(citation: str) -> tuple[str, str, str | None, str] | None:
     text = citation.strip()
     if m := _ARTICLE.fullmatch(text):
         points = re.sub(r"\s+", "", m.group(3)).lower()
-        return "article", m.group(1).lower(), m.group(2), points
+        paragraph = m.group(2).lower() if m.group(2) else None
+        return "article", m.group(1).lower(), paragraph, points
     if m := _ANNEX.fullmatch(text):
-        return "annex", m.group(1).upper(), m.group(2), ""
+        point = m.group(2).lower() if m.group(2) else None
+        return "annex", m.group(1).upper(), point, ""
     return None
 
 

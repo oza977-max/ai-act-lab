@@ -31,7 +31,9 @@ def wilson(k: int, n: int) -> tuple[float, float] | None:
     centre = p + z2 / (2 * n)
     half = Z_95 * math.sqrt(p * (1 - p) / n + z2 / (4 * n * n))
     denominator = 1 + z2 / n
-    return max(0.0, (centre - half) / denominator), min(1.0, (centre + half) / denominator)
+    return max(0.0, (centre - half) / denominator), min(
+        1.0, (centre + half) / denominator
+    )
 
 
 def _percentile_interval(values: list[float]) -> tuple[float, float]:
@@ -99,5 +101,7 @@ def kappa_bootstrap(
     )
     if not values:
         return None
-    low, high = _percentile_interval(values) if len(values) > 1 else (values[0], values[0])
+    low, high = (
+        _percentile_interval(values) if len(values) > 1 else (values[0], values[0])
+    )
     return low, high, skipped
