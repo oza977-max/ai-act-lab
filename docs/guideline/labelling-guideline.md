@@ -87,10 +87,14 @@ tier. Question 4 sets the flag for every tier except `prohibited` and
      nature of a sexual act depicted, is not manipulation (Art. 5(1b)).
 
    Safeguards count only if they **reliably** prevent the output and misuse that is
-   reported gets corrected. If the description says users can repeatedly get
-   round the safeguards and nothing was done about it, the provider's system is prohibited.
-   If a general image or video tool's description says nothing about safeguards,
-   assume the ordinary case (working safeguards) and carry on. If yes: `prohibited`.
+   reported gets corrected. Four situations:
+   - the description says a tool that takes real people's photos, video or voices
+     has no safeguards against this output: prohibited;
+   - it says users can repeatedly get round the safeguards and says the problem was
+     not corrected: prohibited;
+   - it reports users getting round them but says nothing about a response: assume
+     the ordinary case (it was corrected) and carry on;
+   - it says nothing about safeguards: assume working safeguards and carry on. If yes: `prohibited`.
 3. **Is it high-risk through Annex I or Annex III, after the Article 6(3) exception?**
    - Annex I route (Art. 6(1)): the AI system is a safety component of a product, or
      is itself a product, covered by legislation listed in Annex I, and that product
@@ -137,8 +141,9 @@ disclaimer in the description does not change it.
   (assisting standard editing, or not substantially altering the input or its
   meaning) to cover summaries, extracts, transcriptions and format conversions of
   material the user supplies: those alone do not set the flag. This reading is provisional and
-  will be revisited if Commission guidance on Article 50 says otherwise. A chatbot is flagged and cited
-  under 50(1); add 50(2) only if it also generates images, audio or video.
+  will be revisited if Commission guidance on Article 50 says otherwise. A tool whose main purpose is
+  conversation is flagged and cited under 50(1), even if it drafts text along the
+  way; add 50(2) only if it also generates images, audio or video.
 - **50(3), emotion recognition or biometric categorisation.** The deployer must tell
   the people exposed: flag `true` whenever such a system is used and is not
   prohibited. Categorisation that is only ancillary to another service, such as a
@@ -216,7 +221,7 @@ The rule here, the owner's simplification of the "no significant risk" test:
 - Clearly stated: decide the tier from the remaining questions (`transparency-only`
   if an Article 50 duty applies, otherwise `minimal`) and cite Art. 6(3) and the
   Annex III point, never Art. 95(1).
-- `unsettled-law` is only for a task that **is** clearly described, where whether
+- Within this exception, `unsettled-law` is only for a task that **is** clearly described, where whether
   that task counts as one of the four is something the Act's text does not settle.
 
 Source: Art. 3(52), 6(3) and 6(4) of the amended Act
@@ -270,7 +275,10 @@ in `lab/records.py` (the single source of truth) and quoted here.
 Article 50 paragraph or paragraphs when the flag is `true` (and only then). For a high-risk case, Art. 6(1) or
 6(2) and the Annex point. For an Article 6(3) result, Art. 6(3) and the Annex III
 point, plus any Article 50 paragraph that sets the flag, and nothing else; with the
-flag `true` the tier is `transparency-only`, otherwise `minimal`. For any other `minimal` case, Art. 95(1). For a review case, the provisions in doubt, or
+flag `true` the tier is `transparency-only`, otherwise `minimal`. For any other `minimal` case, Art. 95(1). For a ban under
+Art. 5(1)(ba) or (bb), also cite Art. 5(1a). Write `annex_i_legislation` as the
+act's number and short title, such as "Regulation (EU) 2017/745 on medical
+devices". For a review case, the provisions in doubt, or
 none. Provisions that were considered and do not apply are not cited.
 
 The record never holds a date, deadline or list of duties. Those come from the
@@ -310,7 +318,7 @@ prohibited (see HR-2); the ban covers workplaces and schools, except for medical
 safety reasons.
 
 ```json
-{"tier": "prohibited", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Art. 5(1)(f)"], "review_reason": null, "reason": "Inferring employees' emotions at work, for no medical or safety reason, is a banned practice."}
+{"tier": "prohibited", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Art. 5(1)(f)"], "review_reason": null, "reason": "Inferring employees' emotions at work, with no medical or safety reason given, is a banned practice."}
 ```
 
 ### Example PR-3 (prohibited)
@@ -472,7 +480,11 @@ excludes systems used to detect financial fraud. The facts are clear; the open
 question is whether that exclusion is judged by the system's **purpose** (built to
 catch fraud, so excluded) or by its **effect** (it alone decides who gets credit,
 so high-risk). No guidance answers it yet. Owner decision D-LS-4 (2026-10-27):
-keep such cases as review until it does.
+keep such cases as review until it does. The question arises only when a fraud
+score on credit applications **alone** decides access to credit. A fraud score on
+card payments, or one that only routes a file to a person who still checks the
+applicant's ability to repay, is decided: excluded fraud detection, so not
+Annex III 5(b).
 
 ```json
 {"tier": "needs-human-review", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Annex III 5(b)"], "review_reason": "unsettled-law", "reason": "It is open whether the fraud-detection exclusion is judged by purpose, which excludes this score, or by effect, since the score alone decides who gets a loan."}
