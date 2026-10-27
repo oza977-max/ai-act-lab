@@ -5,8 +5,8 @@ Command:
 
 Reads `outputs.jsonl` and `run.json` from the run folder, prints the headline
 numbers, and writes `report.md` into the run folder. This chunk covers tier
-accuracy, share answered, answered-case accuracy and the review rates; the
-remaining measures and intervals arrive in P1-C04.
+accuracy, share answered, answered-case accuracy, the review rates and dates
+found (P1-C03); the remaining measures and intervals arrive in P1-C04.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from lab.records import REVIEW_TIER, TIERS, parse_answer
+from lab.records import REVIEW_TIER, TIERS, contains_date, parse_answer
 
 
 class EvaluationError(Exception):
@@ -39,6 +39,9 @@ class Measures:
     missing: int = 0
     unreadable_ids: list[str] = field(default_factory=list)
     missing_ids: list[str] = field(default_factory=list)
+    with_raw: int = 0
+    dates_found: int = 0
+    date_ids: list[str] = field(default_factory=list)
     confusion: dict[str, dict[str, int]] = field(
         default_factory=lambda: defaultdict(lambda: defaultdict(int))
     )
@@ -126,6 +129,14 @@ def load_outputs(path: Path) -> dict[str, dict]:
     return _index_by_id(_read_jsonl(path), path)
 
 
+def _raw_text(output: dict | None) -> str | None:
+    """The model's text, or None when the answer is missing or not text."""
+    if output is None or output.get("error") == "missing":
+        return None
+    raw = output.get("raw")
+    return raw if isinstance(raw, str) else None
+
+
 def _predicted_tier(output: dict | None) -> tuple[str | None, str]:
     """Return (tier or None, status) where status is ok, unreadable or missing."""
     if output is None or output.get("error") == "missing":
@@ -140,8 +151,16 @@ def evaluate(gold: dict[str, str], outputs: dict[str, dict]) -> Measures:
         raise EvaluationError(f"output ids not in the gold set: {', '.join(extra)}")
     m = Measures()
     for case_id, gold_tier in gold.items():
-        predicted, status = _predicted_tier(outputs.get(case_id))
+        output = outputs.get(case_id)
+        predicted, status = _predicted_tier(output)
         m.total += 1
+        raw = _raw_text(output)
+        if raw is not None:
+            # Dates are scanned in the raw text, even when the answer is unreadable.
+            m.with_raw += 1
+            if contains_date(raw):
+                m.dates_found += 1
+                m.date_ids.append(case_id)
         if status == "missing":
             m.missing += 1
             m.missing_ids.append(case_id)
@@ -209,6 +228,7 @@ def render_report(m: Measures, run: dict) -> str:
         f"| Review when gold does not | {_fraction(m.review_when_gold_not, m.gold_not_review)} |",
         f"| Unreadable answers | {m.unreadable} ({', '.join(m.unreadable_ids) or 'none'}) |",
         f"| Missing answers | {m.missing} ({', '.join(m.missing_ids) or 'none'}) |",
+        f"| Dates found | {_fraction(m.dates_found, m.with_raw)} ({', '.join(m.date_ids) or 'none'}) |",
         "",
         "## Confusion table (rows: gold tier; columns: answer)",
         "",

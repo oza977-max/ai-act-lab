@@ -28,7 +28,9 @@ def test_rule_breaking_answer_is_unreadable_and_dates_are_flagged(eval10):
             # Right tier, but a 41-word reason: no longer counts as correct.
             "E01": {"reason": " ".join(["word"] * 40) + " end."},
             # Still a valid record, but it states a date.
-            "E02": {"reason": "It filters job applicants and applies from 2 August 2026."},
+            "E02": {
+                "reason": "It filters job applicants and applies from 2 August 2026."
+            },
         },
     )
     result = run_cli(gold, run_dir)

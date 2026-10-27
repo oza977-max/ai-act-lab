@@ -160,3 +160,37 @@ def test_realistic_unicode_line_separator_inside_raw_answer(eval10):
         encoding="utf-8",
     )
     assert measures(gold, run_dir).tier_correct == 7
+
+
+def test_tc_ev_8_01_date_in_output_is_flagged(eval10):
+    gold, run_dir = eval10
+
+    def dated(lines):
+        for l in lines:
+            if l["id"] == "E03":
+                record = json.loads(l["raw"])
+                record["reason"] = "It scores credit and applies from 2 August 2026."
+                l["raw"] = json.dumps(record)
+        return lines
+
+    rewrite_outputs(run_dir, dated)
+    m = measures(gold, run_dir)
+    assert m.date_ids == ["E03"]
+    assert (m.dates_found, m.with_raw) == (1, 10)
+
+
+def test_realistic_date_is_flagged_even_in_an_unreadable_answer(eval10):
+    gold, run_dir = eval10
+
+    def prose(lines):
+        for l in lines:
+            if l["id"] == "E05":
+                l["raw"] = "Minimal risk; obligations start 2026-08-02."
+            if l["id"] == "E06":
+                l["raw"] = None
+        return lines
+
+    rewrite_outputs(run_dir, prose)
+    m = measures(gold, run_dir)
+    assert "E05" in m.unreadable_ids and m.date_ids == ["E05"]
+    assert m.with_raw == 9
