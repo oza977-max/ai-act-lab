@@ -190,7 +190,10 @@ def _draft_problems(case: dict) -> list[str]:
     if not isinstance(draft, dict):
         return [*problems, "the draft record is not an object"]
     problems += [f"draft record: {p}" for p in record_problems(draft)]
-    if any(";" in a for a in draft.get("articles") or [] if isinstance(a, str)):
+    articles = draft.get("articles")
+    if isinstance(articles, list) and any(
+        isinstance(a, str) and ";" in a for a in articles
+    ):
         problems.append(
             "draft record: an article contains ';', which the sheet uses between articles"
         )
@@ -221,7 +224,9 @@ def read_drafts(path: Path) -> dict[str, dict]:
             f"no draft file {path}; a sheet must be named batch-NN.csv to match batch-NN.jsonl"
         )
     drafts: dict[str, dict] = {}
-    for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    # Split on newlines only, as the evaluation does: other Unicode line breaks are text.
+    lines = path.read_text(encoding="utf-8").split("\n")
+    for n, line in enumerate((line.rstrip("\r") for line in lines), start=1):
         if not line.strip():
             continue
         try:
@@ -361,6 +366,13 @@ def check_rows(
                 f"guideline version {row['guideline_version']!r} is not the guideline's {version}"
             )
         draft = drafts.get(case_id)
+        if (
+            draft is not None
+            and row["guideline_version"].strip() != draft["guideline_version"]
+        ):
+            flag(
+                "the guideline version differs from the draft's; the case needs drafting again"
+            )
         proposed = None
         if draft is None:
             flag("no draft has this id")

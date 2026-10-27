@@ -472,3 +472,30 @@ def test_a_draft_batch_without_a_sheet_is_named(full):
     (full / "drafts" / "batch-06.jsonl").write_text("", encoding="utf-8")
     with pytest.raises(GoldError, match="batch-06.jsonl has no review sheet"):
         assemble(full / "review", full / "drafts", GUIDELINE)
+
+
+def test_a_hand_edited_guideline_version_is_caught(batch):
+    case = one_case(guideline_version="v0")
+    drafts, sheet = batch(case)
+    edit_rows(sheet, decision="accept", guideline_version="v1")
+    assert any("differs from the draft's" in p for p in problems(drafts, sheet))
+
+
+def test_non_list_articles_in_a_draft_are_refused_cleanly(batch):
+    case = one_case()
+    with pytest.raises(GoldError):
+        batch({**case, "draft": {**case["draft"], "articles": 5}})
+
+
+def test_a_unicode_line_separator_inside_a_draft_is_text(batch):
+    case = one_case()
+    case["description"] = case["description"].replace(
+        " fictional", "\u2028fictional", 1
+    )
+    drafts, _sheet = batch(case)
+    raw = drafts.read_text(encoding="utf-8")
+    drafts.write_text(raw.replace("\\u2028", "\u2028"), encoding="utf-8")
+    assert "\u2028" in drafts.read_text(encoding="utf-8")
+    from lab.gold import read_drafts
+
+    assert read_drafts(drafts)["GC-001"]["description"] == case["description"]

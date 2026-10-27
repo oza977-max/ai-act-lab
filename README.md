@@ -27,7 +27,8 @@ and the owner approved it. The [zero-shot prompt](prompts/zero-shot-v1.txt) is n
 generated from that guideline, so the two cannot drift apart. The
 [dates-and-duties table](data/dates/dates-table.toml) is built, every date read
 from the Official Journal, and the owner approved it. Phase 2 is complete.
-Next: Phase 3, the gold set.
+Phase 3 has started: the tools that turn drafted cases and the owner's review
+sheets into the gold set are built. Next: the first batch of 20 cases.
 Target date 16 November 2026.
 
 ## Start here
@@ -53,12 +54,12 @@ Pick the path that fits you:
 
 | Measure | Now |
 |---|---|
-| Build chunks done | 8 of 21 (2 of 4 phases complete) |
-| Automated tests | 338 passing |
-| Independent review passes | 23 passes over 8 chunks; 49 serious findings caught and fixed before commit |
-| Learning entries | 18, plus 1 film |
+| Build chunks done | 9 of 21 (2 of 4 phases complete) |
+| Automated tests | 408 passing |
+| Independent review passes | 26 passes over 9 chunks; 55 serious findings caught and fixed before commit |
+| Learning entries | 19, plus 1 film |
 | Training runs logged | 1 |
-| Commits | 60 |
+| Commits | 66 |
 
 **Build log.** Each chunk is reviewed by an independent reviewer until a pass finds nothing serious; the numbers show the serious findings each pass found.
 
@@ -72,7 +73,7 @@ Pick the path that fits you:
 | P2-C01 | Guideline v1 | 10 → 8 → 3 → 4 → 3 → 1 → 0 | [handover](build/handovers/P2-C01.md) |
 | P2-C02 | Prompt build | 1 → 1 → 0 | [handover](build/handovers/P2-C02.md) |
 | P2-C03 | Dates table | 6 → 3 → 0 | [handover](build/handovers/P2-C03.md) |
-| P3-C01 | Gold tooling | not started |  |
+| P3-C01 | Gold tooling | 5 → 1 → 0 | [handover](build/handovers/P3-C01.md) |
 | P3-C02 | Gold batch 1 | not started |  |
 | P3-C03 | Gold batch 2 | not started |  |
 | P3-C04 | Gold batch 3 | not started |  |
@@ -214,6 +215,11 @@ Kept here on purpose: these are the most useful lessons.
   dates table was ever wrong, but the first draft listed only some of the
   high-risk duties without saying so. Reviewers needed three rounds (6, 3 and 0
   serious findings); every high-risk entry now says what it leaves out.
+- **The worst bug is silent.** The first version of the gold tools would have
+  ignored a label the owner typed if they forgot to switch "accept" to "change".
+  Reviewers (5, 1 and 0 serious findings) also showed how ordinary spreadsheet
+  habits could lock the owner out. Now every surprise is reported by case id,
+  and nothing Claude drafts reaches the owner unless it reads back unchanged.
 - **Ten cases say little.** The 10-case practice exam scores 7 of 10, with a 95%
   interval of 40% to 89%. Every number in the report now carries its interval.
 - **Time estimates.** Early deadline options suggested months; the honest estimate
