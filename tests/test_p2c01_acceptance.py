@@ -33,9 +33,24 @@ def section(text, heading):
 
 def examples(text):
     return [
-        {"id": m[1], "label": m[2], "boundary": bool(m[3]), "record": json.loads(m[5])}
+        {
+            "id": m[1],
+            "label": m[2],
+            "boundary": bool(m[3]),
+            "description": m[4],
+            "record": json.loads(m[5]),
+        }
         for m in _EXAMPLE.finditer(section(text, "Worked examples"))
     ]
+
+
+def test_every_example_heading_has_its_own_record(text):
+    headings = re.findall(
+        r"^### Example ", section(text, "Worked examples"), re.MULTILINE
+    )
+    found = examples(text)
+    assert len(found) == len(headings)
+    assert all("### Example" not in e["description"] for e in found)
 
 
 def test_tc_ls_1_01_six_labels_each_resting_on_an_article(text):
@@ -46,7 +61,10 @@ def test_tc_ls_1_01_six_labels_each_resting_on_an_article(text):
     )
     assert [r[0] for r in rows] == list(LABELS)
     for label, definition, rests_on in rows:
-        assert definition.count(".") >= 1 and rests_on.strip(), label
+        assert len(definition.split()) >= 8 and definition.endswith("."), label
+        if label == REVIEW_TIER:
+            assert "project label" in rests_on  # the Act has no such label
+            continue
         assert all(is_valid(c.strip()) for c in rests_on.split(";")), rests_on
     assert len(rows) == 6  # no seventh label such as limited-risk
 
@@ -89,8 +107,12 @@ def test_tc_ls_6_01_decidable_credit_case_is_high_risk(text):
 def test_tc_ls_6_02_ranking_tool_without_purpose_goes_to_review(text):
     review = [e for e in examples(text) if e["label"] == REVIEW_TIER]
     assert {e["record"]["review_reason"] for e in review} >= {"missing-fact"}
-    ranking = [e for e in review if "ranks people" in section(text, "Worked examples")]
+    ranking = [e for e in review if "ranks people" in e["description"]]
     assert ranking
+    assert all(e["record"]["review_reason"] == "missing-fact" for e in ranking)
+    assert all(
+        e["record"]["articles"] == [] or e["record"]["articles"] for e in ranking
+    )
 
 
 def test_review_rule_is_narrow_and_names_three_reasons(text):
@@ -110,9 +132,11 @@ def test_tc_ls_8_01_article_6_3_rule_names_draft_guidance(text):
     rule = section(text, "The Article 6(3) exception")
     assert "Art. 6(3)" in rule
     assert "draft Commission guidelines" in rule
-    assert "eur-lex.europa.eu" in rule and re.search(r"checked on 2026-\d\d-\d\d", rule)
+    assert "eur-lex.europa.eu" in rule and re.search(
+        r"checked on\s+2026-\d\d-\d\d", rule
+    )
     assert not re.search(
-        r"final (Commission )?(Article 6|classification) guidelines",
+        r"(final|adopted) (Commission )?(Article 6|classification) guidelines",
         rule,
         re.IGNORECASE,
     )
@@ -122,6 +146,55 @@ def test_ls_8_sources_link_the_amended_act(text):
     sources = section(text, "Sources")
     assert "2024/1689" in sources and "2026/1744" in sources
     assert "eur-lex.europa.eu" in sources and "checked on" in sources
+
+
+@pytest.mark.parametrize(
+    "heading",
+    [
+        "Decision order",
+        "Article 50 in short",
+        "When the description is silent",
+        "The Article 6(3) exception",
+        "When to say needs-human-review",
+        "The answer record",
+    ],
+)
+def test_ls_8_every_rule_section_names_its_source(text, heading):
+    rule = section(text, heading)
+    assert "Source:" in rule
+    assert "eur-lex.europa.eu" in rule and re.search(
+        r"checked on\s+2026-\d\d-\d\d", rule
+    )
+
+
+def test_tc_ls_9_01_complete_example_is_a_valid_record(text):
+    block = re.search(
+        r"Complete example:\n\n```json\n(.*?)\n```",
+        section(text, "The answer record"),
+        re.DOTALL,
+    )
+    record = Record.from_json(json.loads(block.group(1)))
+    assert validate(record) == []
+    assert set(json.loads(block.group(1))) == set(FIELD_NAMES)
+
+
+def test_flag_is_false_when_article_50_is_never_reached(text):
+    for e in examples(text):
+        if e["label"] in ("prohibited", "out-of-scope"):
+            assert e["record"]["art50_flag"] is False, e["id"]
+    assert "always `false`" in section(text, "Decision order")
+
+
+def test_tc_ls_3_01_and_3_02_flag_independent_of_tier(text):
+    found = examples(text)
+    assert any(e["label"] == "high-risk" and e["record"]["art50_flag"] for e in found)
+    assert any(e["label"] == "minimal" and not e["record"]["art50_flag"] for e in found)
+
+
+def test_amended_prohibitions_and_safety_components_are_covered(text):
+    order = section(text, "Decision order")
+    for phrase in ("(ba)", "(bb)", "5(1a)", "Art. 6(1a)", "Art. 6(1b)"):
+        assert phrase in order, phrase
 
 
 def test_ls_9_record_fields_quoted_from_records(text):
@@ -140,4 +213,7 @@ def test_tc_gs_6_01_gold_set_is_never_train(text):
 def test_owner_decisions_are_written_down(text):
     assumptions = section(text, "When the description is silent")
     assert "used in the EU" in assumptions
-    assert "profiling" in section(text, "The Article 6(3) exception")
+    rule = section(text, "The Article 6(3) exception")
+    assert "Not clearly stated means high-risk" in rule
+    assert "always high-risk" in rule and "Art. 3(52)" in rule
+    assert "never on the Annex I route" in rule

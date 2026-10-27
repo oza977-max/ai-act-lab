@@ -12,55 +12,119 @@ It classifies **AI systems**, not general-purpose AI models: the obligations for
 models in Chapter V are not a tier here. It is a learning project's rulebook, not
 legal advice.
 
+All citations are to Regulation (EU) 2024/1689 as amended by Regulation (EU)
+2026/1744 ([Act](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng),
+[amendment](https://eur-lex.europa.eu/eli/reg/2026/1744/oj/eng)). The Act was
+read on 2026-10-27; the status of Commission guidance was checked on 2026-10-26,
+during the requirements phase.
+
 ## The six labels
 
 Exactly six labels exist. There is no "limited-risk" or "general-purpose" label.
 
 | Label | Definition | Rests on |
 |---|---|---|
-| `prohibited` | The system carries out a practice the Act bans outright, such as social scoring or emotion recognition at work. | Art. 5(1) |
-| `high-risk` | The system is a safety component of, or is itself, a product under the Annex I legislation needing third-party assessment, or it serves an Annex III use and the Article 6(3) exception does not apply. | Art. 6(1); Art. 6(2) |
+| `prohibited` | The system carries out a practice the Act bans outright, such as social scoring, emotion recognition at work, or generating non-consensual intimate images. | Art. 5(1) |
+| `high-risk` | The system is a safety component of, or is itself, a product under the Annex I legislation that needs third-party assessment, or it serves an Annex III use and the Article 6(3) exception does not apply. | Art. 6(1); Art. 6(2) |
 | `transparency-only` | The system is not prohibited or high-risk, but an Article 50 duty applies, such as telling people they are talking to a machine or marking generated content. | Art. 50(1); Art. 50(2); Art. 50(3); Art. 50(4) |
-| `minimal` | The system is an AI system within scope, and no prohibition, high-risk route or Article 50 duty applies, so only voluntary codes of conduct concern it. | Art. 95(1) |
+| `minimal` | The system is an AI system within scope, and no prohibition, high-risk route or Article 50 duty applies. | Art. 4(1); Art. 95(1) |
 | `out-of-scope` | The thing described is not an AI system under the definition, or the Act excludes it, for example military use or use for scientific research only. | Art. 3(1); Art. 2(3); Art. 2(6) |
-| `needs-human-review` | This project's label, not the Act's: the description does not let a careful reader decide the tier, for one of three narrow reasons. | Art. 6(2); Art. 6(3) |
+| `needs-human-review` | This project's label, not the Act's: the description does not let a careful reader decide the tier, for one of three narrow reasons. | none: a project label |
 
 The **Article 50 flag** is separate from the tier (`art50_flag`). A high-risk
 recruitment chatbot is `high-risk` with the flag set to `true`. The tier
 `transparency-only` is used only when Article 50 is the highest thing that applies.
 
+Duties that apply to every AI system whatever its tier, such as AI literacy
+(Art. 4(1)), are not a tier and are not recorded.
+
 ## Decision order
 
-Ask the questions in this order and stop at the first one that decides the tier.
-Question 4 is always answered, because it sets the flag for every tier.
+Ask questions 1 to 3 and 5 in order and stop at the first one that decides the
+tier. Question 4 sets the flag for every tier except `prohibited` and
+`out-of-scope`, whose flag is always `false`, because Article 50 is never reached.
 
-1. **Is it an AI system, and within the Act's scope?** Use the definition in
-   Art. 3(1) (a machine-based system that infers from its input how to produce
-   outputs such as predictions, content, recommendations or decisions) and the
-   exclusions in Art. 2. Fixed rules written by people, with no inference, are not
-   an AI system. If no: `out-of-scope`.
-2. **Is it a prohibited practice?** Check Art. 5(1). If yes: `prohibited`.
+1. **Is it an AI system, and within the Act's scope?** An AI system is a
+   machine-based system, designed to operate with some autonomy, that infers from
+   its input how to produce outputs such as predictions, content, recommendations
+   or decisions that can influence its environment (Art. 3(1)). Rules written by
+   people, simple heuristics and basic data processing infer nothing, so they are
+   not AI systems. Then check the exclusions:
+   - used exclusively for military, defence or national-security purposes (Art. 2(3));
+   - developed and used for the sole purpose of scientific research (Art. 2(6));
+   - research, testing or development before it is placed on the market (Art. 2(8));
+   - used by a person for a purely personal, non-professional activity (Art. 2(10));
+   - released under a free and open-source licence, unless it is prohibited,
+     high-risk or an Article 50 system (Art. 2(12)).
+
+   If it is not an AI system, or an exclusion applies: `out-of-scope`.
+2. **Is it a prohibited practice?** Check every point of Art. 5(1), including
+   points (ba) and (bb) added in 2026: generating non-consensual intimate images of
+   an identifiable person, and generating child sexual abuse material. Paragraphs
+   5(1a) and 5(1b) say when those two apply. If yes: `prohibited`.
 3. **Is it high-risk through Annex I or Annex III, after the Article 6(3) exception?**
-   Annex I route: Art. 6(1). Annex III route: Art. 6(2), then the exception in
-   Art. 6(3) as set out below. If yes: `high-risk`, with the route recorded.
-4. **Do Article 50 duties apply?** Set `art50_flag`. If the tier is still open and
-   the answer is yes: `transparency-only`.
+   - Annex I route (Art. 6(1)): the AI system is a safety component of a product, or
+     is itself a product, covered by legislation listed in Annex I, and that product
+     needs a third-party conformity assessment. Since 2026, a system used only for
+     non-safety aspects such as user assistance, performance optimisation, service
+     efficiency, convenience or quality control is not a safety component
+     (Art. 6(1a)), unless its failure would endanger health and safety (Art. 6(1b)).
+   - Annex III route (Art. 6(2)): the system serves one of the uses listed in
+     Annex III, unless the Article 6(3) exception applies (see below).
+
+   If yes: `high-risk`, with the route recorded.
+4. **Do Article 50 duties apply?** Set `art50_flag` using "Article 50 in short"
+   below. If the tier is still open and the answer is yes: `transparency-only`.
 5. **Otherwise: minimal.**
 
 At any step, if the step cannot be decided for one of the three reasons in
 "When to say needs-human-review", stop with `needs-human-review`.
 
+Source: Art. 2, 3(1), 5, 6(1) to 6(3), 50 and Annex I and III of the amended Act
+([official text](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng), checked on
+2026-10-27); Commission guidelines on the AI system definition and on prohibited
+practices (adopted, February 2025).
+
+## Article 50 in short
+
+The flag records that a duty **applies**, not whether it was met: a sign or a
+disclaimer in the description does not change it.
+
+- **50(1), interaction.** A system meant to interact directly with people, such as a
+  chatbot or voice assistant: flag `true`, unless the description says it is obvious
+  to people that they are dealing with a machine. Treat a chatbot as not obvious by
+  default.
+- **50(2), generated content.** A system that generates synthetic audio, images,
+  video or text: flag `true`, unless it only assists standard editing or does not
+  substantially alter the input.
+- **50(3), emotion recognition or biometric categorisation.** The deployer must tell
+  the people exposed: flag `true` whenever such a system is used and is not
+  prohibited.
+- **50(4), deep fakes and public-interest text.** The deployer must disclose deep
+  fakes, and AI-generated text published to inform the public, unless a person
+  reviewed it and holds editorial responsibility: flag `true`.
+- Systems authorised by law for detecting or investigating crime have exceptions;
+  a gold case that turns on them is not used in v1.
+
+Source: Art. 50(1) to 50(4)
+([official text](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng), checked on
+2026-10-27).
+
 ## When the description is silent
 
 Owner decision D-LS-1 (2026-10-27): **assume the ordinary case.**
 
-- Assume the system is used in the EU, by a professional user, and works as the
-  description says.
+- Assume the system is used in the EU, by a professional user (so the personal-use
+  exclusion does not apply), and works as the description says.
 - Do not invent facts that would change the tier. If the purpose or setting is
   what decides the tier and the description does not give it, the case goes to
   review with `missing-fact`.
 - When an assumption mattered, say so in the reason sentence, for example
   "Assuming use in the EU, ...".
+
+Source: territorial scope and exclusions, Art. 2(1) and 2(10)
+([official text](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng), checked on
+2026-10-27).
 
 ## The Article 6(3) exception
 
@@ -68,27 +132,32 @@ Owner decision D-LS-2 (2026-10-27): **the exception must be stated clearly.**
 
 Under Art. 6(3), a system serving an Annex III use is not high-risk when it does
 not pose a significant risk of harm, including by not materially influencing a
-decision. The Act lists four such cases: a narrow procedural task; improving the
-result of a human activity already completed; detecting decision-making patterns
-without replacing or influencing the human assessment without proper review; or a
+decision. The Act lists four cases: a narrow procedural task; improving the result
+of a human activity already completed; detecting decision-making patterns without
+replacing or influencing the human assessment without proper review; or a
 preparatory task. **A system that profiles people is always high-risk**, whatever
-its task. The provider must document its assessment before placing the system on
-the market (Art. 6(4)).
+its task. Profiling means automated evaluation of personal aspects of a person,
+such as their work performance, economic situation, health, preferences,
+reliability, behaviour, location or movements (Art. 3(52), which points to the
+GDPR's definition). The provider must document its assessment before placing the
+system on the market (Art. 6(4)); that duty is not recorded (no duties in the
+record).
 
-The rule here:
+The rule here, the owner's simplification of the "no significant risk" test:
 
-- The label stays `high-risk` unless the description **clearly** says the task is
-  one of the four, **and** it does not say or imply profiling of people.
-- Clearly stated and no profiling: decide the tier from the remaining questions,
+- The exception applies only on the Annex III route, never on the Annex I route.
+- **Not clearly stated means high-risk.** The label stays `high-risk` unless the
+  description clearly says the task is one of the four, **and** nothing in it
+  evaluates people as described above.
+- Clearly stated, and no profiling: decide the tier from the remaining questions,
   usually `minimal`, and cite Art. 6(3) and the Annex III point.
-- Where the answer turns on how the Commission will read one of the four cases,
-  and the text alone cannot settle it, use `needs-human-review` with
-  `unsettled-law`.
+- `unsettled-law` is only for a task that **is** clearly described, where whether
+  that task counts as one of the four is something the Act's text does not settle.
 
-Source: Regulation (EU) 2024/1689, Art. 6(3) and 6(4), as amended by Regulation
-(EU) 2026/1744 ([official text](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng),
-checked on 2026-10-27). This rule also leans on the **draft Commission guidelines**
-on classifying high-risk AI systems under Article 6, open for consultation from
+Source: Art. 3(52), 6(3) and 6(4) of the amended Act
+([official text](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng), checked on
+2026-10-27). This rule also leans on the **draft Commission guidelines** on
+classifying high-risk AI systems under Article 6, open for consultation from
 19 May 2026; no adopted version had been found when checked on 2026-10-26. Treat
 anything the draft says as provisional.
 
@@ -102,13 +171,17 @@ Narrowly. A case goes to review only for one of three reasons, recorded in
   people, with no purpose or setting given.
 - `conflicting-facts`: the description says two things that cannot both be true,
   and the tier depends on which is.
-- `unsettled-law`: the legal question the tier depends on is not settled by the
-  Act's text, for example a point that depends on the draft Article 6 guidelines.
+- `unsettled-law`: the facts are clear, but the legal question the tier depends on
+  is not settled by the Act's text, for example a point that depends on the draft
+  Article 6 guidelines or on wording new in 2026.
 
 **A case that is hard but decidable is decided.** Review is not a way to avoid a
-difficult call: accuracy bought by refusing hard cases is not accuracy. Each
-review answer still sets `art50_flag` and may cite the provisions it could not
-decide between.
+difficult call: accuracy bought by refusing hard cases is not accuracy. A review
+answer sets `art50_flag` when the description decides it, and otherwise `false`.
+
+Source: the requirement LS-6 of this project; the provisions in doubt are cited
+in each record ([official text](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng),
+checked on 2026-10-27).
 
 ## The answer record
 
@@ -127,6 +200,12 @@ in `lab/records.py` (the single source of truth) and quoted here.
 | `review_reason` | `missing-fact`, `conflicting-facts`, `unsettled-law` or `null` | Required when tier is needs-human-review, otherwise null |
 | `reason` | text | One sentence, at most 40 words |
 
+**What goes in `articles`:** the provisions that decide the tier, plus the
+Article 50 paragraph when the flag is `true`. For a high-risk case, Art. 6(1) or
+6(2) and the Annex point. For an Article 6(3) result, Art. 6(3) and the Annex III
+point. For `minimal`, Art. 95(1). For a review case, the provisions in doubt, or
+none. Provisions that were considered and do not apply are not cited.
+
 The record never holds a date, deadline or list of duties. Those come from the
 dates-and-duties table, which is maintained separately and checked against the
 law. An answer that cannot be read as this record counts as a format failure.
@@ -136,6 +215,10 @@ Complete example:
 ```json
 {"tier": "high-risk", "route": "annex-iii", "annex_iii_area": 4, "annex_iii_point": "4(a)", "annex_i_legislation": null, "art50_flag": true, "articles": ["Art. 6(2)", "Annex III 4(a)", "Art. 50(1)"], "review_reason": null, "reason": "The system screens job applicants, an Annex III employment use, and it talks to them directly."}
 ```
+
+Source: requirements LS-2 to LS-4, LS-9 and LS-10 of this project; citations
+checked against `data/articles.json`, built from the
+[official text](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng), checked on 2026-10-27.
 
 ## Worked examples
 
@@ -172,11 +255,10 @@ their likelihood of repaying, and loan officers use the score to approve or refu
 
 ### Example HR-2 (high-risk) · boundary
 A chain of clothes shops uses cameras with an AI system that infers whether
-customers look pleased or frustrated near displays, to rearrange stock. A sign at
-the entrance tells customers about it.
+customers look pleased or frustrated near displays, to rearrange stock.
 *Why boundary:* emotion recognition is banned only at work and in education; for
 customers it is a high-risk biometric use, and Article 50 also requires informing
-the people exposed.
+the people exposed. A sign at the entrance would not change the flag.
 
 ```json
 {"tier": "high-risk", "route": "annex-iii", "annex_iii_area": 1, "annex_iii_point": "1(c)", "annex_i_legislation": null, "art50_flag": true, "articles": ["Art. 6(2)", "Annex III 1(c)", "Art. 50(3)"], "review_reason": null, "reason": "Recognising customers' emotions is an Annex III biometric use outside the workplace ban, and the people exposed must be informed."}
@@ -185,9 +267,23 @@ the people exposed.
 ### Example HR-3 (high-risk)
 Software reads chest X-rays and flags suspected lung nodules for radiologists. It
 is sold as a medical device that needs certification by a notified body.
+*Note:* medical devices are point 11 of Annex I, Section A; the 2026 amendment
+deleted point 1 without renumbering the rest.
 
 ```json
 {"tier": "high-risk", "route": "annex-i", "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": "Regulation (EU) 2017/745 on medical devices", "art50_flag": false, "articles": ["Art. 6(1)", "Annex I 11"], "review_reason": null, "reason": "The system is a medical device that needs third-party conformity assessment under Annex I legislation, which makes it high-risk."}
+```
+
+### Example HR-4 (high-risk) · boundary
+A recruitment platform's AI system writes a short summary of each applicant's CV,
+highlighting relevant experience, and recruiters read the summaries before
+deciding whom to shortlist.
+*Why boundary:* summarising may sound preparatory, but the description does not
+clearly state a narrow or preparatory task, and choosing what is relevant
+evaluates candidates, so the Article 6(3) exception is not applied.
+
+```json
+{"tier": "high-risk", "route": "annex-iii", "annex_iii_area": 4, "annex_iii_point": "4(a)", "annex_i_legislation": null, "art50_flag": false, "articles": ["Art. 6(2)", "Annex III 4(a)"], "review_reason": null, "reason": "Summarising applicants for shortlisting is a recruitment use, and the description does not clearly state a narrow or preparatory task, so it stays high-risk."}
 ```
 
 ### Example TO-1 (transparency-only)
@@ -206,7 +302,15 @@ does not monitor staff.
 decisions about workers and monitoring them, which this chatbot does not do.
 
 ```json
-{"tier": "transparency-only", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": true, "articles": ["Art. 50(1)", "Annex III 4(b)"], "review_reason": null, "reason": "Answering policy questions makes no decisions about workers and monitors no one, so only the duty to disclose the chatbot applies."}
+{"tier": "transparency-only", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": true, "articles": ["Art. 50(1)"], "review_reason": null, "reason": "Answering policy questions makes no decisions about workers and monitors no one, so only the duty to disclose the chatbot applies."}
+```
+
+### Example TO-3 (transparency-only)
+A design studio offers an online tool that generates product photos from a text
+prompt, for customers' marketing material.
+
+```json
+{"tier": "transparency-only", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": true, "articles": ["Art. 50(2)"], "review_reason": null, "reason": "Generating synthetic images is not a listed high-risk use, but the output must be marked as artificially generated."}
 ```
 
 ### Example MI-1 (minimal)
@@ -214,7 +318,7 @@ A small firm's email system uses a learned spam filter that moves likely junk ma
 into a separate folder.
 
 ```json
-{"tier": "minimal", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Art. 95(1)"], "review_reason": null, "reason": "Spam filtering is not banned, not listed as high-risk and triggers no Article 50 duty, so only voluntary codes apply."}
+{"tier": "minimal", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Art. 95(1)"], "review_reason": null, "reason": "Spam filtering is not banned, not listed as high-risk and triggers no Article 50 duty, so no tier applies beyond minimal."}
 ```
 
 ### Example MI-2 (minimal) · boundary
@@ -223,6 +327,7 @@ into a standard text format with fixed headings. It does not rank, score, filter
 or assess candidates, and recruiters read every converted CV.
 *Why boundary:* recruitment is an Annex III use, but the description clearly states
 a narrow procedural task with no profiling, so the Article 6(3) exception applies.
+Compare HR-4, where the task is not clearly narrow.
 
 ```json
 {"tier": "minimal", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Art. 6(3)", "Annex III 4(a)"], "review_reason": null, "reason": "Converting CV formats without assessing candidates is a narrow procedural task under the Article 6(3) exception, so the recruitment use is not high-risk."}
@@ -258,7 +363,7 @@ says who is ranked, for what, or who uses the ranking.
 A recruitment tool "makes the final hiring decision automatically", the vendor
 says in one paragraph; in the next, it "only converts CVs into a standard format
 and never assesses candidates".
-*Why boundary:* either reading alone is decidable (HR or MI-2); together they
+*Why boundary:* either reading alone is decidable (HR-4 or MI-2); together they
 conflict on the fact that decides the tier.
 
 ```json
@@ -266,15 +371,16 @@ conflict on the fact that decides the tier.
 ```
 
 ### Example NR-3 (needs-human-review) · boundary
-A regional electricity grid operator uses an AI system to forecast next-day
-demand. Engineers use the forecast when scheduling power stations; the
-description does not say it controls any equipment.
-*Why boundary:* whether a forecasting aid counts as a safety component of
-critical infrastructure is a question the draft Article 6 guidelines address
-but the Act's text alone does not settle.
+A lift manufacturer builds into its lifts an AI system that predicts when the
+brake parts will wear out and books replacement visits. The lifts still get the
+safety inspections the law requires, and the system controls no part of the lift.
+*Why boundary:* a system that controlled the brakes would clearly be a safety
+component, and one that only chose which lift answers a call would clearly not be
+(Art. 6(1a)); whether a wear prediction for a safety part, backed by mandatory
+inspections, is one turns on wording new in 2026 that the text does not settle.
 
 ```json
-{"tier": "needs-human-review", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Annex III 2", "Art. 3(14)"], "review_reason": "unsettled-law", "reason": "Whether a demand forecast used in scheduling is a safety component of critical infrastructure is not settled by the Act's text."}
+{"tier": "needs-human-review", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Art. 6(1)", "Art. 6(1b)", "Annex I 4"], "review_reason": "unsettled-law", "reason": "Whether predicting brake wear, with mandatory inspections still done, makes the system a safety component under the new Article 6 wording is not settled by the text."}
 ```
 
 ## The gold set
@@ -285,16 +391,20 @@ never used for training: it is kept apart from all training data, no training
 case may paraphrase a gold case, and any model that drafts training data is
 checked against it, never shown it.
 
+Source: requirements GS-6 and LS-7 of this project.
+
 ## Sources
 
 - Regulation (EU) 2024/1689 (the AI Act),
   [official text](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng), as amended by
   Regulation (EU) 2026/1744,
   [official text](https://eur-lex.europa.eu/eli/reg/2026/1744/oj/eng); both checked on
-  2026-10-27. Every citation in this guideline is checked against the
-  valid-article table built from them (`data/articles.json`).
+  2026-10-27, including the amended Art. 4, 5, 6 and Annex I. Every citation in
+  this guideline is checked against the valid-article table built from them
+  (`data/articles.json`).
 - European Commission, guidelines on the definition of an AI system and on
-  prohibited AI practices: adopted (February 2025); used for steps 1 and 2.
+  prohibited AI practices: adopted (February 2025), before the 2026 amendment; used
+  for steps 1 and 2. Where they differ from the amended text, the text wins.
 - European Commission, draft Commission guidelines on classifying high-risk AI
   systems under Article 6: consultation from 19 May 2026; draft status checked on
   2026-10-26. Provisional; used only where this guideline says so.
@@ -306,4 +416,4 @@ checked against it, never shown it.
 
 | Version | Date | Change | Why |
 |---|---|---|---|
-| v1 | 2026-10-27 | First version: six labels, decision order, owner decisions D-LS-1 (assume the ordinary case) and D-LS-2 (Article 6(3) must be stated clearly), 14 worked examples | Build chunk P2-C01, before any gold case is labelled |
+| v1 | 2026-10-27 | First version: six labels, decision order, Article 50 rules, owner decisions D-LS-1 (assume the ordinary case) and D-LS-2 (Article 6(3) must be stated clearly), 16 worked examples | Build chunk P2-C01, before any gold case is labelled |
