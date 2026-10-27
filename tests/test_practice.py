@@ -33,7 +33,13 @@ def items(n_per_tier=30):
 
 def test_description_uses_the_case_fields():
     text = build_description(ITEM)
-    for part in ("Deployer", "Score job applicants", "CV ranking model", "CVs, cover letters", "Employment"):
+    for part in (
+        "Deployer",
+        "Score job applicants",
+        "CV ranking model",
+        "CVs, cover letters",
+        "Employment",
+    ):
         assert part in text
 
 
@@ -47,7 +53,9 @@ def test_target_has_tier_articles_reason_and_never_obligations():
 
 
 def test_limited_maps_to_transparency_only():
-    assert build_target({**ITEM, "risk_level": "limited"})["tier"] == "transparency-only"
+    assert (
+        build_target({**ITEM, "risk_level": "limited"})["tier"] == "transparency-only"
+    )
 
 
 def test_split_is_stratified_disjoint_and_repeatable():
@@ -60,7 +68,7 @@ def test_split_is_stratified_disjoint_and_repeatable():
     for part, per_tier in ((heldout, 5), (valid, 8)):
         tiers = [x["risk_level"] for x in part]
         assert all(tiers.count(t) == per_tier for t in TIER_MAP)
-    keys = lambda part: {x["intended_use"] for x in part}  # noqa: E731
+    keys = lambda part: {x["intended_use"] for x in part}
     assert not keys(train) & keys(heldout)
     assert not keys(train) & keys(valid)
     assert not keys(valid) & keys(heldout)

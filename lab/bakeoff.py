@@ -189,8 +189,9 @@ class Generator(Protocol):
 class MlxGenerator:
     """A pinned, checked MLX model: greedy, thinking off, one user message."""
 
-    def __init__(self, entry: ModelEntry):
+    def __init__(self, entry: ModelEntry, adapter_path: str | None = None):
         self.entry = entry
+        self.adapter_path = adapter_path
         self.template = entry.template
         self.model = None
         self.tokenizer = None
@@ -204,7 +205,9 @@ class MlxGenerator:
         path = Path(snapshot_download(self.entry.repo, revision=self.entry.revision))
         check_build_files(snapshot_files(path))
         verify_weights(path, self.entry.weights)
-        self.model, self.tokenizer = load(str(path), trust_remote_code=False)
+        self.model, self.tokenizer = load(
+            str(path), adapter_path=self.adapter_path, trust_remote_code=False
+        )
 
     def render(self, prompt: str) -> str:
         return self.tokenizer.apply_chat_template(
