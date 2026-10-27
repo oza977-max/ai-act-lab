@@ -1,6 +1,6 @@
 # Labelling guideline
 
-**Version:** v1 (drafted 2026-10-27; awaiting the owner's approval)
+**Version:** v1 (approved by the owner on 2026-10-27)
 
 This is the rulebook for labelling a description of an AI system under the EU AI
 Act. Every gold case is labelled with it, and the model's prompt is generated from
@@ -525,4 +525,4 @@ Source: requirements GS-6 and LS-7 of this project.
 
 | Version | Date | Change | Why |
 |---|---|---|---|
-| v1 | 2026-10-27 | First version: six labels, decision order, Article 50 rules, owner decisions D-LS-1 (assume the ordinary case), D-LS-2 (Article 6(3) must be stated clearly), D-LS-3 (silence on profiling passes) and D-LS-4 (the fraud-score question stays with review), 18 worked examples | Build chunk P2-C01, before any gold case is labelled |
+| v1 | 2026-10-27 | First version: six labels, decision order, Article 50 rules, owner decisions D-LS-1 (assume the ordinary case), D-LS-2 (Article 6(3) must be stated clearly), D-LS-3 (silence on profiling passes) and D-LS-4 (the fraud-score question stays with review), 18 worked examples | Build chunk P2-C01, before any gold case is labelled; approved by the owner on 2026-10-27 |

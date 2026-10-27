@@ -23,7 +23,7 @@ cited articles are checked against the official text (including the July 2026
 amendment), and two models can be compared case by case. Phase 2 has started:
 the [labelling guideline](docs/guideline/labelling-guideline.md), the rulebook for
 every gold label, is drafted with 18 worked examples and four owner decisions,
-and is awaiting the owner's approval. Next: the prompt and the dates table.
+and the owner approved it. Next: the prompt and the dates table.
 Target date 16 November 2026.
 
 ## Start here
@@ -49,12 +49,12 @@ Pick the path that fits you:
 
 | Measure | Now |
 |---|---|
-| Build chunks done | 5 of 21 (1 of 4 phases complete) |
+| Build chunks done | 6 of 21 (1 of 4 phases complete) |
 | Automated tests | 232 passing |
-| Independent review passes | 10 passes over 5 chunks; 9 serious findings caught and fixed before commit |
+| Independent review passes | 17 passes over 6 chunks; 38 serious findings caught and fixed before commit |
 | Learning entries | 16, plus 1 film |
 | Training runs logged | 1 |
-| Commits | 48 |
+| Commits | 49 |
 
 **Build log.** Each chunk is reviewed by an independent reviewer until a pass finds nothing serious; the numbers show the serious findings each pass found.
 
@@ -65,7 +65,7 @@ Pick the path that fits you:
 | P1-C02b | Practice fine-tune (owner-run) | 0 | [handover](build/handovers/P1-C02b.md) |
 | P1-C03 | Record rules | 0 → 0 | [handover](build/handovers/P1-C03.md) |
 | P1-C04 | Full evaluation | 1 → 0 | [handover](build/handovers/P1-C04.md) |
-| P2-C01 | Guideline v1 | 10 → 8 → 3 → 4 → 3 → 1 → 0 (awaiting owner approval) | [handover](build/handovers/P2-C01.md) |
+| P2-C01 | Guideline v1 | 10 → 8 → 3 → 4 → 3 → 1 → 0 | [handover](build/handovers/P2-C01.md) |
 | P2-C02 | Prompt build | not started |  |
 | P2-C03 | Dates table | not started |  |
 | P3-C01 | Gold tooling | not started |  |
