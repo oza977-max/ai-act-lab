@@ -145,7 +145,8 @@ def ask(adapter: str | None, label: str) -> int:
     )
     generator.load()
     rows = [
-        json.loads(line) for line in (OUT / "heldout.jsonl").read_text().splitlines()
+        json.loads(line)
+        for line in (OUT / "heldout.jsonl").read_text(encoding="utf-8").splitlines()
     ]
     results, correct, unreadable = [], 0, 0
     for row in rows:
