@@ -67,10 +67,21 @@ def problems(drafts, sheet):
 
 @pytest.mark.parametrize("n, ok", [(59, False), (60, True), (200, True), (201, False)])
 def test_tc_gs_2_01_and_2_02_word_limits(batch, n, ok):
+    # A draft outside the limits never reaches the owner: the sheet is refused.
+    if not ok:
+        with pytest.raises(GoldError, match="words"):
+            batch(one_case(description=words(n)))
+        return
     drafts, sheet = batch(one_case(description=words(n)))
     edit_rows(sheet, decision="accept")
-    found = [p for p in problems(drafts, sheet) if "words" in p]
-    assert (found == []) is ok
+    assert problems(drafts, sheet) == []
+
+
+@pytest.mark.parametrize("n, ok", [(59, False), (60, True), (200, True), (201, False)])
+def test_word_limits_are_checked_again_in_the_owners_sheet(batch, n, ok):
+    drafts, sheet = batch(one_case())
+    edit_rows(sheet, decision="accept", description=words(n))
+    assert any("words" in p for p in problems(drafts, sheet)) is not ok
 
 
 def test_a_byte_order_mark_and_capital_booleans_are_accepted(batch):
@@ -146,9 +157,10 @@ def test_a_description_changed_by_the_spreadsheet_is_reported(batch):
 )
 def test_descriptions_that_would_break_the_prompt_are_refused(batch, insert):
     case = one_case()
-    case["description"] = case["description"] + " " + insert
+    with pytest.raises(GoldError, match="delimiter|control token"):
+        batch({**case, "description": case["description"] + " " + insert})
     drafts, sheet = batch(case)
-    edit_rows(sheet, decision="accept")
+    edit_rows(sheet, decision="accept", description=case["description"] + " " + insert)
     assert any(
         "delimiter" in p or "control token" in p for p in problems(drafts, sheet)
     )
@@ -269,3 +281,142 @@ def test_a_case_in_two_sheets_is_refused(full):
     owner_fills(full / "review" / "batch-06.csv")
     with pytest.raises(GoldError, match="more than one sheet"):
         assemble(full / "review", full / "drafts", GUIDELINE)
+
+
+def test_i1_final_columns_filled_under_accept_are_reported(batch):
+    drafts, sheet = batch(one_case())
+    edit_rows(sheet, decision="accept", final_tier="minimal")
+    assert any(
+        "final columns are filled but the decision is accept" in p
+        for p in problems(drafts, sheet)
+    )
+
+
+def test_a_change_identical_to_the_draft_is_reported(batch):
+    case = one_case()
+    drafts, sheet = batch(case)
+    from lab.gold import record_to_cells
+
+    finals = {f"final_{k}": v for k, v in record_to_cells(case["draft"]).items()}
+    edit_rows(sheet, decision="change", **finals)
+    assert any("write accept instead" in p for p in problems(drafts, sheet))
+
+
+@pytest.mark.parametrize(
+    "area, ok", [("4", True), ("4.0", True), ("²", False), ("four", False)]
+)
+def test_i2_area_cells_as_spreadsheets_export_them(batch, area, ok):
+    drafts, sheet = batch(one_case())
+    edit_rows(sheet, decision="change", **{**TO_HIGH_RISK, "final_area": area})
+    found = problems(drafts, sheet)
+    assert (found == []) is ok, found
+
+
+def test_i3_a_guideline_without_a_version_is_a_clear_refusal(batch, tmp_path, capsys):
+    from lab.gold import main
+
+    drafts, sheet = batch(one_case())
+    bad = tmp_path / "g.md"
+    bad.write_text("# no version line\n", encoding="utf-8")
+    assert (
+        main(["check", str(sheet), "--drafts", str(drafts), "--guideline", str(bad)])
+        == 1
+    )
+    assert "Version" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "draft_change",
+    [
+        {"draft": {**spread()[0]["draft"], "art50_flag": 1}},
+        {"draft": {**spread()[0]["draft"], "articles": ["Art. 147"]}},
+        {"tags": ["shiny"]},
+        {"tags": "boundary"},
+        {"draft": {**spread()[0]["draft"], "articles": ["Art. 5(1)(c); Art. 6"]}},
+    ],
+)
+def test_i4_bad_drafts_are_refused_before_the_owner_sees_them(batch, draft_change):
+    with pytest.raises(GoldError):
+        batch(one_case(**draft_change))
+
+
+@pytest.mark.parametrize(
+    "transform",
+    [
+        lambda d: d + "\n",
+        lambda d: "  " + d.replace(". ", ".  ", 1),
+        lambda d: d.replace(" ", "\r\n", 1),
+    ],
+)
+def test_i5_harmless_spacing_changes_are_not_differences(batch, transform):
+    case = one_case()
+    drafts, sheet = batch(case)
+    edit_rows(sheet, decision="accept", description=transform(case["description"]))
+    assert problems(drafts, sheet) == []
+
+
+def test_capitalised_choices_are_accepted(batch):
+    drafts, sheet = batch(one_case())
+    edit_rows(
+        sheet,
+        decision="Change",
+        **{**TO_HIGH_RISK, "final_tier": "High-Risk", "final_route": "Annex-III"},
+    )
+    assert problems(drafts, sheet) == []
+
+
+def test_blank_rows_and_empty_right_hand_columns_are_ignored(batch):
+    drafts, sheet = batch(one_case())
+    edit_rows(sheet, decision="accept")
+    lines = sheet.read_text(encoding="utf-8").splitlines()
+    padded = (
+        [lines[0] + ",,"]
+        + [line + ",," for line in lines[1:]]
+        + ["," * (len(COLUMNS) + 1)] * 2
+    )
+    sheet.write_text("\n".join(padded) + "\n", encoding="utf-8")
+    assert problems(drafts, sheet) == []
+
+
+def test_wrong_columns_are_named(tmp_path):
+    sheet = tmp_path / "batch-01.csv"
+    sheet.write_text(
+        ",".join(c for c in COLUMNS if c != "decision") + ",verdict\n", encoding="utf-8"
+    )
+    with pytest.raises(
+        GoldError, match="missing \\['decision'\\].*unexpected \\['verdict'\\]"
+    ):
+        read_sheet(sheet)
+
+
+def test_a_sheet_without_a_matching_draft_file_says_how_to_name_it(tmp_path):
+    from lab.gold import read_drafts
+
+    with pytest.raises(GoldError, match="batch-NN.csv"):
+        read_drafts(tmp_path / "batch-01 2.jsonl")
+
+
+def test_non_utf8_sheet_says_how_to_export(tmp_path):
+    sheet = tmp_path / "batch-01.csv"
+    sheet.write_bytes(",".join(COLUMNS).encode() + b"\nGC-001,caf\xe9\n")
+    with pytest.raises(GoldError, match="CSV UTF-8"):
+        read_sheet(sheet)
+
+
+def test_an_apostrophe_formula_cell_round_trips(batch):
+    case = one_case()
+    case["draft"] = {**case["draft"], "reason": "'=Scoring residents is banned."}
+    drafts, sheet = batch(case)
+    edit_rows(sheet, decision="accept")
+    assert read_sheet(sheet)[0]["proposed_reason"] == "'=Scoring residents is banned."
+    assert problems(drafts, sheet) == []
+
+
+def test_a_gold_file_without_its_metadata_is_rewritten(full):
+    _path, _, _ = build(full / "review", full / "drafts", full / "gold", GUIDELINE)
+    (full / "gold" / "gold-v1.meta.json").unlink()
+    again, meta, written = build(
+        full / "review", full / "drafts", full / "gold", GUIDELINE
+    )
+    assert written and (full / "gold" / f"{again.stem}.meta.json").is_file()
+    assert meta["sha256"]
