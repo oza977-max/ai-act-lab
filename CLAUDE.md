@@ -30,6 +30,9 @@ confidentiality check runs before every commit. There is no margin for a quiet f
     Never git.
   - Keep requirement slices thin so building starts early.
   Every explanation must be one the owner could repeat to a colleague.
+- **The README is the public story.** The repo is meant to teach others. At every
+  milestone, update `README.md`: status, what was measured, decisions and why, and
+  what went wrong and how it was caught. Plain English, honest, no internal names.
 - **Confidentiality is a hard rule.** No employer name, no internal figures, no
   internal team or committee names, anywhere in the repo or its history. Public
   regulation text and freshly written cases only.
