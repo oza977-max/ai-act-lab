@@ -10,11 +10,12 @@ import pytest
 from conftest import ROOT
 
 GUIDELINE = ROOT / "docs" / "guideline" / "labelling-guideline.md"
-FILLER = (
+FILLER_TEXT = (
     "The organisation is fictional and the system is described in plain words for the "
     "purpose of this test, with enough detail to reach the minimum length that the gold "
     "set rules require for every case written for the project, and nothing else of note."
-).split()
+)
+FILLER = FILLER_TEXT.split() * 2  # 88 words
 
 
 def gold_cli(*args):
@@ -58,9 +59,8 @@ def spread():
     """100 drafts meeting GS-1, GS-3 and GS-4 once the owner changes one TO case to Annex III."""
     cases = []
     cases += [("prohibited", record("prohibited", articles=["Art. 5(1)(c)"]), [])] * 10
-    areas = [a for a in range(1, 9) for _ in range(4)][
-        :29
-    ]  # 29 drafted; the owner's change makes 30
+    # 29 drafted, three per area plus five; the owner's change (area 4) makes 30.
+    areas = [a for a in range(1, 9) for _ in range(3)] + [1, 2, 3, 5, 6]
     for area in areas:
         r = record(
             "high-risk",

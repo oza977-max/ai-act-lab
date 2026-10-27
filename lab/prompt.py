@@ -204,22 +204,27 @@ def _lint(prompt: str) -> None:
         )
 
 
+def description_problems(description: object) -> list[str]:
+    """Why a case description cannot go into the prompt; empty when it can."""
+    if not isinstance(description, str) or not description.strip():
+        return ["must be non-empty text"]
+    problems = [
+        f"contains the delimiter {d!r}"
+        for d in (CASE_OPEN, CASE_CLOSE)
+        if d in description
+    ]
+    if m := _SPECIAL_TOKEN.search(description):
+        problems.append(f"contains a chat control token: {m.group(0)!r}")
+    return problems
+
+
 def fill(prompt_text: str, description: str) -> str:
     """The prompt with one case description inserted between the delimiters.
 
     The description is inserted verbatim apart from surrounding whitespace.
     """
-    if not isinstance(description, str) or not description.strip():
-        raise PromptError("the case description must be non-empty text")
-    for delimiter in (CASE_OPEN, CASE_CLOSE):
-        if delimiter in description:
-            raise PromptError(
-                f"the case description contains the delimiter {delimiter!r}"
-            )
-    if m := _SPECIAL_TOKEN.search(description):
-        raise PromptError(
-            f"the case description contains a chat control token: {m.group(0)!r}"
-        )
+    if problems := description_problems(description):
+        raise PromptError("the case description " + "; ".join(problems))
     if prompt_text.count(PLACEHOLDER) != 1:
         raise PromptError("the prompt must contain the case placeholder exactly once")
     return prompt_text.replace(PLACEHOLDER, description.strip())
