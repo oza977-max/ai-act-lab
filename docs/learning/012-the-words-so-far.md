@@ -14,6 +14,34 @@ matter, each with a picture, what it was in our own run, and one check question.
 The running picture from entry 000 stays: the model is a **junior colleague**
 who has read a huge amount but has never done our job.
 
+**Prefer watching?** Open `012-video.html` (in this folder) in a browser: a
+narrated film of this entry, about seven minutes, with chapters.
+
+---
+
+## Part 0. Which kind of training did we do?
+
+There are three common ways to train a language model:
+
+| Kind | What the model sees | What it learns |
+|---|---|---|
+| **Pretraining** (or *continued* pretraining, on one field's text) | Piles of plain text, no questions | Language, facts, the style of a field |
+| **Instruction fine-tuning** (also called supervised fine-tuning) | A question plus the right answer | To answer a task in a set format |
+| **RLHF** (reinforcement learning from human feedback) | Its own answers, ranked by people | Which answers people prefer |
+
+**We did instruction fine-tuning, with LoRA.** Each of the 287 practice cards was a
+description of an AI system (the question) and the right answer (tier, articles,
+reason). The setting `mask_prompt: true` means only the answer part counted towards
+the loss: the model was marked on what it wrote, not on re-reading the question.
+
+The model's makers had already done the expensive first stage, and general
+instruction training, before we downloaded it. We did not do continued
+pretraining (we never fed it raw regulation text) and we did not do RLHF (nobody
+ranked its answers).
+
+**Check:** If you fed the model the whole text of the AI Act with no questions,
+which of the three would that be, and would it learn our answer format?
+
 ---
 
 ## Part 1. What the model is

@@ -21,4 +21,4 @@ This is separate from `notebook/`, which records individual training runs.
 | [009](009-first-build-chunk.md) | The first build chunk: red, green, and an honest reviewer (P1-C01) | 2026-10-26 |
 | [010](010-first-real-model.md) | A real model on this Mac (P1-C02) | 2026-10-26 |
 | [011](011-first-fine-tune.md) | Your first fine-tune (practice run 001) | 2026-10-27 |
-| [012](012-the-words-so-far.md) | The words so far, slowly: every term from the first fine-tune | 2026-10-27 |
+| [012](012-the-words-so-far.md) | The words so far, slowly: every term from the first fine-tune ([film version](012-video.html)) | 2026-10-27 |

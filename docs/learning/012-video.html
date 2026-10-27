@@ -1,0 +1,486 @@
+<title>The Words So Far</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a single film screen, subtitles under it, then chapters. The screen is always dark (a projector look); the page around it follows the viewer's theme. */
+:root {
+  --bg: #eef1ee; --fg: #1b2624; --muted: #5a6a66; --line: #c9d3cf; --panel: #ffffff; --accent: #b4730f;
+  --s-bg: #10242a; --s-panel: #183339; --s-chalk: #eef3ea; --s-dim: #8fa6a2; --s-amber: #f2b84b;
+  --s-mint: #7fd1b9; --s-red: #ff7a6b; --s-grey: #3b5559;
+  --f-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1416; --fg: #e3ebe8; --muted: #93a7a2; --line: #24383b; --panel: #122125; --accent: #f2b84b; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #0b1416; --fg: #e3ebe8; --muted: #93a7a2; --line: #24383b; --panel: #122125; --accent: #f2b84b; color-scheme: dark }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 1060px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px; }
+header h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(28px, 5vw, 44px); line-height: 1.05; margin: 0; text-wrap: balance; }
+header p { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+
+.screen { position: relative; background: var(--s-bg); border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 9; max-width: 100%;
+  box-shadow: 0 18px 40px -24px rgba(0,0,0,.6); }
+.screen svg { display: block; width: 100%; height: 100%; }
+.cover { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(16,36,42,.55); border: 0; cursor: pointer; color: var(--s-chalk); font: inherit; }
+.cover span { display: grid; place-items: center; gap: 10px; }
+.cover b { width: 92px; height: 92px; border-radius: 50%; background: var(--s-amber); display: grid; place-items: center; }
+.cover b::after { content: ""; border-left: 30px solid var(--s-bg); border-top: 19px solid transparent; border-bottom: 19px solid transparent; margin-left: 8px; }
+.cover em { font-style: normal; font-family: var(--f-mono); font-size: 14px; letter-spacing: .08em; }
+
+.sub { min-height: 3.4em; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px;
+  font-size: clamp(17px, 2.3vw, 21px); line-height: 1.45; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.controls button, .chap button { font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+.controls button:hover, .chap button:hover { border-color: var(--accent); }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.controls .primary { background: var(--accent); color: #10242a; border-color: var(--accent); font-weight: 700; min-width: 96px; }
+.controls .spacer { flex: 1; }
+.time { font-family: var(--f-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { display: flex; gap: 3px; }
+.bar i { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.bar i.done { background: var(--accent); opacity: .55; }
+.bar i.now { background: var(--accent); }
+
+.chap { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; list-style: none; margin: 0; padding: 0; }
+.chap button { width: 100%; text-align: left; display: grid; gap: 2px; }
+.chap button small { font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.chap button[aria-current="true"] { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+.note { color: var(--muted); font-size: 14px; max-width: 70ch; }
+.note a { color: var(--accent); }
+h2 { font-family: var(--f-display); font-size: 20px; margin: 10px 0 0; }
+
+/* SVG scene styles */
+.d { font-family: var(--f-display); font-weight: 800; fill: var(--s-chalk); }
+.b { font-family: var(--f-body); fill: var(--s-chalk); }
+.m { font-family: var(--f-mono); font-weight: 500; fill: var(--s-chalk); }
+.dim { fill: var(--s-dim); } .amb { fill: var(--s-amber); } .mint { fill: var(--s-mint); } .red { fill: var(--s-red); } .ink { fill: var(--s-bg); }
+.mid { text-anchor: middle; } .end { text-anchor: end; }
+[data-b] { opacity: 0; transition: opacity .6s ease, transform .6s ease; }
+[data-b].show { opacity: 1; }
+.pop { transform: translateY(18px); } .pop.show { transform: none; }
+.grow { transform: scaleX(0); transform-box: fill-box; transform-origin: left center; transition: transform 1.6s ease-out; }
+.growy { transform: scaleY(0); transform-box: fill-box; transform-origin: center bottom; transition: transform 1.2s ease-out; }
+.show .grow, .show.grow, .show .growy, .show.growy { transform: none; }
+.slow { transition-duration: 4.5s; transition-timing-function: linear; }
+.draw { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 3s ease; }
+.show .draw, .show.draw { stroke-dashoffset: 0; }
+.stag > * { opacity: 0; transition: opacity .4s ease; }
+.show.stag > *, .show .stag > * { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { *, *::before { transition-duration: .01s !important; transition-delay: 0s !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">AI Act Lab · learning entry 012 · film</div>
+    <h1>The words so far, in about seven minutes</h1>
+    <p>Every idea from your first fine-tune, with pictures and a voice. Press play with your sound on. Pause, go back or jump to a chapter whenever you like.</p>
+  </header>
+
+  <div class="screen" id="screen">
+    <div id="stage"></div>
+    <button class="cover" id="cover" aria-label="Play the film"><span><b></b><em>PLAY · SOUND ON</em></span></button>
+  </div>
+  <div class="bar" id="bar" aria-hidden="true"></div>
+  <div class="sub" id="sub" aria-live="polite">Press play. Each picture is explained out loud, and the words appear here too.</div>
+  <div class="controls">
+    <button id="prev" aria-label="Previous chapter">◀ Back</button>
+    <button id="play" class="primary">Play</button>
+    <button id="next" aria-label="Next chapter">Next ▶</button>
+    <button id="voice" aria-pressed="true">Voice: on</button>
+    <button id="speed">Speed: normal</button>
+    <span class="spacer"></span>
+    <span class="time" id="time">1 / 14</span>
+  </div>
+
+  <h2>Chapters</h2>
+  <ol class="chap" id="chap"></ol>
+
+  <p class="note">The voice is your browser's built-in speech, so it sounds different on each computer. If you hear nothing, turn the voice off: the film then moves on by itself at reading speed. Every number shown comes from practice run 001 (notebook entry 2026-10-27-01) except the two pictures marked "illustration". The same material as text: <a href="https://github.com/oza977-max/ai-act-lab/blob/main/docs/learning/012-the-words-so-far.md">learning entry 012</a>.</p>
+</div>
+
+<script>
+const W = 1600, H = 900;
+const hdr = (part, title) => `<text x="70" y="78" class="m amb" font-size="24" letter-spacing="3">${part.toUpperCase()}</text><text x="70" y="132" class="d" font-size="46">${title}</text>`;
+const t = (x, y, s, size, cls = 'b', extra = '') => `<text x="${x}" y="${y}" font-size="${size}" class="${cls}" ${extra}>${s}</text>`;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const VAL = [[1,1.003],[25,.293],[50,.311],[75,.224],[100,.224],[125,.2],[150,.28],[175,.206],[200,.176],[225,.181],[250,.176],[275,.152],[300,.149]];
+function line(pts, x0, y0, w, h, xmax, ymax, color, width = 6) {
+  const p = pts.map(([x, y]) => `${(x0 + x / xmax * w).toFixed(1)},${(y0 + h - y / ymax * h).toFixed(1)}`).join(' ');
+  return `<polyline points="${p}" pathLength="1" class="draw" fill="none" stroke="${color}" stroke-width="${width}" stroke-linejoin="round" stroke-linecap="round"/>`;
+}
+function axes(x0, y0, w, h, xl, yl) {
+  return `<path d="M${x0} ${y0} V${y0 + h} H${x0 + w}" fill="none" stroke="var(--s-dim)" stroke-width="3"/>` +
+    t(x0 + w, y0 + h + 40, xl, 22, 'm dim end') + t(x0 - 14, y0 - 16, yl, 22, 'm dim');
+}
+function tween(ms, fn) { const s = performance.now(); const step = now => { const k = Math.min(1, (now - s) / ms); fn(k); if (k < 1 && alive(step)) requestAnimationFrame(step); }; requestAnimationFrame(step); }
+let sceneRun = 0; const alive = () => true;
+
+const scenes = [
+{ part: 'Start', title: 'The junior colleague',
+  lines: [
+    'Meet the model. Think of it as a junior colleague.',
+    'It has read a huge amount of text, so it writes fluently.',
+    'But it has never done our job: sorting AI systems under the EU AI Act. Untrained, it called every case high-risk.',
+    'Fine-tuning is on-the-job training. Here is how yours worked.'],
+  svg: () => hdr('Start', 'The junior colleague') + `
+  <g data-b="0" class="pop">
+    <circle cx="800" cy="390" r="82" fill="var(--s-mint)"/>
+    <path d="M670 650 Q800 470 930 650 Z" fill="var(--s-mint)"/>
+    <circle cx="772" cy="378" r="9" fill="var(--s-bg)"/><circle cx="828" cy="378" r="9" fill="var(--s-bg)"/>
+    <path d="M768 418 Q800 440 832 418" stroke="var(--s-bg)" stroke-width="6" fill="none" stroke-linecap="round"/>
+    ${t(800, 712, 'the model = a junior colleague', 32, 'b mid')}
+  </g>
+  <g data-b="1" class="pop">
+    <rect x="250" y="560" width="250" height="38" rx="5" fill="var(--s-amber)"/>
+    <rect x="270" y="518" width="220" height="40" rx="5" fill="var(--s-red)"/>
+    <rect x="240" y="476" width="240" height="40" rx="5" fill="var(--s-grey)"/>
+    <rect x="262" y="436" width="200" height="38" rx="5" fill="var(--s-amber)"/>
+    <rect x="250" y="398" width="232" height="36" rx="5" fill="var(--s-dim)"/>
+    ${t(370, 650, 'has read a huge amount', 28, 'b mid dim')}
+  </g>
+  <g data-b="2" class="pop">
+    <path d="M1010 250 h440 a22 22 0 0 1 22 22 v120 a22 22 0 0 1 -22 22 h-360 l-70 50 l18 -50 h-28 a22 22 0 0 1 -22 -22 v-120 a22 22 0 0 1 22 -22z" fill="var(--s-chalk)"/>
+    ${t(1230, 320, 'Every case?', 34, 'b ink mid')}
+    ${t(1230, 372, '"High-risk!"', 40, 'd ink mid')}
+    ${t(1230, 520, 'untrained: 5 of 20 right, by luck', 28, 'b amb mid')}
+  </g>
+  <g data-b="3" class="pop">
+    <rect x="490" y="770" width="620" height="76" rx="38" fill="var(--s-amber)"/>
+    ${t(800, 820, 'fine-tuning = on-the-job training', 34, 'd ink mid')}
+  </g>` },
+
+{ part: 'Start', title: 'Three ways to train a model',
+  lines: [
+    'There are three common ways to train a model. Each teaches something different.',
+    'One: pretraining, or continued pretraining. The model reads piles of plain text and learns to guess the next word. It soaks up language and facts, but nobody shows it a task.',
+    'Two: instruction fine-tuning. You show it example questions with the right answers, and it learns to answer that way. This is what you did.',
+    'Three: RLHF. The model writes answers, people rank which is better, and the model is nudged towards the preferred ones. It needs lots of human ratings.',
+    'Your model\'s makers had already done the first stage and general training of the second. You added a small dose of instruction fine-tuning: 287 cards about the AI Act, learned through LoRA sticky notes.'],
+  svg: () => {
+    const col = (x, n, name, what, data, b, hi) => `<g data-b="${b}" class="pop">
+      <rect x="${x}" y="190" width="440" height="560" rx="18" fill="${hi ? 'var(--s-panel)' : 'none'}" stroke="${hi ? 'var(--s-amber)' : 'var(--s-grey)'}" stroke-width="${hi ? 5 : 3}"/>
+      ${t(x + 30, 250, n, 26, 'm ' + (hi ? 'amb' : 'dim'))}
+      ${name.map((s, i) => t(x + 30, 305 + i * 46, s, 36, 'd')).join('')}
+      ${t(x + 30, 430, 'it sees:', 22, 'm dim')}${data.map((s, i) => t(x + 30, 470 + i * 36, s, 26, 'b')).join('')}
+      ${t(x + 30, 610, 'it learns:', 22, 'm dim')}${what.map((s, i) => t(x + 30, 650 + i * 36, s, 26, 'b ' + (hi ? 'amb' : ''))).join('')}</g>`;
+    return hdr('Start', 'Three ways to train a model') +
+      col(70, '1', ['Pretraining', '(or continued)'], ['language, facts,', 'style of a field'], ['piles of plain text,', 'no questions'], 1, false) +
+      col(580, '2 · YOU DID THIS', ['Instruction', 'fine-tuning'], ['to answer a task', 'in a set format'], ['a question plus', 'the right answer'], 2, true) +
+      col(1090, '3', ['RLHF'], ['which answers', 'people prefer'], ['its own answers,', 'ranked by people'], 3, false) +
+      `<g data-b="4" class="pop">${t(800, 830, 'Qwen\'s makers did the big training first. You added 287 AI Act cards with LoRA.', 28, 'b mint mid')}</g>`; } },
+
+{ part: 'Part 1 · What the model is', title: 'Weights: a giant panel of dials',
+  lines: [
+    'Inside, the colleague is a giant panel of dials.',
+    'Each dial is one number, called a parameter, or a weight. Yours has about 752 million of them.',
+    'Training changes one thing only: where the dials are set. No rules get written down.',
+    'That is why dates and deadlines live in a lookup table. You cannot edit a dial like a spreadsheet.'],
+  svg: () => {
+    let d = '';
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 14; c++) {
+      const x = 241 + c * 86, y = 240 + r * 82, a = rnd(-70, 70), b = a + rnd(-60, 60);
+      d += `<g transform="translate(${x} ${y})"><circle r="31" fill="var(--s-panel)" stroke="var(--s-grey)" stroke-width="3"/>
+        <line x2="0" y2="-24" stroke="var(--s-amber)" stroke-width="5" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" values="${a} 0 0;${b} 0 0;${a} 0 0" dur="${rnd(2.5, 6).toFixed(1)}s" repeatCount="indefinite"/></line></g>`;
+    }
+    return hdr('Part 1 · What the model is', 'Weights: a giant panel of dials') + `
+    <g data-b="0">${d}</g>
+    <g data-b="1" class="pop">${t(800, 700, '0', 76, 'm amb mid', 'id="cnt" font-weight="700"')}${t(800, 748, 'dials, called parameters or weights', 28, 'b mid dim')}</g>
+    <g data-b="2" class="pop">${t(800, 826, 'Training = turning dials. Nothing else changes.', 32, 'b mint mid')}</g>
+    <g data-b="3" class="pop"><rect x="1050" y="34" width="500" height="120" rx="14" fill="var(--s-panel)" stroke="var(--s-amber)" stroke-width="3"/>
+      ${t(1080, 82, 'Dates and deadlines →', 28, 'b')}${t(1080, 126, 'lookup table, not dials', 28, 'b amb')}</g>`; },
+  beat(b, root) { if (b === 1) { const el = root.querySelector('#cnt'); tween(2200, k => { el.textContent = Math.round(752e6 * (1 - Math.pow(1 - k, 3))).toLocaleString('en-GB'); }); } } },
+
+{ part: 'Part 1 · What the model is', title: 'Tokens: word-pieces',
+  lines: [
+    'The model does not read whole words. It reads word-pieces, called tokens.',
+    'It writes one token at a time, each time guessing the most likely next piece.',
+    'It stops only when it writes a special stop token.',
+    'A normal answer from your model is about 100 to 200 tokens.'],
+  svg: () => {
+    const toks = ['Class', 'ified', ' as', ' high', '-risk', ' because', ' it', ' ranks', ' job', ' applic', 'ants', '.'];
+    let x = 120, y = 540, chips = '';
+    const chip = (s, x, y, fill, cls, delay) => { const w = s.length * 25 + 40;
+      return [`<g style="transition-delay:${delay}s"><rect x="${x}" y="${y - 50}" width="${w}" height="70" rx="12" fill="${fill}"/>${t(x + w / 2, y - 3, s.replace(/ /g, '·'), 34, cls + ' mid')}</g>`, w]; };
+    toks.forEach((s, i) => { const [g, w] = chip(s, x, y, 'var(--s-panel)', 'm', i * .32); if (x + w > 1480) { x = 120; y += 92; } const [g2, w2] = chip(s, x, y, 'var(--s-panel)', 'm', i * .32); chips += g2; x += w2 + 12; });
+    const [stop] = chip('STOP', x, y, 'var(--s-red)', 'm ink', 0);
+    return hdr('Part 1 · What the model is', 'Tokens: word-pieces') + `
+    <g data-b="0" class="pop">${t(560, 280, 'classification', 64, 'd mid')}
+      <rect x="980" y="225" width="150" height="76" rx="12" fill="var(--s-panel)" stroke="var(--s-amber)" stroke-width="3"/>${t(1055, 278, 'class', 36, 'm amb mid')}
+      <rect x="1142" y="225" width="200" height="76" rx="12" fill="var(--s-panel)" stroke="var(--s-amber)" stroke-width="3"/>${t(1242, 278, 'ification', 36, 'm amb mid')}
+      ${t(920, 278, '→', 50, 'b dim mid')}${t(1160, 345, '1 word, 2 tokens', 26, 'b dim mid')}</g>
+    <g data-b="1" class="stag">${chips}</g>
+    <g data-b="2" class="pop">${stop}</g>
+    <g data-b="3" class="pop">${t(800, 820, 'normal answer ≈ 100 to 200 tokens', 36, 'm amb mid')}</g>`; } },
+
+{ part: 'Part 1 · What the model is', title: 'The token limit: a safety stop',
+  lines: [
+    'So in build chunk P1-C02 we set a safety stop: at most 400 tokens per answer.',
+    'That is about twice a normal answer, so an honest answer is never cut short.',
+    'At step 200 of your run, the answers got stuck: Article 99, Article 99, Article 99, and never wrote the stop token.',
+    'They hit 400, were cut off, and counted as wrong. The limit turned a hidden loop into a failure you could see.'],
+  svg: () => {
+    let ticks = '';
+    for (let v = 0; v <= 400; v += 100) ticks += `<line x1="${200 + v * 3}" y1="640" x2="${200 + v * 3}" y2="656" stroke="var(--s-dim)" stroke-width="3"/>` + t(200 + v * 3, 694, v, 24, 'm dim mid');
+    return hdr('Part 1 · What the model is', 'The token limit: a safety stop') + `
+    <line x1="200" y1="640" x2="1420" y2="640" stroke="var(--s-dim)" stroke-width="3"/>${ticks}${t(1430, 694, 'tokens', 24, 'm dim')}
+    <g data-b="0"><line x1="1400" y1="250" x2="1400" y2="640" stroke="var(--s-red)" stroke-width="5" stroke-dasharray="14 10"/>${t(1400, 232, 'limit: 400', 30, 'm red mid', 'font-weight="700"')}</g>
+    <g data-b="1"><rect x="200" y="320" width="480" height="70" rx="8" fill="var(--s-mint)" class="grow"/>${t(700, 366, 'STOP ✓  normal answer', 30, 'b mint')}</g>
+    <g data-b="2"><rect x="200" y="460" width="1200" height="70" rx="8" fill="var(--s-red)" class="grow slow"/>
+      <text x="222" y="506" font-size="28" class="m ink" style="transition:opacity 1s 1s">Art. 99, Art. 99, Art. 99, Art. 99, Art. 99, Art. 99, Art. 99 …</text></g>
+    <g data-b="3" class="pop"><g transform="rotate(-4 800 800)"><rect x="420" y="752" width="760" height="86" rx="10" fill="none" stroke="var(--s-red)" stroke-width="5"/>
+      ${t(800, 808, 'CUT AT 400 · unreadable · counts as wrong', 32, 'm red mid', 'font-weight="700"')}</g></g>`; } },
+
+{ part: 'Part 1 · What the model is', title: '4-bit: rounding the dials',
+  lines: [
+    'Each dial setting has to be stored as a number.',
+    'Stored precisely, in 16 bits, a dial can sit at about 65 thousand positions.',
+    'Stored in 4 bits, it can sit at just 16. Like rounding every price to the nearest pound.',
+    'The model shrinks from about one and a half gigabytes to under half a gigabyte, so it fits on your 8 gigabyte Mac, for a little less precision.'],
+  svg: () => {
+    const dial = (cx, n, w) => { let s = `<circle cx="${cx}" cy="390" r="150" fill="var(--s-panel)" stroke="var(--s-grey)" stroke-width="4"/>`;
+      for (let i = 0; i < n; i++) { const a = i / n * 2 * Math.PI; s += `<line x1="${cx + Math.sin(a) * 120}" y1="${390 - Math.cos(a) * 120}" x2="${cx + Math.sin(a) * 142}" y2="${390 - Math.cos(a) * 142}" stroke="var(--s-amber)" stroke-width="${w}"/>`; }
+      return s + `<line x1="${cx}" y1="390" x2="${cx + 70}" y2="${390 - 70}" stroke="var(--s-chalk)" stroke-width="8" stroke-linecap="round"/><circle cx="${cx}" cy="390" r="12" fill="var(--s-chalk)"/>`; };
+    return hdr('Part 1 · What the model is', '4-bit: rounding the dials') + `
+    <g data-b="0" class="pop">${t(800, 395, 'one dial', 30, 'b dim mid')}</g>
+    <g data-b="1" class="pop">${dial(450, 160, 1.5)}${t(450, 590, '16-bit: 65,536 positions', 30, 'm mid')}</g>
+    <g data-b="2" class="pop">${dial(1150, 16, 8)}${t(1150, 590, '4-bit: 16 positions', 30, 'm amb mid')}${t(1150, 630, 'like rounding prices to the nearest pound', 24, 'b dim mid')}</g>
+    <g data-b="3" class="pop">
+      <rect x="200" y="690" width="1200" height="150" rx="10" fill="none" stroke="var(--s-dim)" stroke-width="3" stroke-dasharray="10 8"/>
+      ${t(1390, 680, 'your Mac: 8 GB', 24, 'm dim end')}
+      <rect x="216" y="712" width="225" height="46" rx="6" fill="var(--s-grey)"/>${t(460, 745, 'model at 16-bit ≈ 1.5 GB', 26, 'b')}
+      <rect x="216" y="774" width="70" height="46" rx="6" fill="var(--s-mint)"/>${t(305, 807, 'model at 4-bit: under 0.5 GB', 26, 'b mint')}</g>`; } },
+
+{ part: 'Part 2 · How training works', title: 'Loss: a score of surprise',
+  lines: [
+    'Training starts with a practice card: a description of an AI system, and the right answer.',
+    'The colleague reads the right answer one piece at a time.',
+    'For each piece we ask: how surprised were you? Very surprised gives a high number.',
+    'The average surprise is the loss. Training pushes the bars down. It is a score of surprise, not a percentage right.'],
+  svg: () => hdr('Part 2 · How training works', 'Loss: a score of surprise') + `
+    <g data-b="0" class="pop"><rect x="100" y="200" width="620" height="440" rx="16" fill="var(--s-chalk)"/>
+      ${t(130, 250, 'PRACTICE CARD', 24, 'm ink', 'letter-spacing="3"')}
+      ${t(130, 310, 'Role: deployer', 30, 'b ink')}${t(130, 356, 'Sector: retail', 30, 'b ink')}
+      ${t(130, 402, 'System: product recommender', 30, 'b ink')}${t(130, 448, 'Use: suggests items to shoppers', 30, 'b ink')}
+      <line x1="130" y1="490" x2="690" y2="490" stroke="var(--s-grey)" stroke-width="2"/>
+      ${t(130, 548, 'Right answer:', 28, 'b ink')}${t(130, 600, 'minimal risk', 40, 'd ink')}</g>
+    <g data-b="1" class="pop">
+      ${t(920, 700, 'Classified', 28, 'm mid')}${t(1130, 700, 'as', 28, 'm mid')}${t(1340, 700, 'minimal', 28, 'm mid')}
+      <line x1="820" y1="650" x2="1450" y2="650" stroke="var(--s-dim)" stroke-width="3"/></g>
+    <g data-b="2">${t(1135, 260, 'surprise', 28, 'm dim mid')}
+      <rect class="growy sb" x="860" y="560" width="120" height="90" fill="var(--s-amber)"/>
+      <rect class="growy sb" x="1070" y="590" width="120" height="60" fill="var(--s-amber)"/>
+      <rect class="growy sb" x="1280" y="300" width="120" height="350" fill="var(--s-red)"/>
+      ${t(1340, 290, '"minimal"? didn\'t expect that', 24, 'b red mid')}</g>
+    <g data-b="3" class="pop">${t(1135, 790, 'loss = average height of the bars', 32, 'b amb mid')}${t(1135, 836, 'lower is better · not a percentage right', 26, 'b dim mid')}</g>`,
+  beat(b, root) { if (b === 3) setTimer(() => root.querySelectorAll('.sb').forEach((r, i) => { r.style.transition = 'transform 2s ease'; r.style.transform = `scaleY(${[.5, .6, .2][i]})`; }), 1600); } },
+
+{ part: 'Part 2 · How training works', title: 'Two piles of cards',
+  lines: [
+    'We keep two piles of cards.',
+    '287 training cards. The colleague studies these, and the dials are nudged after each one.',
+    '32 validation cards are never studied. Every 25 steps we only check the surprise on them. That is the validation loss.',
+    'In your run it fell from 1.0 to 0.15, and was still falling at the end. That is the honest number to watch.'],
+  svg: () => {
+    const pile = (x, c) => [0, 1, 2, 3].map(i => `<rect x="${x + i * 10}" y="${300 - i * 12}" width="250" height="170" rx="12" fill="${c}" stroke="var(--s-bg)" stroke-width="3"/>`).join('');
+    return hdr('Part 2 · How training works', 'Two piles of cards') + `
+    <g data-b="1" class="pop">${pile(110, 'var(--s-mint)')}${t(250, 540, '287 training', 32, 'd mid')}${t(250, 580, 'studied, dials nudged', 24, 'b dim mid')}</g>
+    <g data-b="2" class="pop">${pile(460, 'var(--s-amber)')}${t(600, 540, '32 validation', 32, 'd mid')}${t(600, 580, 'only checked, every 25 steps', 24, 'b dim mid')}</g>
+    <g data-b="3">${axes(900, 220, 600, 420, 'step', 'validation loss')}
+      ${[0, 100, 200, 300].map(s => t(900 + s * 2, 680, s, 22, 'm dim mid')).join('')}
+      ${line(VAL, 900, 220, 600, 420, 300, 1.05, 'var(--s-amber)')}
+      ${t(920, 248, '1.003', 26, 'm amb')}${t(1500, 600, '0.149', 26, 'm amb end')}
+      ${t(1200, 760, 'your run: real numbers', 24, 'b dim mid')}</g>`; } },
+
+{ part: 'Part 2 · How training works', title: 'Steps, batch size, learning rate',
+  lines: [
+    'One step means: show a card, measure the loss, nudge the dials a little.',
+    'Batch size is how many cards per nudge. Four did not fit in memory, so yours was one. One card per nudge is jumpy, so your training loss bounced around. That is normal.',
+    'Learning rate is the size of each nudge. Yours was 0.0001. Too big and the dials overshoot. Too small and nothing changes.',
+    '300 steps is roughly one pass through the 287 cards. It took 12 minutes.'],
+  svg: () => {
+    const q = k => [(1 - k) ** 2 * 200 + 2 * (1 - k) * k * 800 + k * k * 1400, (1 - k) ** 2 * 270 + 2 * (1 - k) * k * 1030 + k * k * 270];
+    let p = []; for (let i = 0; i <= 20; i++) { const [x, y] = q(i * .025); p.push(`${x.toFixed(0)},${(y - 24 + (i % 2 ? -rnd(10, 26) : 0)).toFixed(0)}`); }
+    return hdr('Part 2 · How training works', 'Steps, batch size, learning rate') + `
+    <path d="M200 270 Q800 1030 1400 270" fill="none" stroke="var(--s-grey)" stroke-width="8"/>
+    ${t(1420, 300, 'high loss', 22, 'm dim')}${t(800, 690, 'low loss', 22, 'm dim mid')}
+    <g data-b="0"><circle r="22" fill="var(--s-amber)"><animateMotion dur="7s" repeatCount="indefinite" path="M${p.join(' L')}"/></circle>
+      ${t(800, 200, '1 step = show card → measure loss → nudge dials', 30, 'b mid')}</g>
+    <g data-b="1" class="pop">${t(800, 762, 'batch size 1: one card per nudge, so it hops around', 28, 'b mint mid')}</g>
+    <g data-b="2" class="pop">${t(800, 812, 'learning rate 0.0001: how big each nudge is', 28, 'b amb mid')}</g>
+    <g data-b="3" class="pop">${t(800, 862, '300 steps ≈ one pass through 287 cards · 12 minutes', 28, 'm mid')}</g>`; } },
+
+{ part: 'Part 3 · LoRA', title: 'LoRA: sticky notes, not surgery',
+  lines: [
+    'Turning all 752 million dials would need far more memory than your Mac has.',
+    'So LoRA freezes the original dials, and clips small sticky notes onto them.',
+    'Your model is a stack of 24 layers, like floors in a building. You put notes on the top 8.',
+    'Only the notes learn: 1.8 million numbers, 0.24 percent of the model, saved in a 7.2 megabyte adapter file.',
+    'Rank is how much each note can say. Yours was 8. LoRA never deletes layers: peel off the notes and the original model is back.'],
+  svg: () => {
+    let floors = '', notes = '';
+    for (let i = 0; i < 24; i++) { const y = 830 - (i + 1) * 25; floors += `<rect x="620" y="${y}" width="360" height="21" rx="3" fill="var(--s-grey)"/>`;
+      if (i >= 16) notes += `<rect x="${960 + (i % 2) * 8}" y="${y - 3}" width="52" height="26" rx="2" fill="var(--s-amber)" transform="rotate(${i % 2 ? 4 : -5} ${985} ${y + 10})" style="transition-delay:${(i - 16) * .25}s"/>`; }
+    return hdr('Part 3 · LoRA', 'LoRA: sticky notes, not surgery') + `
+    <g data-b="0">${floors}${t(800, 865, '24 layers', 24, 'm dim mid')}</g>
+    <g data-b="1" class="pop"><rect x="1050" y="700" width="420" height="96" rx="12" fill="var(--s-panel)"/>${t(1075, 740, 'FROZEN', 26, 'm mint', 'letter-spacing="3"')}${t(1075, 778, 'the original dials never change', 24, 'b')}</g>
+    <g data-b="2"><g class="stag">${notes}</g>${t(1050, 260, 'sticky notes on the top 8 layers', 28, 'b amb')}</g>
+    <g data-b="3" class="pop">${t(1050, 400, '1.8 million numbers learn', 32, 'd')}${t(1050, 446, '= 0.24% of the model', 28, 'm amb')}${t(1050, 492, 'adapter file: 7.2 MB', 28, 'm')}</g>
+    <g data-b="4" class="pop">${t(90, 360, 'rank 8 =', 30, 'm amb')}${t(90, 400, 'how much each note can say', 26, 'b')}
+      ${t(90, 500, 'peel the notes off →', 26, 'b')}${t(90, 540, 'the original model is back', 26, 'b mint')}</g>`; } },
+
+{ part: 'Part 4 · Memory', title: 'The desk is only so big',
+  lines: [
+    'While it learns, the model keeps scratch notes of every in-between step. They sit on a desk: the GPU memory.',
+    'Your desk is 8 gigabytes, shared with macOS. Batch size 4 overflowed it.',
+    'Even batch size 1 overflowed.',
+    'Gradient checkpointing throws most scratch notes away and redoes them when needed. Slower, but with 8 layers it peaked at 6.4 gigabytes, and fit.',
+    'That is also why the laptop got hot. The graphics chip ran flat out for 12 minutes. Normal.'],
+  svg: () => {
+    const X = g => 200 + g * 110;
+    let ticks = ''; for (let g = 0; g <= 8; g += 2) ticks += t(X(g), 720, g + ' GB', 22, 'm dim mid');
+    const row = (y, w, c, label, cls) => `<rect x="200" y="${y}" width="${w}" height="56" rx="6" fill="${c}" class="grow"/>${t(200, y - 14, label, 26, cls)}`;
+    return hdr('Part 4 · Memory', 'The desk is only so big') + `
+    <g data-b="0"><line x1="200" y1="690" x2="${X(8)}" y2="690" stroke="var(--s-dim)" stroke-width="3"/>${ticks}
+      <line x1="${X(8)}" y1="200" x2="${X(8)}" y2="690" stroke="var(--s-red)" stroke-width="6"/>${t(X(8) + 14, 230, 'your Mac: 8 GB', 24, 'm red')}${t(X(8) + 14, 262, '(shared with macOS)', 22, 'b dim')}
+      <line x1="${X(6.5)}" y1="280" x2="${X(6.5)}" y2="690" stroke="var(--s-amber)" stroke-width="3" stroke-dasharray="10 8"/>${t(X(6.5), 790, 'our safety limit 6.5 GB', 22, 'm amb mid')}</g>
+    <g data-b="1">${row(330, X(8) - 200, 'var(--s-red)', 'batch size 4', 'b')}${t(X(8) + 14, 370, '✕ out of memory', 28, 'm red')}</g>
+    <g data-b="2">${row(450, X(8) - 200, 'var(--s-red)', 'batch size 1', 'b')}${t(X(8) + 14, 490, '✕ out of memory', 28, 'm red')}</g>
+    <g data-b="3">${row(570, X(6.4) - 200, 'var(--s-mint)', 'batch size 1 + gradient checkpointing, 8 layers', 'b mint')}${t(X(6.4) - 16, 608, '6.4 GB ✓', 28, 'm ink end', 'font-weight="700"')}</g>
+    <g data-b="4" class="pop">${t(800, 860, '12 minutes flat out → a hot laptop. Normal.', 28, 'b amb mid')}</g>`; } },
+
+{ part: 'Part 4 · Memory', title: 'Snapshots: why step 200 fooled us',
+  lines: [
+    'Every 25 steps, the notes were saved to disk. That is a snapshot.',
+    'At step 200 the loss looked good: 0.176.',
+    'But zero of 20 answers were usable. Every one looped until the 400-token stop.',
+    'At step 300, 19 of 20 answers finished, and 16 were right. The lesson: loss is not the result. Always read real answers.'],
+  svg: () => {
+    const X = s => 150 + s * 4; let dots = '';
+    for (let s = 25; s <= 300; s += 25) dots += `<circle cx="${X(s)}" cy="480" r="13" fill="var(--s-amber)" style="transition-delay:${s / 25 * .15}s"/>`;
+    return hdr('Part 4 · Memory', 'Snapshots: why step 200 fooled us') + `
+    <line x1="150" y1="480" x2="${X(300)}" y2="480" stroke="var(--s-dim)" stroke-width="4"/>
+    ${[0, 100, 200, 300].map(s => t(X(s), 530, 'step ' + s, 22, 'm dim mid')).join('')}
+    <g data-b="0" class="stag">${dots}</g>
+    <g data-b="1" class="pop"><line x1="${X(200)}" y1="465" x2="${X(200)}" y2="390" stroke="var(--s-chalk)" stroke-width="3"/>${t(X(200), 330, 'step 200: loss 0.176', 30, 'm mid')}${t(X(200), 372, 'looks good…', 26, 'b dim mid')}</g>
+    <g data-b="2" class="pop">${t(X(200), 600, '0 of 20 usable', 34, 'd red mid')}${t(X(200), 640, 'all looped "Art. 99, Art. 99…"', 24, 'b red mid')}</g>
+    <g data-b="3" class="pop"><line x1="${X(300)}" y1="495" x2="${X(300)}" y2="690" stroke="var(--s-mint)" stroke-width="3"/>${t(X(300), 730, 'step 300: 16 of 20 right', 30, 'm mint end')}
+      ${t(800, 840, 'Loss is not the result. Read real answers.', 34, 'd amb mid')}</g>`; } },
+
+{ part: 'Part 5 · Judging the result', title: 'The final exam: held-out cases',
+  lines: [
+    'The final exam uses 20 held-out cases, kept out of training and validation completely.',
+    'Why not reuse the validation cards? Because we used them to make decisions. Anything you decide with stops being a fair exam.',
+    'Untrained, the colleague got 5 of 20, by saying high-risk every single time.',
+    'Trained, 16 of 20. But 20 cases is far too few to prove anything. This was practice. The real test uses our own checked cases.'],
+  svg: () => {
+    let env = ''; for (let i = 0; i < 20; i++) { const x = 220 + i * 58; env += `<rect x="${x}" y="210" width="46" height="34" rx="3" fill="var(--s-chalk)"/><path d="M${x} 210 l23 18 l23 -18" fill="none" stroke="var(--s-grey)" stroke-width="2"/>`; }
+    const row = (y, n) => Array.from({ length: 20 }, (_, i) => `<rect x="${420 + i * 48}" y="${y}" width="40" height="40" rx="6" fill="${i < n ? 'var(--s-mint)' : 'var(--s-red)'}" style="transition-delay:${i * .06}s"/>`).join('');
+    return hdr('Part 5 · Judging the result', 'The final exam: held-out cases') + `
+    <g data-b="0" class="pop">${env}${t(800, 290, '20 sealed cases: never trained on, never used to decide anything', 26, 'b dim mid')}</g>
+    <g data-b="1" class="pop">${t(800, 380, 'validation cards helped us decide → not a fair exam', 28, 'b amb mid')}</g>
+    <g data-b="2">${t(390, 498, 'Untrained', 30, 'b end')}<g class="stag">${row(468, 5)}</g>${t(1400, 498, '5 / 20', 32, 'm')}</g>
+    <g data-b="3">${t(390, 598, 'Trained', 30, 'b end')}<g class="stag">${row(568, 16)}</g>${t(1400, 598, '16 / 20', 32, 'm mint')}
+      ${t(800, 720, '20 cases is far too few to prove anything. This was practice.', 28, 'b dim mid')}</g>`; } },
+
+{ part: 'Part 5 · Judging the result', title: 'Overfitting, and the recap',
+  lines: [
+    'One danger to watch: overfitting. The colleague memorises the practice cards instead of learning the method.',
+    'The sign: training loss keeps falling while validation loss rises.',
+    'Yours did not do that. Validation loss was still falling, and training loss stayed close to it.',
+    'So: the model is dials. Tokens are word-pieces. Loss is surprise. LoRA trains sticky notes. And always read the answers.'],
+  svg: () => hdr('Part 5 · Judging the result', 'Overfitting, and the recap') + `
+    <g data-b="0" class="pop">${t(430, 220, 'Overfitting (illustration)', 28, 'b mid')}${t(1170, 220, 'Your run (real)', 28, 'b mid')}</g>
+    <g data-b="1">${axes(150, 270, 560, 340, 'step', 'loss')}
+      ${line([[0, .9], [60, .5], [120, .3], [180, .18], [240, .1], [300, .06]], 150, 270, 560, 340, 300, 1, 'var(--s-mint)')}
+      ${line([[0, .95], [60, .55], [120, .4], [180, .42], [240, .52], [300, .65]], 150, 270, 560, 340, 300, 1, 'var(--s-red)')}
+      ${t(700, 590, 'training ↓', 24, 'm mint end')}${t(700, 370, 'validation ↑', 24, 'm red end')}${t(430, 700, 'memorising!', 30, 'd red mid')}</g>
+    <g data-b="2">${axes(890, 270, 560, 340, 'step', 'loss')}
+      ${line(VAL, 890, 270, 560, 340, 300, 1.05, 'var(--s-amber)')}
+      ${t(1440, 560, 'validation 0.149', 24, 'm amb end')}${t(1170, 700, 'training at the end: 0.12 to 0.14', 26, 'b mid')}${t(1170, 740, 'close together = no memorising', 26, 'b mint mid')}</g>
+    <g data-b="3"><rect x="0" y="0" width="${W}" height="${H}" fill="var(--s-bg)" opacity=".94"/>
+      ${t(800, 200, 'What you just learned', 46, 'd mid')}
+      ${['The model is dials (752 million). Training turns dials.', 'Tokens are word-pieces; the 400 limit is a safety stop.', 'Loss is surprise. Validation loss is the honest one.', 'LoRA trains sticky notes: 0.24% of the model, 7.2 MB.', 'Always read real answers. Step 200 proved why.']
+        .map((s, i) => `<g class="stag"><g style="transition-delay:${i * .5}s">${t(300, 310 + i * 90, (i + 1) + '.', 34, 'm amb')}${t(360, 310 + i * 90, s, 34, 'b')}</g></g>`).join('')}</g>` }
+];
+
+/* ---------- player ---------- */
+const $ = id => document.getElementById(id);
+const stage = $('stage'), sub = $('sub');
+const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
+let si = 0, li = 0, playing = false, voiceOn = !!synth, rate = 1, run = 0, timers = [], voice = null;
+const setTimer = (fn, ms) => timers.push(setTimeout(fn, ms));
+const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+function pickVoice() {
+  if (!synth) return; const vs = synth.getVoices().filter(v => /^en/i.test(v.lang)); if (!vs.length) return;
+  const pref = ['Daniel', 'Serena', 'Kate', 'Google UK English Female', 'Google UK English Male', 'Samantha', 'Karen', 'Moira'];
+  voice = pref.map(n => vs.find(v => v.name.includes(n))).find(Boolean) || vs.find(v => v.lang === 'en-GB') || vs[0];
+}
+if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; } else { $('voice').textContent = 'Voice: unavailable'; $('voice').disabled = true; }
+const spoken = s => s.replace('P1-C02', 'P1, C02').replace('0.0001', 'zero point zero zero zero one').replace(/(\d)\.(\d)(\d)(\d)\b/g, '$1 point $2 $3 $4');
+const words = s => s.split(/\s+/).length;
+
+function render(i, upTo) {
+  si = i; stage.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${scenes[i].title}">${scenes[i].svg()}</svg>`;
+  for (let b = 0; b <= upTo; b++) show(b, b === upTo);
+  ui();
+}
+function show(b, live) {
+  const root = stage.querySelector('svg');
+  root.querySelectorAll(`[data-b="${b}"]`).forEach(el => { el.getBoundingClientRect(); el.classList.add('show'); });
+  if (live && scenes[si].beat) scenes[si].beat(b, root);
+  li = b; sub.textContent = scenes[si].lines[b]; ui();
+}
+function go(i, play = playing) {
+  clearTimers(); run++; if (synth) synth.cancel();
+  playing = play; li = 0;
+  // two frames so the start state paints before the reveal transition
+  stage.innerHTML = ''; render(i, -1);
+  requestAnimationFrame(() => requestAnimationFrame(() => { show(0, true); if (playing) speak(); }));
+}
+function speak() {
+  const id = ++run, text = scenes[si].lines[li], est = words(text) / (2.6 * rate) + 0.8;
+  const done = () => { if (id !== run) return; run++; advance(); };
+  if (voiceOn && synth) {
+    const u = new SpeechSynthesisUtterance(spoken(text)); if (voice) u.voice = voice; u.rate = .95 * rate; u.lang = voice ? voice.lang : 'en-GB';
+    u.onend = () => setTimer(done, 380); u.onerror = () => setTimer(done, 380);
+    synth.speak(u); setTimer(done, est * 2200 + 4000);
+  } else setTimer(done, est * 1000);
+}
+function advance() {
+  if (li < scenes[si].lines.length - 1) { show(li + 1, true); speak(); }
+  else if (si < scenes.length - 1) setTimer(() => go(si + 1, true), 700);
+  else { playing = false; ui(); sub.textContent = 'The end. Pick any chapter to watch it again, or read learning entry 012.'; }
+}
+function toggle() {
+  $('cover').hidden = true;
+  if (playing) { playing = false; clearTimers(); run++; if (synth) synth.cancel(); ui(); }
+  else { playing = true; ui(); if (si === scenes.length - 1 && li === scenes[si].lines.length - 1) go(0, true); else speak(); }
+}
+function ui() {
+  $('play').textContent = playing ? 'Pause' : 'Play';
+  $('time').textContent = `${si + 1} / ${scenes.length}`;
+  $('bar').innerHTML = scenes.map((_, i) => `<i class="${i < si ? 'done' : i === si ? 'now' : ''}"></i>`).join('');
+  document.querySelectorAll('#chap button').forEach((b, i) => b.setAttribute('aria-current', i === si));
+}
+$('chap').innerHTML = scenes.map((s, i) => `<li><button data-i="${i}"><small>${i + 1} · ${s.part}</small>${s.title}</button></li>`).join('');
+$('chap').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { $('cover').hidden = true; go(+b.dataset.i, true); } });
+$('cover').addEventListener('click', () => { $('cover').hidden = true; go(0, true); });
+$('play').addEventListener('click', () => $('cover').hidden ? toggle() : ($('cover').hidden = true, go(0, true)));
+$('prev').addEventListener('click', () => { $('cover').hidden = true; go(Math.max(0, si - 1)); });
+$('next').addEventListener('click', () => { $('cover').hidden = true; go(Math.min(scenes.length - 1, si + 1)); });
+$('voice').addEventListener('click', () => { voiceOn = !voiceOn; $('voice').textContent = 'Voice: ' + (voiceOn ? 'on' : 'off'); $('voice').setAttribute('aria-pressed', voiceOn); if (playing) { clearTimers(); run++; synth && synth.cancel(); speak(); } });
+$('speed').addEventListener('click', () => { rate = rate === 1 ? .85 : rate === .85 ? 1.15 : 1; $('speed').textContent = 'Speed: ' + (rate === 1 ? 'normal' : rate < 1 ? 'slower' : 'faster'); });
+document.addEventListener('keydown', e => { if (e.target.closest('button') && e.key === ' ') return;
+  if (e.key === ' ') { e.preventDefault(); $('cover').hidden ? toggle() : ($('cover').hidden = true, go(0, true)); }
+  if (e.key === 'ArrowRight') $('next').click(); if (e.key === 'ArrowLeft') $('prev').click(); });
+
+// resting frame: the opening scene fully drawn, under the play button
+render(0, scenes[0].lines.length - 1); sub.textContent = 'Press play. Each picture is explained out loud, and the words appear here too.';
+</script>
