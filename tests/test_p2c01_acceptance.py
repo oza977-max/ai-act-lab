@@ -110,9 +110,7 @@ def test_tc_ls_6_02_ranking_tool_without_purpose_goes_to_review(text):
     ranking = [e for e in review if "ranks people" in e["description"]]
     assert ranking
     assert all(e["record"]["review_reason"] == "missing-fact" for e in ranking)
-    assert all(
-        e["record"]["articles"] == [] or e["record"]["articles"] for e in ranking
-    )
+    assert all(e["record"]["art50_flag"] is False for e in ranking)
 
 
 def test_review_rule_is_narrow_and_names_three_reasons(text):
@@ -151,6 +149,7 @@ def test_ls_8_sources_link_the_amended_act(text):
 @pytest.mark.parametrize(
     "heading",
     [
+        "The six labels",
         "Decision order",
         "Article 50 in short",
         "When the description is silent",
@@ -185,6 +184,20 @@ def test_flag_is_false_when_article_50_is_never_reached(text):
     assert "always `false`" in section(text, "Decision order")
 
 
+def test_examples_follow_the_articles_rule(text):
+    for e in examples(text):
+        r = e["record"]
+        cites_50 = any(c.startswith("Art. 50") for c in r["articles"])
+        assert cites_50 == r["art50_flag"], e[
+            "id"
+        ]  # Article 50 cited if and only if flagged
+        if r["route"] == "annex-iii":
+            assert "Art. 6(2)" in r["articles"], e["id"]
+            assert f"Annex III {r['annex_iii_point']}" in r["articles"], e["id"]
+        if r["route"] == "annex-i":
+            assert "Art. 6(1)" in r["articles"], e["id"]
+
+
 def test_tc_ls_3_01_and_3_02_flag_independent_of_tier(text):
     found = examples(text)
     assert any(e["label"] == "high-risk" and e["record"]["art50_flag"] for e in found)
@@ -193,7 +206,16 @@ def test_tc_ls_3_01_and_3_02_flag_independent_of_tier(text):
 
 def test_amended_prohibitions_and_safety_components_are_covered(text):
     order = section(text, "Decision order")
-    for phrase in ("(ba)", "(bb)", "5(1a)", "Art. 6(1a)", "Art. 6(1b)"):
+    for phrase in (
+        "(ba)",
+        "(bb)",
+        "5(1a)",
+        "5(1b)",
+        "Art. 6(1a)",
+        "Art. 6(1b)",
+        "Art. 6(1c)",
+        "Art. 2(2)",
+    ):
         assert phrase in order, phrase
 
 
