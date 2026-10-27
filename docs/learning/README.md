@@ -22,3 +22,4 @@ This is separate from `notebook/`, which records individual training runs.
 | [010](010-first-real-model.md) | A real model on this Mac (P1-C02) | 2026-10-26 |
 | [011](011-first-fine-tune.md) | Your first fine-tune (practice run 001) | 2026-10-27 |
 | [012](012-the-words-so-far.md) | The words so far, slowly: every term from the first fine-tune ([film version](012-video.html)) | 2026-10-27 |
+| [013](013-record-rules.md) | The rules for a proper answer (P1-C03) | 2026-10-27 |

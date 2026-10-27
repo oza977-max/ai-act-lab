@@ -15,8 +15,11 @@ human, and runs with no data leaving the laptop. This is a learning project, not
 legal advice.
 
 **Status (2026-10-27):** planning complete and reviewed; build in progress. The
-evaluation tool works, a first model runs on the laptop, and the owner has run a
-first practice fine-tune. Next: the labelling guideline and dates table. Target
+evaluation tool works and now marks answers strictly (a wrong field, a missing box
+or a second sentence makes an answer count as wrong, and any date in an answer is
+flagged), a first model runs on the laptop, and the owner has run a first practice
+fine-tune. Next: the full evaluation report, then the labelling guideline and dates
+table. Target
 date 16 November 2026.
 
 ---
@@ -120,6 +123,11 @@ Kept here on purpose: these are the most useful lessons.
 - **Borrowed memory estimates.** A figure from another project (3.9 GB to train a 0.8B
   model) did not hold here; a two-step test run found the real limits before the
   owner's run.
+- **Detectors make two kinds of mistake.** The first date detector missed
+  "2 august 2026" (lowercase) and wrongly flagged "Section 6.5.2026"; the
+  one-sentence check rejected "Example Ltd. screens CVs." because of the period in
+  "Ltd.". An independent reviewer found all three by throwing about 60 odd inputs
+  at the code; each now has a test.
 - **Time estimates.** Early deadline options suggested months; the honest estimate
   is 15 to 20 hours of the owner's time over two to three weeks.
 
@@ -127,6 +135,8 @@ Kept here on purpose: these are the most useful lessons.
 
 - `docs/learning/000-the-whole-picture.md`: the whole project in plain English, as a
   six-step story about training a junior colleague. Start here.
+- `docs/learning/012-video.html`: a narrated seven-minute film of the ideas behind
+  the first fine-tune (open it in a browser).
 - `docs/learning/`: the owner's textbook, one entry per step, each with a lesson,
   what happened, the terms, and check questions.
 - `docs/01-glossary.md`: the words, in plain English.
