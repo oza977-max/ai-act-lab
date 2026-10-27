@@ -73,8 +73,8 @@ tier. Question 4 sets the flag for every tier except `prohibited` and
 
    If it is not an AI system, or an exclusion applies: `out-of-scope`.
 2. **Is it a prohibited practice?** Check every point of Art. 5(1), including
-   points (ba) and (bb) added in 2026: generating non-consensual intimate images of
-   an identifiable person without their explicit consent, and generating child
+   points (ba) and (bb) added in 2026: generating realistic intimate images, video
+   or audio of an identifiable person without their explicit consent, and generating child
    sexual abuse material (unless a "without right" defence applies under national
    law). For these two:
    - a **provider's** system is prohibited when generating that material is its
@@ -87,8 +87,8 @@ tier. Question 4 sets the flag for every tier except `prohibited` and
      nature of a sexual act depicted, is not manipulation (Art. 5(1b)).
 
    Safeguards count only if they **reliably** prevent the output and misuse that is
-   reported gets corrected. If the description says users can get round the
-   safeguards and nothing was done about it, the provider's system is prohibited.
+   reported gets corrected. If the description says users can repeatedly get
+   round the safeguards and nothing was done about it, the provider's system is prohibited.
    If a general image or video tool's description says nothing about safeguards,
    assume the ordinary case (working safeguards) and carry on. If yes: `prohibited`.
 3. **Is it high-risk through Annex I or Annex III, after the Article 6(3) exception?**
@@ -135,8 +135,8 @@ disclaimer in the description does not change it.
   audio, images, video or text as new content, such as an image generator, a voice
   clone or a text writer: flag `true`. This guideline reads the Act's exception
   (assisting standard editing, or not substantially altering the input or its
-  meaning) to cover summaries, extracts and format conversions of documents the
-  user supplies: those alone do not set the flag. This reading is provisional and
+  meaning) to cover summaries, extracts, transcriptions and format conversions of
+  material the user supplies: those alone do not set the flag. This reading is provisional and
   will be revisited if Commission guidance on Article 50 says otherwise. A chatbot is flagged and cited
   under 50(1); add 50(2) only if it also generates images, audio or video.
 - **50(3), emotion recognition or biometric categorisation.** The deployer must tell
@@ -192,23 +192,30 @@ record).
 The rule here, the owner's simplification of the "no significant risk" test:
 
 - The exception applies only on the Annex III route, never on the Annex I route.
-- **First, is the Annex III use established?** A system that does a task inside
-  one of the Annex III processes (for example any step of recruitment) is treated
-  as serving that use; this is this guideline's convention, so whether a small
-  task "counts" is never a reason for review. If the process itself is not given,
-  that is `missing-fact`.
+- **First, is the Annex III use established?** A system that does a step within a
+  process Annex III names, and whose output feeds that process (for example
+  transcribing interviews that recruiters use to select), is treated as serving
+  that use; this is this guideline's convention, so whether a small step "counts"
+  is never a reason for review. A pure information or support function that
+  feeds no such decision, assesses no one and monitors no one, such as an HR
+  chatbot answering policy questions (TO-2), is not the Annex III use. If the
+  process itself is not given, that is `missing-fact`.
 - **The "clearly stated" test, the one test to apply.** Both must hold:
   1. the description names the task, and it is plainly one of the four (for
      example "converts formats", "transcribes recordings", "checks spelling after
      the decision is made"); and
   2. nothing in the description says or implies that the system assesses, ranks,
-     scores or filters people.
+     scores or filters people. "Implies" means the description mentions an output
+     about an individual person, such as a score, rating, rank, flag,
+     recommendation, or a tag for their mood or sentiment. Owner decision D-LS-3
+     (2026-10-27): **silence passes**; an explicit denial is not needed.
   This is the owner's simplification: it is stricter than the Act's profiling rule
   (filtering by objective criteria is not profiling, but fails point 2 here).
 - **Not clearly stated means high-risk.** If either point fails, the label stays
   `high-risk`.
-- Clearly stated: decide the tier from the remaining questions, usually `minimal`,
-  and cite Art. 6(3) and the Annex III point (not Art. 95(1)).
+- Clearly stated: decide the tier from the remaining questions (`transparency-only`
+  if an Article 50 duty applies, otherwise `minimal`) and cite Art. 6(3) and the
+  Annex III point, never Art. 95(1).
 - `unsettled-law` is only for a task that **is** clearly described, where whether
   that task counts as one of the four is something the Act's text does not settle.
 
@@ -231,7 +238,8 @@ Narrowly. A case goes to review only for one of three reasons, recorded in
   and the tier depends on which is.
 - `unsettled-law`: the facts are clear, but the legal question the tier depends on
   is not settled by the Act's text, for example a point that depends on the draft
-  Article 6 guidelines or on wording new in 2026.
+  Article 6 guidelines, on wording new in 2026, or on original wording that can be
+  read two ways with no guidance yet. Name the open question in the reason.
 
 **A case that is hard but decidable is decided.** Review is not a way to avoid a
 difficult call: accuracy bought by refusing hard cases is not accuracy. A review
@@ -261,7 +269,8 @@ in `lab/records.py` (the single source of truth) and quoted here.
 **What goes in `articles`:** the provisions that decide the tier, plus the
 Article 50 paragraph or paragraphs when the flag is `true` (and only then). For a high-risk case, Art. 6(1) or
 6(2) and the Annex point. For an Article 6(3) result, Art. 6(3) and the Annex III
-point, and nothing else. For any other `minimal` case, Art. 95(1). For a review case, the provisions in doubt, or
+point, plus any Article 50 paragraph that sets the flag, and nothing else; with the
+flag `true` the tier is `transparency-only`, otherwise `minimal`. For any other `minimal` case, Art. 95(1). For a review case, the provisions in doubt, or
 none. Provisions that were considered and do not apply are not cited.
 
 The record never holds a date, deadline or list of duties. Those come from the
@@ -306,7 +315,7 @@ safety reasons.
 
 ### Example PR-3 (prohibited)
 A mobile app is advertised as turning any uploaded photo of a real, identifiable
-person into a nude image of them. It does not ask whether the person shown has consented.
+person into a realistic nude image of them. It does not ask whether the person shown has consented.
 
 ```json
 {"tier": "prohibited", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Art. 5(1)(ba)", "Art. 5(1a)"], "review_reason": null, "reason": "Generating nude images of identifiable people without their consent is the app's intended purpose, which the Act bans."}
@@ -345,9 +354,9 @@ deleted point 1 without renumbering the rest.
 A recruitment platform's AI system writes a short summary of each applicant's CV,
 highlighting relevant experience, and recruiters read the summaries before
 deciding whom to shortlist.
-*Why boundary:* summarising may sound preparatory, but choosing which experience
-is "relevant" assesses candidates, so point 2 of the "clearly stated" test fails
-and the exception is not applied. A summary of
+*Why boundary:* summarising may sound preparatory, but "summary" is not plainly
+one of the four tasks, so point 1 of the "clearly stated" test fails and the
+exception is not applied. A summary of
 a supplied document does not set the Article 50 flag.
 
 ```json
@@ -459,12 +468,14 @@ the applicant's documents and transaction history. Applications above a set scor
 are refused automatically, and no one checks the applicant's ability to repay
 for those.
 *Why boundary:* creditworthiness assessment is high-risk (HR-1), but Annex III 5(b)
-excludes systems used to detect financial fraud. The facts are clear; whether a
-fraud score that alone decides access to credit falls inside that exclusion is a
-question the text does not settle.
+excludes systems used to detect financial fraud. The facts are clear; the open
+question is whether that exclusion is judged by the system's **purpose** (built to
+catch fraud, so excluded) or by its **effect** (it alone decides who gets credit,
+so high-risk). No guidance answers it yet. Owner decision D-LS-4 (2026-10-27):
+keep such cases as review until it does.
 
 ```json
-{"tier": "needs-human-review", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Annex III 5(b)"], "review_reason": "unsettled-law", "reason": "Whether a fraud score that alone decides who gets a loan is excluded fraud detection or a creditworthiness assessment is not settled by the text."}
+{"tier": "needs-human-review", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Annex III 5(b)"], "review_reason": "unsettled-law", "reason": "It is open whether the fraud-detection exclusion is judged by purpose, which excludes this score, or by effect, since the score alone decides who gets a loan."}
 ```
 
 ## The gold set
@@ -500,4 +511,4 @@ Source: requirements GS-6 and LS-7 of this project.
 
 | Version | Date | Change | Why |
 |---|---|---|---|
-| v1 | 2026-10-27 | First version: six labels, decision order, Article 50 rules, owner decisions D-LS-1 (assume the ordinary case) and D-LS-2 (Article 6(3) must be stated clearly), 18 worked examples | Build chunk P2-C01, before any gold case is labelled |
+| v1 | 2026-10-27 | First version: six labels, decision order, Article 50 rules, owner decisions D-LS-1 (assume the ordinary case), D-LS-2 (Article 6(3) must be stated clearly), D-LS-3 (silence on profiling passes) and D-LS-4 (the fraud-score question stays with review), 18 worked examples | Build chunk P2-C01, before any gold case is labelled |
