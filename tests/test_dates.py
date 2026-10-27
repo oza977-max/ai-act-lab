@@ -366,3 +366,19 @@ def test_change_log_must_be_in_date_order(approved):
 def test_an_approval_dated_in_the_future_is_refused(approved):
     with pytest.raises(DatesError, match="approval"):
         lookup("minimal", "none", False, datetime.date(2026, 10, 26), approved)
+
+
+def test_a_plan_value_without_a_matching_date_needs_a_note(approved):
+    variant(approved, 'plan_value = "2027-12-02"', 'plan_value = "2027-08-02"')
+    with pytest.raises(DatesError, match="discrepancy"):
+        load_table(approved)
+
+
+def test_a_non_text_source_is_refused(approved):
+    variant(
+        approved,
+        'source_url = "https://eur-lex.europa.eu/eli/reg/2026/1744/oj/eng"',
+        "source_url = 5",
+    )
+    with pytest.raises(DatesError, match="EUR-Lex link"):
+        load_table(approved)

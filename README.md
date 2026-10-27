@@ -24,8 +24,10 @@ amendment), and two models can be compared case by case. Phase 2 has started:
 the [labelling guideline](docs/guideline/labelling-guideline.md), the rulebook for
 every gold label, is drafted with 18 worked examples and four owner decisions,
 and the owner approved it. The [zero-shot prompt](prompts/zero-shot-v1.txt) is now
-generated from that guideline, so the two cannot drift apart. Next: the dates
-table.
+generated from that guideline, so the two cannot drift apart. The
+[dates-and-duties table](data/dates/dates-table.toml) is built, every date read
+from the Official Journal, and awaits the owner's approval. Next: Phase 3, the
+gold set.
 Target date 16 November 2026.
 
 ## Start here
@@ -52,11 +54,11 @@ Pick the path that fits you:
 | Measure | Now |
 |---|---|
 | Build chunks done | 7 of 21 (1 of 4 phases complete) |
-| Automated tests | 283 passing |
+| Automated tests | 338 passing |
 | Independent review passes | 20 passes over 7 chunks; 40 serious findings caught and fixed before commit |
-| Learning entries | 17, plus 1 film |
+| Learning entries | 18, plus 1 film |
 | Training runs logged | 1 |
-| Commits | 54 |
+| Commits | 59 |
 
 **Build log.** Each chunk is reviewed by an independent reviewer until a pass finds nothing serious; the numbers show the serious findings each pass found.
 
@@ -69,7 +71,7 @@ Pick the path that fits you:
 | P1-C04 | Full evaluation | 1 → 0 | [handover](build/handovers/P1-C04.md) |
 | P2-C01 | Guideline v1 | 10 → 8 → 3 → 4 → 3 → 1 → 0 | [handover](build/handovers/P2-C01.md) |
 | P2-C02 | Prompt build | 1 → 1 → 0 | [handover](build/handovers/P2-C02.md) |
-| P2-C03 | Dates table | not started |  |
+| P2-C03 | Dates table | 6 → 3 → 0 (awaiting owner approval) | [handover](build/handovers/P2-C03.md) |
 | P3-C01 | Gold tooling | not started |  |
 | P3-C02 | Gold batch 1 | not started |  |
 | P3-C03 | Gold batch 2 | not started |  |
@@ -208,6 +210,10 @@ Kept here on purpose: these are the most useful lessons.
   looped on article numbers. After one added line it stopped looping but copied
   the prompt's example record instead. We stopped tuning there: fitting the prompt
   to one case is the same trap as fitting a model to its training data.
+- **A list that looks complete misleads as much as a wrong date.** No date in the
+  dates table was ever wrong, but the first draft listed only some of the
+  high-risk duties without saying so. Reviewers needed three rounds (6, 3 and 0
+  serious findings); every high-risk entry now says what it leaves out.
 - **Ten cases say little.** The 10-case practice exam scores 7 of 10, with a 95%
   interval of 40% to 89%. Every number in the report now carries its interval.
 - **Time estimates.** Early deadline options suggested months; the honest estimate

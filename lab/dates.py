@@ -104,8 +104,9 @@ def _entry(raw: dict, index: int) -> Entry:
         f"{where}: last_checked must be a date",
     )
     _need(
-        str(raw["source_url"]).startswith("https://eur-lex.europa.eu/"),
-        f"{where}: source must be EUR-Lex",
+        isinstance(raw["source_url"], str)
+        and raw["source_url"].startswith("https://eur-lex.europa.eu/"),
+        f"{where}: source_url must be a EUR-Lex link",
     )
     _need(
         (raw["tier"] == HIGH_RISK) == (raw["route"] != "none"),
@@ -134,6 +135,13 @@ def _entry(raw: dict, index: int) -> Entry:
             f"{where}: {d['article']} applies_from must be a date",
         )
         duties.append(Duty(d["article"], d["title"], d["applies_from"]))
+    # DT-2: a plan value either matches one of the verified dates or the gap is recorded.
+    if raw["plan_value"]:
+        listed = {d.applies_from.isoformat() for d in duties}
+        _need(
+            raw["plan_value"] in listed or raw["discrepancy_note"].strip() != "",
+            f"{where}: plan value {raw['plan_value']} matches no date and has no discrepancy note",
+        )
     return Entry(
         tier=raw["tier"],
         route=raw["route"],

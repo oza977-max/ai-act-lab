@@ -26,3 +26,4 @@ This is separate from `notebook/`, which records individual training runs.
 | [014](014-full-evaluation.md) | The full scoring report: intervals, citations, paired comparison (P1-C04) | 2026-10-27 |
 | [015](015-labelling-guideline.md) | The labelling guideline: the rulebook for every gold label (P2-C01) | 2026-10-27 |
 | [016](016-the-prompt.md) | The prompt, generated from the guideline (P2-C02) | 2026-10-27 |
+| [017](017-dates-table.md) | The dates-and-duties table, checked against the Official Journal (P2-C03) | 2026-10-27 |
