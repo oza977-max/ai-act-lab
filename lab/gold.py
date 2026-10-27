@@ -71,8 +71,10 @@ DRAFT_KEYS = {"id", "description", "tags", "draft", "guideline_version"}
 # Cells a spreadsheet would run as a formula (spec), plus tab and carriage return (OWASP).
 FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
 ENUM_PARTS = ("tier", "route", "review_reason", "art50")
-_AREA = re.compile(r"[0-9]+(?:\.0+)?")
-_ID = re.compile(r"^GC-\d{3}$")
+_AREA = re.compile(r"[0-9]{1,2}(?:\.0+)?")
+_ID = re.compile(
+    r"GC-[0-9]{3}"
+)  # used with fullmatch: ASCII digits, no trailing newline
 _GOLD_FILE = re.compile(r"^gold-v(\d+)\.jsonl$")
 
 
@@ -194,6 +196,21 @@ def _draft_problems(case: dict) -> list[str]:
         )
     if not isinstance(case["guideline_version"], str):
         problems.append("guideline_version is not text")
+    if not problems:
+        # What the owner will see must read back as exactly this draft, or they could never pass check.
+        cells = {
+            "description": case["description"],
+            **{f"proposed_{k}": v for k, v in record_to_cells(draft).items()},
+        }
+        if any(_unescape(_escape(v)) != v for v in cells.values()):
+            problems.append("a cell would not survive the formula-escape round trip")
+        elif (
+            cells_to_record({k: v.strip() for k, v in cells.items()}, "proposed_")[0]
+            != draft
+        ):
+            problems.append(
+                "the draft record does not read back from the sheet unchanged (stray spaces or ';' in a field?)"
+            )
     return problems
 
 
@@ -215,7 +232,7 @@ def read_drafts(path: Path) -> dict[str, dict]:
             raise GoldError(
                 f"{path} line {n}: a draft needs exactly {sorted(DRAFT_KEYS)}"
             )
-        if not _ID.match(str(case["id"])) or case["id"] in drafts:
+        if not _ID.fullmatch(str(case["id"])) or case["id"] in drafts:
             raise GoldError(f"{path} line {n}: bad or repeated id {case['id']!r}")
         if problems := _draft_problems(case):
             raise GoldError(f"{path} line {n} ({case['id']}): " + "; ".join(problems))
@@ -271,6 +288,8 @@ def read_sheet(path: Path) -> list[dict[str, str]]:
         raise GoldError(
             f"{path} is not UTF-8 text: export it again as 'CSV UTF-8'"
         ) from exc
+    except csv.Error as exc:
+        raise GoldError(f"{path} cannot be read as CSV: {exc}") from exc
     # Spreadsheets may add empty columns on the right and empty rows at the bottom.
     while (
         header
@@ -296,6 +315,8 @@ def read_sheet(path: Path) -> list[dict[str, str]]:
             if all(c == "" for c in cells[len(COLUMNS) :])
             else cells
         )
+        if len(cells) < len(COLUMNS):  # some exports drop empty cells at the end
+            cells = cells + [""] * (len(COLUMNS) - len(cells))
         if len(cells) != len(COLUMNS):
             raise GoldError(
                 f"{path} row {n}: {len(cells)} cells; expected {len(COLUMNS)}"
@@ -319,7 +340,7 @@ def check_rows(
         def flag(message, case_id=case_id):
             problems.append(f"{case_id or '(no id)'}: {message}")
 
-        if not _ID.match(case_id):
+        if not _ID.fullmatch(case_id):
             flag("the id must look like GC-001")
         if case_id in seen:
             flag("the id appears twice")
@@ -437,6 +458,11 @@ def assemble(
         raise GoldError(f"no review sheets named batch-NN.csv in {review_dir}")
     version = _version(guideline)
     problems, cases, doubts = [], [], []
+    for drafts_file in sorted(drafts_dir.glob("batch-*.jsonl")):
+        if not (review_dir / f"{drafts_file.stem}.csv").is_file():
+            problems.append(
+                f"{drafts_file.name} has no review sheet {drafts_file.stem}.csv"
+            )
     for sheet in sheets:
         drafts = read_drafts(drafts_dir / f"{sheet.stem}.jsonl")
         rows = read_sheet(sheet)

@@ -420,3 +420,55 @@ def test_a_gold_file_without_its_metadata_is_rewritten(full):
     )
     assert written and (full / "gold" / f"{again.stem}.meta.json").is_file()
     assert meta["sha256"]
+
+
+@pytest.mark.parametrize(
+    "draft_change",
+    [
+        {"reason": "It is a chatbot. "},
+        {"reason": " It is a chatbot."},
+        {"articles": [" Art. 5(1)(c)"]},
+        {"reason": "''=It is banned."},
+    ],
+)
+def test_drafts_that_would_not_read_back_are_refused(batch, draft_change):
+    case = one_case()
+    with pytest.raises(GoldError, match="read back|round trip"):
+        batch({**case, "draft": {**case["draft"], **draft_change}})
+
+
+def test_an_absurdly_long_area_is_refused_cleanly(batch):
+    drafts, sheet = batch(one_case())
+    edit_rows(sheet, decision="change", **{**TO_HIGH_RISK, "final_area": "9" * 400})
+    assert any("whole number" in p for p in problems(drafts, sheet))
+
+
+def test_a_draft_id_with_a_trailing_newline_is_refused(batch):
+    with pytest.raises(GoldError, match="bad or repeated id"):
+        batch(one_case(id="GC-001\n"))
+
+
+def test_a_row_missing_its_trailing_cells_is_padded(batch):
+    _drafts, sheet = batch(one_case())
+    lines = sheet.read_text(encoding="utf-8").splitlines()
+    lines[1] = lines[1].rsplit(",", 2)[
+        0
+    ]  # drop the owner_note and guideline_version cells
+    sheet.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    row = read_sheet(sheet)[0]
+    assert row["owner_note"] == "" and row["guideline_version"] == ""
+
+
+def test_an_oversized_cell_is_a_clear_refusal(tmp_path):
+    sheet = tmp_path / "batch-01.csv"
+    sheet.write_text(
+        ",".join(COLUMNS) + '\nGC-001,"' + "x" * 200_000 + '"\n', encoding="utf-8"
+    )
+    with pytest.raises(GoldError):
+        read_sheet(sheet)
+
+
+def test_a_draft_batch_without_a_sheet_is_named(full):
+    (full / "drafts" / "batch-06.jsonl").write_text("", encoding="utf-8")
+    with pytest.raises(GoldError, match="batch-06.jsonl has no review sheet"):
+        assemble(full / "review", full / "drafts", GUIDELINE)
