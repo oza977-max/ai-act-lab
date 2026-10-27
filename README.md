@@ -107,8 +107,10 @@ Kept here on purpose: these are the most useful lessons.
 
 ## Learn along
 
+- `docs/learning/000-the-whole-picture.md`: the whole project in plain English, as a
+  six-step story about training a junior colleague. Start here.
 - `docs/learning/`: the owner's textbook, one entry per step, each with a lesson,
-  what happened, the terms, and check questions. Start at entry 001.
+  what happened, the terms, and check questions.
 - `docs/01-glossary.md`: the words, in plain English.
 - `docs/00-plan.md`: the original plan and the decisions log.
 - `notebook/`: one entry per training run (from the practice run on).
