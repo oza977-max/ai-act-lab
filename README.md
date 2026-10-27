@@ -26,8 +26,8 @@ every gold label, is drafted with 18 worked examples and four owner decisions,
 and the owner approved it. The [zero-shot prompt](prompts/zero-shot-v1.txt) is now
 generated from that guideline, so the two cannot drift apart. The
 [dates-and-duties table](data/dates/dates-table.toml) is built, every date read
-from the Official Journal, and awaits the owner's approval. Next: Phase 3, the
-gold set.
+from the Official Journal, and the owner approved it. Phase 2 is complete.
+Next: Phase 3, the gold set.
 Target date 16 November 2026.
 
 ## Start here
@@ -53,12 +53,12 @@ Pick the path that fits you:
 
 | Measure | Now |
 |---|---|
-| Build chunks done | 7 of 21 (1 of 4 phases complete) |
+| Build chunks done | 8 of 21 (2 of 4 phases complete) |
 | Automated tests | 338 passing |
-| Independent review passes | 20 passes over 7 chunks; 40 serious findings caught and fixed before commit |
+| Independent review passes | 23 passes over 8 chunks; 49 serious findings caught and fixed before commit |
 | Learning entries | 18, plus 1 film |
 | Training runs logged | 1 |
-| Commits | 59 |
+| Commits | 60 |
 
 **Build log.** Each chunk is reviewed by an independent reviewer until a pass finds nothing serious; the numbers show the serious findings each pass found.
 
@@ -71,7 +71,7 @@ Pick the path that fits you:
 | P1-C04 | Full evaluation | 1 → 0 | [handover](build/handovers/P1-C04.md) |
 | P2-C01 | Guideline v1 | 10 → 8 → 3 → 4 → 3 → 1 → 0 | [handover](build/handovers/P2-C01.md) |
 | P2-C02 | Prompt build | 1 → 1 → 0 | [handover](build/handovers/P2-C02.md) |
-| P2-C03 | Dates table | 6 → 3 → 0 (awaiting owner approval) | [handover](build/handovers/P2-C03.md) |
+| P2-C03 | Dates table | 6 → 3 → 0 | [handover](build/handovers/P2-C03.md) |
 | P3-C01 | Gold tooling | not started |  |
 | P3-C02 | Gold batch 1 | not started |  |
 | P3-C03 | Gold batch 2 | not started |  |
