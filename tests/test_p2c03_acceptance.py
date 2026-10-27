@@ -44,7 +44,7 @@ def approved(tmp_path):
     )
     text = re.sub(
         r'^approved_on = ".*"$',
-        'approved_on = "2026-10-27"',
+        "approved_on = 2026-10-27",
         text,
         count=1,
         flags=re.MULTILINE,
@@ -168,11 +168,20 @@ def test_tc_dt_4_01_ninety_days_current_ninety_one_stale(tmp_path, approved):
         assert all(e["stale"] is expected for e in json.loads(result.stdout))
 
 
-def test_tc_dt_5_01_table_is_refused_until_the_owner_approves():
+def test_tc_dt_5_01_approval_and_change_log(approved):
     table = tomllib.loads(TABLE.read_text(encoding="utf-8"))
-    assert table["changes"], "a change log is required"
-    if not table["approved_on"]:
-        result = lookup("--tier", "minimal", "--route", "none", "--art50", "false")
-        assert result.returncode == 1 and "not approved" in result.stderr
-    else:
-        assert table["approved_by"]
+    assert table["changes"] and all(c["reason"] for c in table["changes"])
+    if table["approved_on"]:  # the real table, once approved, covers its last change
+        assert (
+            table["approved_by"]
+            and table["approved_on"] >= table["changes"][-1]["date"]
+        )
+    # Use before approval is refused, whatever the real table's state.
+    unapproved = approved.read_text(encoding="utf-8").replace(
+        "approved_on = 2026-10-27", 'approved_on = ""'
+    )
+    approved.write_text(unapproved, encoding="utf-8")
+    result = lookup(
+        "--tier", "minimal", "--route", "none", "--art50", "false", table=approved
+    )
+    assert result.returncode == 1 and "not approved" in result.stderr

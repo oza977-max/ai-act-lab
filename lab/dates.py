@@ -18,7 +18,7 @@ import tomllib
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from lab.records import ROUTES, TIERS
+from lab.records import HIGH_RISK, ROUTES, TIERS
 
 ROOT = Path(__file__).resolve().parent.parent
 TABLE_PATH = ROOT / "data" / "dates" / "dates-table.toml"
@@ -32,6 +32,7 @@ _ENTRY_KEYS = {
     "verified", "plan_value", "discrepancy_note", "note",
 }  # fmt: skip
 _DUTY_KEYS = {"article", "title", "applies_from"}
+_CHANGE_KEYS = {"version", "date", "change", "reason"}
 
 
 class DatesError(Exception):
@@ -106,16 +107,26 @@ def _entry(raw: dict, index: int) -> Entry:
         str(raw["source_url"]).startswith("https://eur-lex.europa.eu/"),
         f"{where}: source must be EUR-Lex",
     )
+    _need(
+        (raw["tier"] == HIGH_RISK) == (raw["route"] != "none"),
+        f"{where}: only high-risk entries have an Annex route",
+    )
     for key in ("checked_by", "note"):
         _need(
             isinstance(raw[key], str) and raw[key].strip() != "",
             f"{where}: {key} is empty",
         )
+    for key in ("plan_value", "discrepancy_note"):
+        _need(isinstance(raw[key], str), f"{where}: {key} must be text")
     duties = []
     for d in raw["duties"]:
         _need(
             isinstance(d, dict) and set(d) == _DUTY_KEYS,
             f"{where}: a duty needs exactly {sorted(_DUTY_KEYS)}",
+        )
+        _need(
+            all(isinstance(d[k], str) and d[k].strip() for k in ("article", "title")),
+            f"{where}: a duty's article and title must be non-empty text",
         )
         _need(
             type(d["applies_from"]) is datetime.date,
@@ -141,8 +152,8 @@ def load_table(path: Path = TABLE_PATH) -> tuple[dict, list[Entry]]:
     """(header, entries) from the table file, checked strictly."""
     try:
         raw = tomllib.loads(path.read_text(encoding="utf-8"))
-    except tomllib.TOMLDecodeError as exc:
-        raise DatesError(f"the table is not valid TOML: {exc}") from exc
+    except (tomllib.TOMLDecodeError, UnicodeDecodeError) as exc:
+        raise DatesError(f"the table is not valid UTF-8 TOML: {exc}") from exc
     _need(
         set(raw) == _HEADER_KEYS,
         f"the table header has fields {sorted(set(raw) ^ _HEADER_KEYS)} wrong",
@@ -150,6 +161,20 @@ def load_table(path: Path = TABLE_PATH) -> tuple[dict, list[Entry]]:
     _need(
         isinstance(raw["changes"], list) and raw["changes"] != [],
         "the table needs a change log",
+    )
+    for change in raw["changes"]:
+        _need(
+            isinstance(change, dict) and set(change) == _CHANGE_KEYS,
+            f"each change needs exactly {sorted(_CHANGE_KEYS)}",
+        )
+        _need(type(change["date"]) is datetime.date, "each change needs a date")
+    _need(
+        raw["version"] == raw["changes"][-1]["version"],
+        "the table version must match the last change-log entry",
+    )
+    _need(
+        raw["approved_on"] == "" or type(raw["approved_on"]) is datetime.date,
+        "approved_on must be empty or a date",
     )
     entries = [_entry(e, i) for i, e in enumerate(raw["entry"])]
     keys = [(e.tier, e.route, e.art50) for e in entries]
@@ -171,6 +196,11 @@ def lookup(
     header, entries = load_table(path)
     if not (header["approved_by"] and header["approved_on"]):
         raise NotApprovedError("the dates table is not approved by the owner yet")
+    if header["approved_on"] < header["changes"][-1]["date"]:
+        # Approval covers the table as it stood; a later change needs a new approval.
+        raise NotApprovedError(
+            "the table changed after it was approved; it needs approval again"
+        )
     today = today or datetime.date.today()
     flag = "true" if art50 else "false"
     found = [
@@ -184,6 +214,14 @@ def lookup(
         if not e.verified:
             raise UnverifiedEntryError(
                 f"entry {e.tier}/{e.route}/{e.art50} is not verified"
+            )
+    articles = [d.article for e in found for d in e.duties]
+    if len(articles) != len(set(articles)):
+        raise DatesError("matching entries list the same article twice")
+    for e in found:
+        if e.last_checked > today:
+            raise DatesError(
+                f"entry {e.tier}/{e.route}/{e.art50} is dated after {today}"
             )
     stale_before = today - datetime.timedelta(days=STALE_AFTER_DAYS)
     return [

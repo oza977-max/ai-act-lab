@@ -33,7 +33,7 @@ def approved(tmp_path):
     )
     text = re.sub(
         r'^approved_on = ".*"$',
-        'approved_on = "2026-10-27"',
+        "approved_on = 2026-10-27",
         text,
         count=1,
         flags=re.MULTILINE,
@@ -113,7 +113,7 @@ def test_impact_assessment_is_annex_iii_only():
 
 
 def test_unapproved_table_is_refused(approved):
-    variant(approved, 'approved_on = "2026-10-27"', 'approved_on = ""')
+    variant(approved, "approved_on = 2026-10-27", 'approved_on = ""')
     with pytest.raises(NotApprovedError):
         lookup("minimal", "none", False, TODAY, approved)
 
@@ -204,3 +204,132 @@ def test_cli_refuses_a_missing_table(tmp_path, capsys):
     args = ["lookup", "--tier", "minimal", "--route", "none", "--art50", "false"]
     assert main([*args, "--table", str(tmp_path / "none.toml")]) == 1
     assert "lookup refused" in capsys.readouterr().err
+
+
+def test_exact_dates_per_duty():
+    _, entries = load_table(TABLE)
+    by = {
+        (e.tier, e.route, e.art50): {d.article: d.applies_from for d in e.duties}
+        for e in entries
+    }
+    prohibited = by[("prohibited", "none", "any")]
+    assert prohibited["Art. 5(1)"] == datetime.date(2025, 2, 2)
+    for point in ("Art. 5(1)(ba)", "Art. 5(1)(bb)", "Art. 5(1a)", "Art. 5(1b)"):
+        assert prohibited[point] == datetime.date(2026, 12, 2), point
+    for route, date in (
+        ("annex-iii", datetime.date(2027, 12, 2)),
+        ("annex-i", datetime.date(2028, 8, 2)),
+    ):
+        core = by[("high-risk", route, "any")]
+        for n in range(9, 27):
+            assert core[f"Art. {n}"] == date, (route, n)
+    for key in (
+        ("high-risk", "annex-iii", "true"),
+        ("transparency-only", "none", "true"),
+    ):
+        assert by[key]["Art. 50(1)"] == datetime.date(2026, 8, 2)
+        assert by[key]["Art. 111(4)"] == datetime.date(2026, 12, 2)
+
+
+def test_ai_literacy_is_listed_for_every_lawful_ai_system_tier():
+    _, entries = load_table(TABLE)
+    for e in entries:
+        has_4 = any(d.article == "Art. 4" for d in e.duties)
+        lawful_system = e.art50 != "true" and e.tier in (
+            "high-risk",
+            "transparency-only",
+            "minimal",
+        )
+        lawful_system = lawful_system or e.tier == "transparency-only"
+        assert has_4 == lawful_system, (e.tier, e.route, e.art50)
+
+
+def test_high_risk_notes_say_what_is_not_listed():
+    _, entries = load_table(TABLE)
+    for e in entries:
+        if e.tier == "high-risk" and e.art50 == "any":
+            assert "Not listed" in e.note and "Articles 43 to 49" in e.note
+
+
+def test_unknown_header_field_is_refused(approved):
+    variant(approved, 'version = "v1"', 'version = "v1"\nowner = "x"')
+    with pytest.raises(DatesError, match="header"):
+        load_table(approved)
+
+
+def test_version_must_match_the_change_log(approved):
+    variant(approved, 'version = "v1"', 'version = "v2"')
+    with pytest.raises(DatesError, match="change-log"):
+        load_table(approved)
+
+
+def test_a_change_after_approval_needs_new_approval(approved):
+    variant(approved, "date = 2026-10-27", "date = 2026-11-03")
+    with pytest.raises(NotApprovedError, match="again"):
+        lookup("minimal", "none", False, datetime.date(2026, 11, 4), approved)
+
+
+def test_high_risk_needs_an_annex_route(approved):
+    variant(
+        approved,
+        'tier = "minimal"\nroute = "none"',
+        'tier = "minimal"\nroute = "annex-iii"',
+    )
+    with pytest.raises(DatesError, match="Annex route"):
+        load_table(approved)
+
+
+def test_unverified_entry_elsewhere_does_not_block_a_lookup(approved):
+    text = approved.read_text(encoding="utf-8")
+    i = text.index('tier = "out-of-scope"')
+    approved.write_text(
+        text[:i] + text[i:].replace("verified = true", "verified = false", 1),
+        encoding="utf-8",
+    )
+    assert lookup("minimal", "none", False, TODAY, approved)
+
+
+def test_the_same_article_twice_in_one_answer_is_refused(approved):
+    variant(approved, 'article = "Art. 50(4)"', 'article = "Art. 9"', count=2)
+    with pytest.raises(DatesError, match="twice"):
+        lookup("high-risk", "annex-iii", True, TODAY, approved)
+
+
+def test_a_check_dated_in_the_future_is_refused(approved):
+    with pytest.raises(DatesError, match="after"):
+        lookup("minimal", "none", False, datetime.date(2026, 10, 1), approved)
+
+
+def test_json_output_carries_stale(approved, capsys):
+    import json
+
+    args = [
+        "lookup",
+        "--tier",
+        "minimal",
+        "--route",
+        "none",
+        "--art50",
+        "false",
+        "--json",
+    ]
+    assert main([*args, "--table", str(approved), "--today", "2027-02-01"]) == 0
+    assert json.loads(capsys.readouterr().out)[0]["stale"] is True
+
+
+def test_invalid_toml_and_bad_encoding_exit_1(tmp_path, capsys):
+    args = [
+        "lookup",
+        "--tier",
+        "minimal",
+        "--route",
+        "none",
+        "--art50",
+        "false",
+        "--table",
+    ]
+    bad = tmp_path / "bad.toml"
+    bad.write_text("this is = = not toml", encoding="utf-8")
+    assert main([*args, str(bad)]) == 1
+    bad.write_bytes(b"\xff\xfe")
+    assert main([*args, str(bad)]) == 1
