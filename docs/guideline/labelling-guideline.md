@@ -86,6 +86,8 @@ tier. Question 4 sets the flag for every tier except `prohibited` and
    - editing that does not increase the exposure of intimate parts, or change the
      nature of a sexual act depicted, is not manipulation (Art. 5(1b)).
 
+   If any point of Art. 5(1) applies: `prohibited`.
+
    Safeguards count only if they **reliably** prevent the output and misuse that is
    reported gets corrected. Four situations:
    - the description says a tool that takes real people's photos, video or voices
@@ -94,7 +96,7 @@ tier. Question 4 sets the flag for every tier except `prohibited` and
      not corrected: prohibited;
    - it reports users getting round them but says nothing about a response: assume
      the ordinary case (it was corrected) and carry on;
-   - it says nothing about safeguards: assume working safeguards and carry on. If yes: `prohibited`.
+   - it says nothing about safeguards: assume working safeguards and carry on.
 3. **Is it high-risk through Annex I or Annex III, after the Article 6(3) exception?**
    - Annex I route (Art. 6(1)): the AI system is a safety component of a product, or
      is itself a product, covered by legislation listed in Annex I, and that product
@@ -221,8 +223,8 @@ The rule here, the owner's simplification of the "no significant risk" test:
 - Clearly stated: decide the tier from the remaining questions (`transparency-only`
   if an Article 50 duty applies, otherwise `minimal`) and cite Art. 6(3) and the
   Annex III point, never Art. 95(1).
-- Within this exception, `unsettled-law` is only for a task that **is** clearly described, where whether
-  that task counts as one of the four is something the Act's text does not settle.
+- Within this exception `unsettled-law` is never used: a task that is not plainly
+  one of the four stays `high-risk` (owner decision D-LS-2).
 
 Source: Art. 3(52), 6(3) and 6(4) of the amended Act
 ([official text](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng), checked on
@@ -242,8 +244,8 @@ Narrowly. A case goes to review only for one of three reasons, recorded in
 - `conflicting-facts`: the description says two things that cannot both be true,
   and the tier depends on which is.
 - `unsettled-law`: the facts are clear, but the legal question the tier depends on
-  is not settled by the Act's text, for example a point that depends on the draft
-  Article 6 guidelines, on wording new in 2026, or on original wording that can be
+  is not settled by the Act's text, for example a point outside the Article 6(3)
+  test that depends on the draft Article 6 guidelines, on wording new in 2026, or on original wording that can be
   read two ways with no guidance yet. Name the open question in the reason.
 
 **A case that is hard but decidable is decided.** Review is not a way to avoid a
@@ -318,7 +320,7 @@ prohibited (see HR-2); the ban covers workplaces and schools, except for medical
 safety reasons.
 
 ```json
-{"tier": "prohibited", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Art. 5(1)(f)"], "review_reason": null, "reason": "Inferring employees' emotions at work, with no medical or safety reason given, is a banned practice."}
+{"tier": "prohibited", "route": null, "annex_iii_area": null, "annex_iii_point": null, "annex_i_legislation": null, "art50_flag": false, "articles": ["Art. 5(1)(f)"], "review_reason": null, "reason": "Assuming no medical or safety reason, inferring employees' emotions at work is a banned practice."}
 ```
 
 ### Example PR-3 (prohibited)
