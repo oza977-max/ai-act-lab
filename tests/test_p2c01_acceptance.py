@@ -239,3 +239,17 @@ def test_owner_decisions_are_written_down(text):
     assert "Not clearly stated means high-risk" in rule
     assert "always high-risk" in rule and "Art. 3(52)" in rule
     assert "never on the Annex I route" in rule
+
+
+def test_d_ls_2_minimal_examples_cite_consistently(text):
+    for e in examples(text):
+        r = e["record"]
+        if r["tier"] != "minimal":
+            continue
+        if "Art. 6(3)" in r["articles"]:  # an Article 6(3) result
+            assert any(c.startswith("Annex III ") for c in r["articles"]), e["id"]
+            assert "Art. 95(1)" not in r["articles"] and len(r["articles"]) == 2, e[
+                "id"
+            ]
+        else:
+            assert r["articles"] == ["Art. 95(1)"], e["id"]
