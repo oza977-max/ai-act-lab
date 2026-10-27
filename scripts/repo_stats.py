@@ -173,6 +173,9 @@ def render(chunks: list[Chunk], tests: str, root: Path, today: datetime.date) ->
         if c.done:
             trail = " → ".join(str(n) for n in c.passes) or "not recorded"
             record = f"[handover](build/handovers/{c.id}.md)"
+        elif c.passes:  # built and reviewed, waiting for the owner's sign-off
+            trail = " → ".join(str(n) for n in c.passes) + " (awaiting owner approval)"
+            record = f"[handover](build/handovers/{c.id}.md)"
         else:
             trail, record = "not started", ""
         lines.append(f"| {c.id} | {c.title} | {trail} | {record} |")

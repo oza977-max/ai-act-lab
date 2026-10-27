@@ -40,7 +40,13 @@ def test_handover_reading():
 def test_real_repo_counts_match_the_files():
     chunks = repo_stats.collect(ROOT)
     handovers = {p.stem for p in (ROOT / "build" / "handovers").glob("*.md")}
-    assert {c.id for c in chunks if c.done} == handovers
+    done = {c.id for c in chunks if c.done}
+    assert done <= handovers
+    for name in handovers - done:  # a handover not yet complete says so
+        assert (
+            "## Status: Complete"
+            not in (ROOT / "build" / "handovers" / f"{name}.md").read_text()
+        )
     assert all(
         c.passes[-1] == 0 for c in chunks if c.done
     )  # every review loop converged

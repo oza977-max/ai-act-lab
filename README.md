@@ -20,9 +20,11 @@ or a second sentence makes an answer count as wrong, and any date in an answer i
 flagged), a first model runs on the laptop, and the owner has run a first practice
 fine-tune. The evaluation report is complete: every number carries a 95% interval,
 cited articles are checked against the official text (including the July 2026
-amendment), and two models can be compared case by case. Next: the labelling
-guideline and dates table, where the owner's decisions start. Target
-date 16 November 2026.
+amendment), and two models can be compared case by case. Phase 2 has started:
+the [labelling guideline](docs/guideline/labelling-guideline.md), the rulebook for
+every gold label, is drafted with 18 worked examples and four owner decisions,
+and is awaiting the owner's approval. Next: the prompt and the dates table.
+Target date 16 November 2026.
 
 ## Start here
 
@@ -48,11 +50,11 @@ Pick the path that fits you:
 | Measure | Now |
 |---|---|
 | Build chunks done | 5 of 21 (1 of 4 phases complete) |
-| Automated tests | 205 passing |
+| Automated tests | 232 passing |
 | Independent review passes | 10 passes over 5 chunks; 9 serious findings caught and fixed before commit |
-| Learning entries | 15, plus 1 film |
+| Learning entries | 16, plus 1 film |
 | Training runs logged | 1 |
-| Commits | 39 |
+| Commits | 48 |
 
 **Build log.** Each chunk is reviewed by an independent reviewer until a pass finds nothing serious; the numbers show the serious findings each pass found.
 
@@ -63,7 +65,7 @@ Pick the path that fits you:
 | P1-C02b | Practice fine-tune (owner-run) | 0 | [handover](build/handovers/P1-C02b.md) |
 | P1-C03 | Record rules | 0 → 0 | [handover](build/handovers/P1-C03.md) |
 | P1-C04 | Full evaluation | 1 → 0 | [handover](build/handovers/P1-C04.md) |
-| P2-C01 | Guideline v1 | not started |  |
+| P2-C01 | Guideline v1 | 10 → 8 → 3 → 4 → 3 → 1 → 0 (awaiting owner approval) | [handover](build/handovers/P2-C01.md) |
 | P2-C02 | Prompt build | not started |  |
 | P2-C03 | Dates table | not started |  |
 | P3-C01 | Gold tooling | not started |  |
@@ -192,6 +194,13 @@ Kept here on purpose: these are the most useful lessons.
   the Official Journal, gave Article 3 no entries because it has numbered
   definitions rather than paragraphs. A model citing "Art. 3(1)" (the definition of
   an AI system) would have been marked as inventing law. A reviewer caught it.
+- **A rulebook's examples can break its own rules.** The labelling guideline passed
+  its own tests at once, because the tests checked shape, not consistency.
+  Independent reviewers needed seven rounds (10, 8, 3, 4, 3, 1 and 0 serious
+  findings) to make every rule precise enough that two careful readers would
+  agree. Along the way they showed that the first draft had missed two new bans
+  in the 2026 amendment, and that two "unsettled law" examples were in fact
+  decidable. Two findings were judgement calls and went to the owner.
 - **Ten cases say little.** The 10-case practice exam scores 7 of 10, with a 95%
   interval of 40% to 89%. Every number in the report now carries its interval.
 - **Time estimates.** Early deadline options suggested months; the honest estimate
