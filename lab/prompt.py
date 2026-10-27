@@ -10,11 +10,19 @@ a changed one writes the next version, so every saved version stays verbatim.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
 
-from lab.records import MAX_REASON_WORDS, REVIEW_REASONS, REVIEW_TIER, ROUTES, TIERS
+from lab.records import (
+    MAX_REASON_WORDS,
+    REVIEW_REASONS,
+    REVIEW_TIER,
+    ROUTES,
+    TIERS,
+    contains_date,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 GUIDELINE_PATH = ROOT / "docs" / "guideline" / "labelling-guideline.md"
@@ -46,6 +54,17 @@ _OWNER_NOTE = re.compile(
     r"Owner decision D-[A-Z]+-\d+\s+\(\d{4}-\d{2}-\d{2}\):\s*|\s*\(owner decision D-[A-Z]+-\d+\)"
 )
 _BOLD_START = re.compile(r"(^|\. )\*\*([a-z])", re.MULTILINE)
+_SPECIAL_TOKEN = re.compile(
+    r"<\|[^|<>]*\|>"
+)  # chat-template control tokens such as <|im_end|>
+# Things for people that must never reach a model: checked on every rendered prompt.
+_LEFTOVERS = {
+    "a source paragraph": re.compile(r"\bSource:"),
+    "a link": re.compile(r"https?://"),
+    "a worked-example reference": re.compile(r"\b(?:PR|HR|TO|MI|OS|NR)-\d\b"),
+    "an owner-decision label": re.compile(r"\bD-[A-Z]+-\d"),
+    "a file path": re.compile(r"\blab/\w+\.py\b"),
+}
 _PROMPT_FILE = re.compile(r"^zero-shot-v(\d+)\.txt$")
 
 
@@ -151,15 +170,45 @@ def render(guideline_text: str) -> str:
         ),
         f"{CASE_OPEN}\n{PLACEHOLDER}\n{CASE_CLOSE}",
     ]
-    return "\n\n".join(blocks) + "\n"
+    prompt = "\n\n".join(blocks) + "\n"
+    _lint(prompt)
+    return prompt
+
+
+def _lint(prompt: str) -> None:
+    """Refuse a rendered prompt that leaks people-only text or breaks the case block."""
+    for what, pattern in _LEFTOVERS.items():
+        if m := pattern.search(prompt):
+            raise PromptError(f"the prompt would contain {what}: {m.group(0)!r}")
+    if contains_date(prompt):
+        raise PromptError("the prompt would contain a date")
+    # Once in the instruction naming them, once around the case.
+    if (
+        prompt.count(PLACEHOLDER) != 1
+        or prompt.count(CASE_OPEN) != 2
+        or prompt.count(CASE_CLOSE) != 2
+    ):
+        raise PromptError(
+            "the guideline text contains a case delimiter or the placeholder"
+        )
 
 
 def fill(prompt_text: str, description: str) -> str:
-    """The prompt with one case description inserted between the delimiters."""
+    """The prompt with one case description inserted between the delimiters.
+
+    The description is inserted verbatim apart from surrounding whitespace.
+    """
     if not isinstance(description, str) or not description.strip():
         raise PromptError("the case description must be non-empty text")
-    if CASE_OPEN in description or CASE_CLOSE in description:
-        raise PromptError("the case description contains a case delimiter")
+    for delimiter in (CASE_OPEN, CASE_CLOSE):
+        if delimiter in description:
+            raise PromptError(
+                f"the case description contains the delimiter {delimiter!r}"
+            )
+    if m := _SPECIAL_TOKEN.search(description):
+        raise PromptError(
+            f"the case description contains a chat control token: {m.group(0)!r}"
+        )
     if prompt_text.count(PLACEHOLDER) != 1:
         raise PromptError("the prompt must contain the case placeholder exactly once")
     return prompt_text.replace(PLACEHOLDER, description.strip())
@@ -182,10 +231,15 @@ def check_matches(prompt_text: str, guideline_text: str) -> list[str]:
 def _versions(out_dir: Path) -> dict[int, Path]:
     if not out_dir.exists():
         return {}
-    found = {}
+    found: dict[int, Path] = {}
     for path in out_dir.iterdir():
-        if m := _PROMPT_FILE.match(path.name):
-            found[int(m.group(1))] = path
+        if (m := _PROMPT_FILE.match(path.name)) and path.is_file():
+            number = int(m.group(1))
+            if number in found:
+                raise PromptError(
+                    f"two prompt files claim version {number}: {found[number].name}, {path.name}"
+                )
+            found[number] = path
     return found
 
 
@@ -201,13 +255,21 @@ def build(
             return latest, False
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"zero-shot-v{max(versions, default=0) + 1}.txt"
-    path.write_text(text, encoding="utf-8")
+    partial = path.with_suffix(".partial")
+    partial.write_text(text, encoding="utf-8")
+    os.replace(partial, path)  # a crash never leaves a truncated version behind
     return path, True
+
+
+def _stamp(prompt_text: str) -> str | None:
+    m = re.search(r"labelling guideline (v\d+)\.", prompt_text)
+    return m.group(1) if m else None
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="python -m lab.prompt", description=__doc__.splitlines()[0]
+        prog="python -m lab.prompt",
+        description="Generate the zero-shot prompt from the labelling guideline.",
     )
     sub = parser.add_subparsers(dest="command", required=True)
     b = sub.add_parser(
@@ -217,10 +279,19 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--out", type=Path, default=PROMPTS_DIR)
     args = parser.parse_args(argv)
     try:
+        previous = _versions(args.out)
         path, written = build(args.guideline, args.out)
     except (PromptError, OSError) as exc:
         print(f"prompt build refused: {exc}", file=sys.stderr)
         return 1
+    if written and previous:
+        old = previous[max(previous)].read_text(encoding="utf-8")
+        if _stamp(old) == _stamp(path.read_text(encoding="utf-8")):
+            print(
+                f"note: {path.name} differs from {previous[max(previous)].name} but names the same "
+                "guideline version; if the rules changed, raise the guideline's version",
+                file=sys.stderr,
+            )
     print(
         f"wrote {path}"
         if written

@@ -122,3 +122,68 @@ def test_committed_prompt_matches_the_guideline():
     assert prompts, "prompt v1 must be committed"
     latest = prompts[-1].read_text(encoding="utf-8")
     assert check_matches(latest, GUIDELINE.read_text(encoding="utf-8")) == []
+
+
+def _flat(text):
+    return " ".join(text.replace("**", "").replace("`", "").split())
+
+
+KEY_RULES = {
+    "The six labels": [
+        "Exactly six labels exist.",
+        "The tier transparency-only is used only when Article 50",
+    ],
+    "Decision order": [
+        "sole purpose of scientific research",
+        "Personal use is not an exclusion of the system",
+        "Section B is points 13 to 21",
+        "does not count (Art. 6(1c))",
+        "If any point of Art. 5(1) applies: prohibited.",
+    ],
+    "Article 50 in short": [
+        "Treat a chatbot as not obvious by default.",
+        "a sign or a disclaimer",
+    ],
+    "When the description is silent": [
+        "Assume the ordinary case.",
+        "Do not invent facts",
+    ],
+    "The Article 6(3) exception": [
+        "A system that profiles people is always high-risk",
+        "Silence passes",
+        "Not clearly stated means high-risk.",
+        "never on the Annex I route",
+    ],
+    "When to say needs-human-review": ["A case that is hard but decidable is decided."],
+    "The answer record": [
+        "What goes in articles:",
+        "Complete example:",
+        "The record never holds a date",
+    ],
+}
+
+
+def test_every_rule_section_arrives_whole():
+    from lab.prompt import render
+
+    guideline = GUIDELINE.read_text(encoding="utf-8")
+    prompt = render(guideline)
+    parts = {
+        p.split("\n", 1)[0]: p
+        for p in re.split(r"^## ", prompt, flags=re.MULTILINE)[1:]
+    }
+    source = {
+        p.split("\n", 1)[0]: p
+        for p in re.split(r"^## ", guideline, flags=re.MULTILINE)[1:]
+    }
+    for name in RULE_SECTIONS:
+        assert name in parts, f"## {name} missing from the prompt"
+        for phrase in KEY_RULES[name]:
+            assert _flat(phrase) in _flat(parts[name]), (name, phrase)
+        # Only source paragraphs, links and labels are dropped: most words survive.
+        kept = [
+            p
+            for p in re.split(r"\n\s*\n", source[name])
+            if not p.lstrip().startswith("Source:")
+        ]
+        assert len(parts[name].split()) >= 0.8 * len(" ".join(kept).split()), name
