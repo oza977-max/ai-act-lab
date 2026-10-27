@@ -36,13 +36,15 @@ def build(guideline, out):
         cwd=ROOT,
         capture_output=True,
         text=True,
+        check=False,
     )
 
 
 def label_definitions(guideline_text):
-    return re.findall(
+    rows = re.findall(
         r"^\| `([a-z-]+)` \| (.+?) \| .+? \|$", guideline_text, re.MULTILINE
     )
+    return [(label, definition) for label, definition in rows if label in TIERS]
 
 
 def test_build_writes_v1_from_the_guideline(tmp_path):
