@@ -24,6 +24,63 @@ amendment), and two models can be compared case by case. Next: the labelling
 guideline and dates table, where the owner's decisions start. Target
 date 16 November 2026.
 
+## Start here
+
+Pick the path that fits you:
+
+- **Curious, no technical background.** Read
+  [the whole picture](docs/learning/000-the-whole-picture.md) (a six-step story about
+  training a junior colleague), then watch [the seven-minute film](docs/learning/012-video.html).
+- **You want to learn to fine-tune a small model.** Follow the
+  [learning log](docs/learning/README.md) in order. Each entry is one step, with a
+  lesson, what happened, the new words and check questions. The
+  [glossary](docs/01-glossary.md) covers every term.
+- **You want to see how an AI assistant can build software you can trust.** Read
+  [how this was built](docs/how-this-was-built.md), then open any file in
+  [build/handovers](build/handovers/) to see one chunk's full record.
+- **You want to run it.** Jump to [Run it yourself](#run-it-yourself).
+
+<!-- stats:start -->
+## Progress at a glance
+
+*Counted from the repository by `scripts/repo_stats.py` on 2026-10-27; nothing in this block is typed by hand.*
+
+| Measure | Now |
+|---|---|
+| Build chunks done | 5 of 21 (1 of 4 phases complete) |
+| Automated tests | 205 passing |
+| Independent review passes | 10 passes over 5 chunks; 9 serious findings caught and fixed before commit |
+| Learning entries | 15, plus 1 film |
+| Training runs logged | 1 |
+| Commits | 39 |
+
+**Build log.** Each chunk is reviewed by an independent reviewer until a pass finds nothing serious; the numbers show the serious findings each pass found.
+
+| Chunk | What it builds | Review passes | Record |
+|---|---|---|---|
+| P1-C01 | Skeleton, guard hook, first evaluation | 4 → 2 → 0 | [handover](build/handovers/P1-C01.md) |
+| P1-C02 | Model smoke test (tracer) | 2 → 0 | [handover](build/handovers/P1-C02.md) |
+| P1-C02b | Practice fine-tune (owner-run) | 0 | [handover](build/handovers/P1-C02b.md) |
+| P1-C03 | Record rules | 0 → 0 | [handover](build/handovers/P1-C03.md) |
+| P1-C04 | Full evaluation | 1 → 0 | [handover](build/handovers/P1-C04.md) |
+| P2-C01 | Guideline v1 | not started |  |
+| P2-C02 | Prompt build | not started |  |
+| P2-C03 | Dates table | not started |  |
+| P3-C01 | Gold tooling | not started |  |
+| P3-C02 | Gold batch 1 | not started |  |
+| P3-C03 | Gold batch 2 | not started |  |
+| P3-C04 | Gold batch 3 | not started |  |
+| P3-C05 | Gold batch 4 | not started |  |
+| P3-C06 | Gold batch 5 | not started |  |
+| P3-C07 | Blind re-label | not started |  |
+| P4-C00 | Spike: candidate builds | not started |  |
+| P4-C01 | Licence criteria | not started |  |
+| P4-C02 | Bake-off runner | not started |  |
+| P4-C03 | Owner runs the bake-off | not started |  |
+| P4-C04 | Comparison and choice | not started |  |
+| P4-C05 | End-to-end closure | not started |  |
+<!-- stats:end -->
+
 ---
 
 ## How we approached it
@@ -41,7 +98,8 @@ already know makes it hallucinate more (Gekhman et al., EMNLP 2024).
 
 The project follows the Grounded Vibe Methodology: one phase at a time, each
 reviewed by the owner before the next, every decision tied to a named published
-source. The phases so far, each with its artefact:
+source. [How this was built](docs/how-this-was-built.md) explains the method for
+newcomers. The phases so far, each with its artefact:
 
 | Phase | What it produced | Read |
 |---|---|---|
@@ -50,7 +108,7 @@ source. The phases so far, each with its artefact:
 | Impact map | Two measured goals, three people, eighteen deliverables | `impact-map.md` |
 | Requirements | 45 testable requirements for the first slice | `requirements/requirements.md` |
 | Test cases | 64 tests written before any code | `test-cases/test-cases.md` |
-| Technical spec | Four short specs and an 18-chunk build guide | `specs/` |
+| Technical spec | Four short specs and a build guide of small chunks | `specs/` |
 | Design review | Five independent reviewers; 59 findings, all fixed | `design-review/design-review-001.html` |
 | Build | Test-first code, each chunk reviewed until clean | `build/handovers/` |
 

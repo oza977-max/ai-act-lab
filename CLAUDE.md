@@ -33,6 +33,12 @@ confidentiality check runs before every commit. There is no margin for a quiet f
 - **The README is the public story.** The repo is meant to teach others. At every
   milestone, update `README.md`: status, what was measured, decisions and why, and
   what went wrong and how it was caught. Plain English, honest, no internal names.
+- **The repo is a showcase for learners.** The owner wants it to be the best
+  public example of learning fine-tuning with GVM: easy for anyone to follow, with
+  live stats. Keep it that way without being asked: at every milestone run
+  `.venv/bin/python scripts/repo_stats.py` (refreshes the README's "Progress at a
+  glance" block from the repo; never hand-edit that block), keep the README's
+  "Start here" paths, the learning index and `docs/how-this-was-built.md` current.
 - **Confidentiality is a hard rule.** No employer name, no internal figures, no
   internal team or committee names, anywhere in the repo or its history. Public
   regulation text and freshly written cases only.
