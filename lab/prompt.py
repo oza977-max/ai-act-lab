@@ -59,7 +59,8 @@ _BOLD_START = re.compile(r"(^|\. )\*\*([a-z])(?=[^*\n]* [^*\n]*\*\*)", re.MULTIL
 # Chat-template control tokens of the candidate families: Qwen and Llama 3 (<|...|>),
 # DeepSeek (fullwidth bars), Gemma (<start_of_turn>, <eos>...), Llama 2 ([INST], <s>).
 _SPECIAL_TOKEN = re.compile(
-    r"<\|[^|<>]*\|>|<｜[^｜]*｜>|</?(?:start_of_turn|end_of_turn|bos|eos|pad|unk|s)>"
+    r"<\|[^|<>]*\|>|<｜[^｜]*｜>"
+    r"|</?(?:start_of_turn|end_of_turn|start_of_image|end_of_image|image_soft_token|bos|eos|pad|unk|s|think|tool_call)>"
     r"|\[/?INST\]|<</?SYS>>",
     re.IGNORECASE,
 )

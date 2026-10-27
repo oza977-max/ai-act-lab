@@ -23,7 +23,9 @@ cited articles are checked against the official text (including the July 2026
 amendment), and two models can be compared case by case. Phase 2 has started:
 the [labelling guideline](docs/guideline/labelling-guideline.md), the rulebook for
 every gold label, is drafted with 18 worked examples and four owner decisions,
-and the owner approved it. Next: the prompt and the dates table.
+and the owner approved it. The [zero-shot prompt](prompts/zero-shot-v1.txt) is now
+generated from that guideline, so the two cannot drift apart. Next: the dates
+table.
 Target date 16 November 2026.
 
 ## Start here
@@ -49,12 +51,12 @@ Pick the path that fits you:
 
 | Measure | Now |
 |---|---|
-| Build chunks done | 6 of 21 (1 of 4 phases complete) |
-| Automated tests | 232 passing |
-| Independent review passes | 17 passes over 6 chunks; 38 serious findings caught and fixed before commit |
-| Learning entries | 16, plus 1 film |
+| Build chunks done | 7 of 21 (1 of 4 phases complete) |
+| Automated tests | 283 passing |
+| Independent review passes | 20 passes over 7 chunks; 40 serious findings caught and fixed before commit |
+| Learning entries | 17, plus 1 film |
 | Training runs logged | 1 |
-| Commits | 49 |
+| Commits | 54 |
 
 **Build log.** Each chunk is reviewed by an independent reviewer until a pass finds nothing serious; the numbers show the serious findings each pass found.
 
@@ -66,7 +68,7 @@ Pick the path that fits you:
 | P1-C03 | Record rules | 0 → 0 | [handover](build/handovers/P1-C03.md) |
 | P1-C04 | Full evaluation | 1 → 0 | [handover](build/handovers/P1-C04.md) |
 | P2-C01 | Guideline v1 | 10 → 8 → 3 → 4 → 3 → 1 → 0 | [handover](build/handovers/P2-C01.md) |
-| P2-C02 | Prompt build | not started |  |
+| P2-C02 | Prompt build | 1 → 1 → 0 | [handover](build/handovers/P2-C02.md) |
 | P2-C03 | Dates table | not started |  |
 | P3-C01 | Gold tooling | not started |  |
 | P3-C02 | Gold batch 1 | not started |  |
@@ -201,6 +203,11 @@ Kept here on purpose: these are the most useful lessons.
   agree. Along the way they showed that the first draft had missed two new bans
   in the 2026 amendment, and that two "unsettled law" examples were in fact
   decidable. Two findings were judgement calls and went to the owner.
+- **One case is a smoke test, not a result.** The untrained model read the new
+  4,400-token prompt in about five seconds, then wrote `"null"` as text and
+  looped on article numbers. After one added line it stopped looping but copied
+  the prompt's example record instead. We stopped tuning there: fitting the prompt
+  to one case is the same trap as fitting a model to its training data.
 - **Ten cases say little.** The 10-case practice exam scores 7 of 10, with a 95%
   interval of 40% to 89%. Every number in the report now carries its interval.
 - **Time estimates.** Early deadline options suggested months; the honest estimate

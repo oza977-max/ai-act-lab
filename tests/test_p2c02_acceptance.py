@@ -4,6 +4,7 @@ import re
 import shutil
 import subprocess
 import sys
+from collections import Counter
 
 from conftest import ROOT
 
@@ -189,36 +190,31 @@ def test_every_rule_section_arrives_whole():
         assert len(parts[name].split()) >= 0.8 * len(" ".join(kept).split()), name
 
 
-_OWNER_WORDS = {"owner", "decision", "d", "ls", "1", "2", "3", "2026", "10", "27"}
-# Exactly what the clean-up may remove from each section, word by word.
-ALLOWED_MISSING = {
-    "The six labels": {"label", "definition"},  # the table header
-    "Decision order": set(),
-    "Article 50 in short": set(),
-    "When the description is silent": _OWNER_WORDS,
-    "The Article 6(3) exception": _OWNER_WORDS | {"to"},  # "(TO-2)"
-    "When to say needs-human-review": set(),
-    "The answer record": {
-        "the",
-        "defined",
-        "in",
-        "lab",
-        "records",
-        "py",
-        "single",
-        "source",
-        "of",
-        "truth",
-        "and",
-        "quoted",
-        "here",
-    },
+def _owner_label(n, digits):
+    """Words of n owner labels such as "Owner decision D-LS-1 (2026-10-27)"."""
+    return Counter(
+        {"owner": n, "decision": n, "d": n, "ls": n, "2026": n, "10": n, "27": n}
+    ) + Counter(digits)
+
+
+# Exactly what the clean-up removes from each section, word by word and count by count.
+EXPECTED_REMOVED = {
+    "The six labels": Counter({"label": 1, "definition": 1}),  # the table header
+    "Decision order": Counter(),
+    "Article 50 in short": Counter(),
+    "When the description is silent": _owner_label(1, ["1"]),
+    # D-LS-2, D-LS-3 labels, "(owner decision D-LS-2)" and "(TO-2)"
+    "The Article 6(3) exception": _owner_label(2, ["2", "3"])
+    + Counter({"owner": 1, "decision": 1, "d": 1, "ls": 1, "2": 1})
+    + Counter({"to": 1, "2": 1}),
+    "When to say needs-human-review": Counter(),
+    "The answer record": Counter(
+        "the defined in lab records py single source of truth and quoted here".split()  # noqa: SIM905
+    ),
 }
 
 
 def test_no_rule_word_is_lost():
-    from collections import Counter
-
     from lab.prompt import render
 
     def words(text):
@@ -240,5 +236,5 @@ def test_no_rule_word_is_lost():
             if not p.lstrip().startswith("Source:")
         )
         kept = re.sub(r"\]\([^)]+\)", "]", kept)  # link targets are dropped by design
-        lost = set(words(kept) - words(prompt[name]))
-        assert lost <= ALLOWED_MISSING[name], (name, lost - ALLOWED_MISSING[name])
+        lost = words(kept) - words(prompt[name])
+        assert lost == EXPECTED_REMOVED[name], (name, lost - EXPECTED_REMOVED[name])
