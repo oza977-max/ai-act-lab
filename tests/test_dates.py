@@ -221,7 +221,7 @@ def test_exact_dates_per_duty():
         ("annex-i", datetime.date(2028, 8, 2)),
     ):
         core = by[("high-risk", route, "any")]
-        for n in range(9, 27):
+        for n in range(8, 27):
             assert core[f"Art. {n}"] == date, (route, n)
     for key in (
         ("high-risk", "annex-iii", "true"),
@@ -235,13 +235,13 @@ def test_ai_literacy_is_listed_for_every_lawful_ai_system_tier():
     _, entries = load_table(TABLE)
     for e in entries:
         has_4 = any(d.article == "Art. 4" for d in e.duties)
-        lawful_system = e.art50 != "true" and e.tier in (
-            "high-risk",
-            "transparency-only",
-            "minimal",
-        )
-        lawful_system = lawful_system or e.tier == "transparency-only"
-        assert has_4 == lawful_system, (e.tier, e.route, e.art50)
+        # Once per answer: the core high-risk entries carry it, not their Article 50 add-ons.
+        expected = (e.tier, e.art50) in {
+            ("high-risk", "any"),
+            ("transparency-only", "true"),
+            ("minimal", "false"),
+        }
+        assert has_4 == expected, (e.tier, e.route, e.art50)
 
 
 def test_high_risk_notes_say_what_is_not_listed():
@@ -333,3 +333,36 @@ def test_invalid_toml_and_bad_encoding_exit_1(tmp_path, capsys):
     assert main([*args, str(bad)]) == 1
     bad.write_bytes(b"\xff\xfe")
     assert main([*args, str(bad)]) == 1
+
+
+@pytest.mark.parametrize(
+    "old, new, match",
+    [
+        (
+            '[[entry]]\ntier = "prohibited"',
+            'entry = 5\n[[x]]\ntier = "prohibited"',
+            "TOML|header|list",
+        ),
+        ("duties = []", "duties = 3", "duties must be a list"),
+    ],
+)
+def test_wrong_shapes_raise_dates_error_not_a_crash(approved, old, new, match):
+    variant(approved, old, new)
+    with pytest.raises(DatesError, match=match):
+        load_table(approved)
+
+
+def test_change_log_must_be_in_date_order(approved):
+    text = approved.read_text(encoding="utf-8")
+    extra = (
+        '[[changes]]\nversion = "v1"\ndate = 2026-10-01\nchange = "x"\nreason = "y"\n\n'
+    )
+    i = text.index("# --- prohibited")
+    approved.write_text(text[:i] + extra + text[i:], encoding="utf-8")
+    with pytest.raises(DatesError, match="date order"):
+        load_table(approved)
+
+
+def test_an_approval_dated_in_the_future_is_refused(approved):
+    with pytest.raises(DatesError, match="approval"):
+        lookup("minimal", "none", False, datetime.date(2026, 10, 26), approved)

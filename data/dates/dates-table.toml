@@ -6,8 +6,9 @@
 # added Article 111(4)). Duties are article references with the Act's own short
 # titles, not obligation text; titles of single points such as Art. 5(1)(ba) are
 # this table's short descriptions, because the Act titles whole articles only.
-# AI literacy (Art. 4) binds providers and deployers of every AI system and is
-# listed with every tier a system can lawfully hold. The lookup (`python -m lab.dates lookup`) refuses
+# AI literacy (Art. 4, as replaced by Regulation (EU) 2026/1744: "Providers and
+# deployers of AI systems shall take measures to support the development of AI
+# literacy of their staff") is listed once with every tier a system can lawfully hold. The lookup (`python -m lab.dates lookup`) refuses
 # to serve the table until the owner has approved it.
 #
 # Learning project, not legal advice.
@@ -73,12 +74,17 @@ checked_by = "Claude (AI assistant), from the Official Journal text"
 verified = true
 plan_value = "2027-12-02"
 discrepancy_note = ""
-note = "Chapter III, Sections 1 to 3 apply to Annex III systems from this date (Article 113(c)(i) as replaced in 2026). The impact assessment of Article 27 applies only to Annex III systems classified under Article 6(2), and only for certain deployers: public bodies, private entities providing public services, and deployers of Annex III 5(b) and 5(c) systems, never area 2. Systems already on the market before this date are covered only after a significant change in design (Article 111(2)); those used by public authorities must comply by 2 August 2030. Listed: the requirements and obligations of Chapter III, Sections 2 and 3 (Articles 9 to 27). Not listed: conformity assessment, declaration, CE marking and registration (Articles 43 to 49) and post-market duties (Articles 72 and 73). Article 16 refers to them, but they sit outside Article 113(c), so this table gives them no date of their own; check with a person."
+note = "Chapter III, Sections 1 to 3 apply to Annex III systems from this date (Article 113(c)(i) as replaced in 2026). The impact assessment of Article 27 applies only to Annex III systems classified under Article 6(2), and only for certain deployers: public bodies, private entities providing public services, and deployers of Annex III 5(b) and 5(c) systems, never area 2. Systems placed on the market before this date (‘the date of application of Chapter III referred to in Article 113’, Article 111(2) as amended in 2026) are covered only after a significant change in design; those intended for use by public authorities must comply by 2 August 2030. Listed: the requirements and obligations of Chapter III, Sections 2 and 3 (Articles 8 to 27). Not listed: conformity assessment, declaration, CE marking and registration (Articles 43 to 49) and post-market duties (Articles 72 and 73). Article 16 refers to them, but they sit outside Article 113(c), so this table gives them no date of their own: read literally they fall under the general date of 2 August 2026, but they only bite once the high-risk requirements do; check with a person."
 
   [[entry.duties]]
   article = "Art. 4"
   title = "AI literacy (every AI system; wording replaced 27 July 2026)"
   applies_from = 2025-02-02
+
+  [[entry.duties]]
+  article = "Art. 8"
+  title = "Compliance with the requirements"
+  applies_from = 2027-12-02
 
   [[entry.duties]]
   article = "Art. 9"
@@ -187,12 +193,17 @@ checked_by = "Claude (AI assistant), from the Official Journal text"
 verified = true
 plan_value = "2028-08-02"
 discrepancy_note = ""
-note = "Chapter III, Sections 1 to 3 apply to Annex I systems from this date (Article 113(c)(ii) as replaced in 2026). These duties apply to products under Annex I Section A. For Section B products only Articles 6(1), 102 to 109 and 112 apply (Article 2(2)); their requirements come through the sector legislation. Systems already on the market are covered only after a significant change in design (Article 111(2)). Listed: the requirements and obligations of Chapter III, Sections 2 and 3 (Articles 9 to 27). Not listed: conformity assessment, declaration, CE marking and registration (Articles 43 to 49) and post-market duties (Articles 72 and 73). Article 16 refers to them, but they sit outside Article 113(c), so this table gives them no date of their own; check with a person."
+note = "Chapter III, Sections 1 to 3 apply to Annex I systems from this date (Article 113(c)(ii) as replaced in 2026). These duties apply to products under Annex I Section A. For Section B products only Articles 6(1), 102 to 109 and 112 apply (Article 2(2)); their requirements come through the sector legislation. Systems placed on the market before this date (‘the date of application of Chapter III referred to in Article 113’, Article 111(2) as amended in 2026) are covered only after a significant change in design; those intended for use by public authorities must comply by 2 August 2030. Listed: the requirements and obligations of Chapter III, Sections 2 and 3 (Articles 8 to 27). Not listed: conformity assessment, declaration, CE marking and registration (Articles 43 to 49) and post-market duties (Articles 72 and 73). Article 16 refers to them, but they sit outside Article 113(c), so this table gives them no date of their own: read literally they fall under the general date of 2 August 2026, but they only bite once the high-risk requirements do; check with a person."
 
   [[entry.duties]]
   article = "Art. 4"
   title = "AI literacy (every AI system; wording replaced 27 July 2026)"
   applies_from = 2025-02-02
+
+  [[entry.duties]]
+  article = "Art. 8"
+  title = "Compliance with the requirements"
+  applies_from = 2028-08-02
 
   [[entry.duties]]
   article = "Art. 9"

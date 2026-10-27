@@ -144,7 +144,11 @@ def test_tc_dt_2_02_plan_values_are_verified_or_flagged():
 
 
 def test_tc_dt_4_01_ninety_days_current_ninety_one_stale(tmp_path, approved):
-    text = approved.read_text(encoding="utf-8")
+    # TC-DT-4-01 views the table on 2026-10-26, so date the copy's change and approval earlier.
+    text = approved.read_text(encoding="utf-8").replace(
+        "date = 2026-10-27", "date = 2026-07-01"
+    )
+    text = text.replace("approved_on = 2026-10-27", "approved_on = 2026-07-01")
     for checked, expected in (("2026-07-28", False), ("2026-07-27", True)):
         path = tmp_path / f"t-{checked}.toml"
         path.write_text(

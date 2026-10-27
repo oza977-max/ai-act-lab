@@ -118,6 +118,7 @@ def _entry(raw: dict, index: int) -> Entry:
         )
     for key in ("plan_value", "discrepancy_note"):
         _need(isinstance(raw[key], str), f"{where}: {key} must be text")
+    _need(isinstance(raw["duties"], list), f"{where}: duties must be a list")
     duties = []
     for d in raw["duties"]:
         _need(
@@ -176,6 +177,9 @@ def load_table(path: Path = TABLE_PATH) -> tuple[dict, list[Entry]]:
         raw["approved_on"] == "" or type(raw["approved_on"]) is datetime.date,
         "approved_on must be empty or a date",
     )
+    dates = [c["date"] for c in raw["changes"]]
+    _need(dates == sorted(dates), "the change log must be in date order")
+    _need(isinstance(raw["entry"], list), "entries must be a list of [[entry]] tables")
     entries = [_entry(e, i) for i, e in enumerate(raw["entry"])]
     keys = [(e.tier, e.route, e.art50) for e in entries]
     _need(
@@ -194,6 +198,7 @@ def lookup(
 ) -> list[Entry]:
     """Entries for one answer: exact matches plus `art50 = any`, in table order."""
     header, entries = load_table(path)
+    today = today or datetime.date.today()
     if not (header["approved_by"] and header["approved_on"]):
         raise NotApprovedError("the dates table is not approved by the owner yet")
     if header["approved_on"] < header["changes"][-1]["date"]:
@@ -201,7 +206,8 @@ def lookup(
         raise NotApprovedError(
             "the table changed after it was approved; it needs approval again"
         )
-    today = today or datetime.date.today()
+    if header["approved_on"] > today:
+        raise DatesError(f"the approval is dated after {today}")
     flag = "true" if art50 else "false"
     found = [
         e
