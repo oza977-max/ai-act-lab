@@ -499,3 +499,47 @@ def test_a_unicode_line_separator_inside_a_draft_is_text(batch):
     from lab.gold import read_drafts
 
     assert read_drafts(drafts)["GC-001"]["description"] == case["description"]
+
+
+def test_claude_may_accept_only_clear_cases(batch):
+    from lab.gold import CLAUDE_NOTE
+
+    clear = one_case(tags=[])
+    drafts, sheet = batch(clear)
+    edit_rows(sheet, decision="accept", owner_note=f"{CLAUDE_NOTE} (clear-cut).")
+    assert problems(drafts, sheet) == []
+    edit_rows(sheet, decision="doubt", owner_note=CLAUDE_NOTE)
+    assert any("only accept" in p for p in problems(drafts, sheet))
+    hard = one_case(tags=["boundary"])
+    drafts, sheet = batch(hard)
+    edit_rows(sheet, decision="accept", owner_note=CLAUDE_NOTE)
+    assert any("must be decided by the owner" in p for p in problems(drafts, sheet))
+
+
+def test_the_gold_file_records_who_decided(full):
+    from lab.gold import CLAUDE_NOTE
+
+    for sheet in sorted((full / "review").glob("*.csv")):
+        clear = [
+            r["id"]
+            for r in read_sheet(sheet)
+            if not {"boundary", "art6-3"} & set(r["tags"].replace(" ", "").split(";"))
+            and r["proposed_tier"] != "needs-human-review"
+        ]
+        if clear:
+            break
+    clear_id = clear[0]
+    with sheet.open(encoding="utf-8", newline="") as f:
+        raw = list(csv.DictReader(f))
+    for r in raw:
+        if r["id"] == clear_id:
+            r["owner_note"] = CLAUDE_NOTE
+    with sheet.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=COLUMNS)
+        writer.writeheader()
+        writer.writerows(raw)
+    path, meta, _ = build(full / "review", full / "drafts", full / "gold", GUIDELINE)
+    lines = path.read_text(encoding="utf-8").splitlines()
+    cases = {json.loads(line)["id"]: json.loads(line) for line in lines}
+    assert cases[clear_id]["decided_by"] == "claude"
+    assert meta["decided_by"] == {"owner": 99, "claude": 1}

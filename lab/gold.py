@@ -55,6 +55,9 @@ COLUMNS = (
     "guideline_version",
 )
 DECISIONS = ("accept", "change", "doubt")
+# Owner decision D-GS-2 (2026-11-07): Claude may accept its own clear-cut drafts; the owner
+# judges every hard case. Such rows carry this note, and the gold case records who decided.
+CLAUDE_NOTE = "Decided by Claude"
 MIN_WORDS, MAX_WORDS = 60, 200
 SPREAD = {  # GS-1
     "prohibited": 10,
@@ -333,6 +336,14 @@ def read_sheet(path: Path) -> list[dict[str, str]]:
 # --- check -----------------------------------------------------------------------
 
 
+def _is_hard(draft: dict) -> bool:
+    """Cases the owner always judges (D-GS-2)."""
+    return (
+        bool({"boundary", "art6-3"} & set(draft["tags"]))
+        or draft["draft"]["tier"] == "needs-human-review"
+    )
+
+
 def check_rows(
     rows: list[dict[str, str]], drafts: dict[str, dict], version: str
 ) -> list[str]:
@@ -406,6 +417,15 @@ def check_rows(
             flag(
                 f"the final columns are filled but the decision is {decision}; write change, or clear them"
             )
+        if row["owner_note"].strip().startswith(CLAUDE_NOTE):
+            if decision != "accept":
+                flag(
+                    "Claude may only accept its own draft; the owner decides any change or doubt"
+                )
+            if draft is not None and _is_hard(draft):
+                flag(
+                    "a hard case (boundary, Article 6(3) or needs-human-review) must be decided by the owner"
+                )
     for case_id in sorted(set(drafts) - seen):
         problems.append(f"{case_id}: in the draft file but missing from the sheet")
     return problems
@@ -499,6 +519,9 @@ def assemble(
                     "tags": draft["tags"],
                     "guideline_version": version,
                     "owner_decision": decision,
+                    "decided_by": "claude"
+                    if row["owner_note"].strip().startswith(CLAUDE_NOTE)
+                    else "owner",
                     "never_train": True,
                 }
             )
@@ -560,6 +583,7 @@ def build(
         "counts": {label: counts[label] for label in SPREAD},
         "share_changed": round(len(changed) / len(cases), 4),
         "changed_ids": changed,
+        "decided_by": dict(Counter(c["decided_by"] for c in cases)),
     }
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"gold-v{n}.jsonl"

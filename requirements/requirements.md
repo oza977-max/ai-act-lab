@@ -94,7 +94,7 @@ The 100 hand-checked cases everything is measured against, and the owner's blind
 **GS-4 (Must) [impact-deliverable: D-2]:** **[MUST]** The gold set shall include at least 15 cases on the Annex III versus Article 50 boundary, at least 5 cases that turn on the Article 6(3) exception, and at least 5 cases whose description contains instructions aimed at the model (to be ignored).
 *Check:* Each case carries tags; count the tags.
 
-**GS-5 (Must) [impact-deliverable: D-2]:** **[MUST]** Claude shall draft each case with a proposed label, articles and reason. The owner shall judge every case: accept, change, or mark as doubtful. The owner's judgement is the gold label, and every change from the draft shall be recorded.
+**GS-5 (Must) [impact-deliverable: D-2]:** **[MUST]** Claude shall draft each case with a proposed label, articles and reason. The owner shall judge every hard case (boundary, Article 6(3), needs-human-review, or flagged by Claude as uncertain): accept, change, or mark as doubtful; Claude may accept its own clear-cut drafts, and each case records who decided it (amended 2026-11-07, D-GS-2). The owner's judgement is the gold label, and every change from the draft shall be recorded.
 *Check:* Every case has an owner decision field; the share of changed drafts is reported.
 
 **GS-6 (Must) [impact-deliverable: D-2]:** **[MUST]** Gold cases shall be marked never-train and kept apart from any training data; no later training case may paraphrase a gold case.
@@ -306,6 +306,7 @@ Covered inside the domains: fits in 8 GB and is timed on this Mac (BO-3, BO-4); 
 |---|---|---|---|
 | 2026-10-26 | Added LG-3 (Should): a practice fine-tune on the public AI Act benchmark before the gold set | Owner request: start hands-on fine-tuning this week | owner/AI |
 | 2026-10-26 | EV-5: missing outputs count as wrong. DT-1: explicit entry for labels with no tier duties. EV-6: report names its interval method. EV-7: paired comparison refuses incomplete pairs | Requirements health report H-1 to H-4, fixes approved by the owner | owner/AI |
+| 2026-11-07 | GS-5 amended (owner decision D-GS-2): Claude may accept its own clear-cut drafts; the owner judges every hard case (boundary, Article 6(3), needs-human-review) and any case Claude is unsure of. Each gold case records who decided it (`decided_by`), and the README says so. GS-1 unchanged, but the free cases lean towards finance (owner decision D-GS-1) | The owner reviewed the first 19 cases, agreed with all of them, and asked Claude to take the clear calls | owner |
 
 ---
 

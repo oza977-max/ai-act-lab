@@ -77,7 +77,7 @@ No date, deadline or duties field exists (LS-10). Example:
  "reason": "The system screens job applicants, an Annex III employment use, and it talks to them directly."}
 ```
 
-A gold case wraps a record: `id` (`GC-001`…), `description`, `gold` (the record), `draft` (the full proposed record, kept for GS-5), `tags` (from a fixed vocabulary: `boundary`, `art6-3`, `hidden-instruction`, `annex-i`, `area-1` to `area-8`), `guideline_version` (one version per gold set), `owner_decision` (`accept` or `change`; `doubt` must be resolved before build), `never_train` (always `true`).
+A gold case wraps a record: `id` (`GC-001`…), `description`, `gold` (the record), `draft` (the full proposed record, kept for GS-5), `tags` (from a fixed vocabulary: `boundary`, `art6-3`, `hidden-instruction`, `annex-i`, `area-1` to `area-8`), `guideline_version` (one version per gold set), `owner_decision` (`accept` or `change`; `doubt` must be resolved before build), `decided_by` (`owner`, or `claude` for a clear-cut draft Claude accepted under GS-5 as amended), `never_train` (always `true`).
 
 A model output line, written by the runner: `id`, `raw` (the model's text, verbatim, or `null`), `seconds` (number or `null`), `error` (`null` or `missing`). The runner never parses. A gold case with no output line and a line with `error: "missing"` are treated identically. Only the evaluation parses `raw`, deriving `unreadable` when no valid record can be read (`data-and-evaluation.md`, ADR-005).
 
