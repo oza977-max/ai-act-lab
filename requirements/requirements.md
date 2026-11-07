@@ -306,7 +306,7 @@ Covered inside the domains: fits in 8 GB and is timed on this Mac (BO-3, BO-4); 
 |---|---|---|---|
 | 2026-10-26 | Added LG-3 (Should): a practice fine-tune on the public AI Act benchmark before the gold set | Owner request: start hands-on fine-tuning this week | owner/AI |
 | 2026-10-26 | EV-5: missing outputs count as wrong. DT-1: explicit entry for labels with no tier duties. EV-6: report names its interval method. EV-7: paired comparison refuses incomplete pairs | Requirements health report H-1 to H-4, fixes approved by the owner | owner/AI |
-| 2026-11-07 | GS-5 amended (owner decision D-GS-2): Claude may accept its own clear-cut drafts; the owner judges every hard case (boundary, Article 6(3), needs-human-review) and any case Claude is unsure of. Each gold case records who decided it (`decided_by`), and the README says so. GS-1 unchanged, but the free cases lean towards finance (owner decision D-GS-1) | The owner reviewed the first 19 cases, agreed with all of them, and asked Claude to take the clear calls | owner |
+| 2026-11-07 | GS-5 amended (owner decision D-GS-2): Claude may accept its own clear-cut drafts; the owner judges every hard case (boundary, Article 6(3), needs-human-review) and any case Claude is unsure of. Each gold case records who decided it (`decided_by`), and the README says so. GS-1 unchanged, but the free cases lean towards finance (owner decision D-GS-1) | The owner reviewed 17 of the first 20 cases, agreed with all of them, and asked Claude to take the clear calls; Claude accepted the other 3 | owner |
 
 ---
 

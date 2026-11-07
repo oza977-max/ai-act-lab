@@ -542,4 +542,54 @@ def test_the_gold_file_records_who_decided(full):
     lines = path.read_text(encoding="utf-8").splitlines()
     cases = {json.loads(line)["id"]: json.loads(line) for line in lines}
     assert cases[clear_id]["decided_by"] == "claude"
-    assert meta["decided_by"] == {"owner": 99, "claude": 1}
+    assert sum(c["decided_by"] == "claude" for c in cases.values()) == 1
+    assert all(c["decided_by"] == "owner" for i, c in cases.items() if i != clear_id)
+    assert meta["decided_by"] == {"owner": len(cases) - 1, "claude": 1}
+
+
+@pytest.mark.parametrize(
+    "case, decision",
+    [
+        (one_case(tags=["art6-3"]), "accept"),
+        (one_case(draft={**spread()[0]["draft"]}, tags=[]), "change"),
+    ],
+)
+def test_claude_cannot_decide_hard_cases_or_changes(batch, case, decision):
+    from lab.gold import CLAUDE_NOTE
+
+    drafts, sheet = batch(case)
+    cells = {**TO_HIGH_RISK} if decision == "change" else {}
+    edit_rows(sheet, decision=decision, owner_note=CLAUDE_NOTE, **cells)
+    assert any("owner" in p for p in problems(drafts, sheet))
+
+
+def test_claude_cannot_decide_a_review_case(batch):
+    from lab.gold import CLAUDE_NOTE
+
+    review = next(c for c in spread() if c["draft"]["tier"] == "needs-human-review")
+    drafts, sheet = batch(review)
+    edit_rows(sheet, decision="accept", owner_note=CLAUDE_NOTE)
+    assert any("must be decided by the owner" in p for p in problems(drafts, sheet))
+
+
+@pytest.mark.parametrize(
+    "note, who",
+    [
+        ("Decided by Claude: clear.", "claude"),
+        ("decided by claude", "claude"),
+        ("", "owner"),
+        ("Reviewed in chat.", "owner"),
+        ("Note: Decided by Claude", None),
+        ("I changed Claude's draft", None),
+    ],
+)
+def test_who_decided_is_never_guessed(note, who):
+    from lab.gold import decided_by
+
+    assert decided_by({"owner_note": note}) == who
+
+
+def test_an_ambiguous_note_is_refused(batch):
+    drafts, sheet = batch(one_case(tags=[]))
+    edit_rows(sheet, decision="accept", owner_note="Note: decided by Claude")
+    assert any("mentions Claude" in p for p in problems(drafts, sheet))

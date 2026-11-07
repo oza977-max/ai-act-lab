@@ -336,6 +336,14 @@ def read_sheet(path: Path) -> list[dict[str, str]]:
 # --- check -----------------------------------------------------------------------
 
 
+def decided_by(row: dict[str, str]) -> str | None:
+    """'claude' or 'owner' from the note; None when a note mentions Claude ambiguously."""
+    note = row["owner_note"].strip()
+    if note.lower().startswith(CLAUDE_NOTE.lower()):
+        return "claude"
+    return None if "claude" in note.lower() else "owner"
+
+
 def _is_hard(draft: dict) -> bool:
     """Cases the owner always judges (D-GS-2)."""
     return (
@@ -417,7 +425,12 @@ def check_rows(
             flag(
                 f"the final columns are filled but the decision is {decision}; write change, or clear them"
             )
-        if row["owner_note"].strip().startswith(CLAUDE_NOTE):
+        who = decided_by(row)
+        if who is None:
+            flag(
+                f"the note mentions Claude; start it with '{CLAUDE_NOTE}' only if Claude decided this case"
+            )
+        if who == "claude":
             if decision != "accept":
                 flag(
                     "Claude may only accept its own draft; the owner decides any change or doubt"
@@ -519,9 +532,7 @@ def assemble(
                     "tags": draft["tags"],
                     "guideline_version": version,
                     "owner_decision": decision,
-                    "decided_by": "claude"
-                    if row["owner_note"].strip().startswith(CLAUDE_NOTE)
-                    else "owner",
+                    "decided_by": decided_by(row),
                     "never_train": True,
                 }
             )

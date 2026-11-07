@@ -27,8 +27,9 @@ and the owner approved it. The [zero-shot prompt](prompts/zero-shot-v1.txt) is n
 generated from that guideline, so the two cannot drift apart. The
 [dates-and-duties table](data/dates/dates-table.toml) is built, every date read
 from the Official Journal, and the owner approved it. Phase 2 is complete.
-Phase 3 has started: the tools that turn drafted cases and the owner's review
-sheets into the gold set are built. Next: the first batch of 20 cases.
+Phase 3 is under way: the gold-set tools are built and the first batch of 20
+cases is judged (the owner agreed with every draft they reviewed). The set leans
+towards finance, the owner's field. Next: batches 2 to 5.
 Target date 16 November 2026.
 
 ## Start here
@@ -50,16 +51,16 @@ Pick the path that fits you:
 <!-- stats:start -->
 ## Progress at a glance
 
-*Counted from the repository by `scripts/repo_stats.py` on 2026-10-27; nothing in this block is typed by hand.*
+*Counted from the repository by `scripts/repo_stats.py` on 2026-11-07; nothing in this block is typed by hand.*
 
 | Measure | Now |
 |---|---|
 | Build chunks done | 9 of 21 (2 of 4 phases complete) |
-| Automated tests | 408 passing |
+| Automated tests | 420 passing |
 | Independent review passes | 26 passes over 9 chunks; 55 serious findings caught and fixed before commit |
 | Learning entries | 19, plus 1 film |
 | Training runs logged | 1 |
-| Commits | 66 |
+| Commits | 68 |
 
 **Build log.** Each chunk is reviewed by an independent reviewer until a pass finds nothing serious; the numbers show the serious findings each pass found.
 
@@ -130,6 +131,17 @@ El-Yaniv, NeurIPS 2017). Every number carries a 95% interval (Miller, 2024).
 
 The measuring stick is built first: a labelling guideline, 100 hand-checked "gold"
 cases, and an evaluation tool proven on a ten-case set small enough to count by hand.
+
+**Who decides the gold labels.** Claude drafts every case with a proposed answer.
+The owner judges every hard case: boundary cases, cases that turn on the
+Article 6(3) exception, and every "needs human review" case. After reviewing the
+first 17 cases and agreeing with all of them, the owner asked Claude to accept its
+own clear-cut drafts, to save time (decision D-GS-2, 2026-11-07). Every gold case
+records who decided it (`decided_by`), and the build reports the split, so readers
+can judge how much of the exam rests on a person's judgement. An exam partly
+labelled by the author of its drafts is weaker evidence than one judged entirely
+by a person; the blind re-label check (20 cases, judged again by the owner) is
+there to measure how much that matters.
 
 ### 4. Compare base models instead of assuming one
 
